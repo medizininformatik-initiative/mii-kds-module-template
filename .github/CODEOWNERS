@@ -11,3 +11,8 @@
 # A team also survives personnel changes and holidays; an individual owner
 # blocks reviews whenever they are unavailable. Until then, reviews are
 # requested by hand. Tracked in issue #143.
+
+# ORG-MOVE TODO (2026-08-27): this repository now lives in the
+# medizininformatik-initiative organisation. Add the owning MII/NUM-DIZ team
+# here once it is named - a deliberate decision left open by the move
+# (see docs/org-move.md).

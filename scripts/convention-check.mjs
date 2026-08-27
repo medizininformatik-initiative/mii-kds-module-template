@@ -155,8 +155,32 @@ export function evaluate({ sushiConfig = null, igIni = null, packageJson = null,
       return { ok: true, parameterized: isPlaceholder(v) };
     });
 
-    field("M5 canonical", readTopLevel(sushiConfig, "canonical"), (v) =>
-      checkPrefixed(v, "https://www.medizininformatik-initiative.de/fhir/", "[a-z0-9-]"));
+    // M5 — the MII canonical universe has THREE spaces, not one (measured
+    // across the medizininformatik-initiative kerndatensatz repositories,
+    // 2026-08-27): `/fhir/ext/<module>` ×14 (Erweiterungsmodule — patho,
+    // onko, biobank, …), `/fhir/core/<module>` ×7 (labor, diagnose, fall,
+    // medikation, …) and bare `/fhir/<module>` ×5 (base, meta, mikrobio,
+    // studie, symptom). A canonical is IMMUTABLE — every profile URL hangs
+    // off it — so this check accepts every space published modules already
+    // use rather than demanding a breaking rename (raised by the Pathologie
+    // module team). Which space a NEW module should choose is TF-KDS
+    // governance, not this check's business.
+    field("M5 canonical", readTopLevel(sushiConfig, "canonical"), (v) => {
+      const prefix = "https://www.medizininformatik-initiative.de/fhir/";
+      let value = v;
+      for (const space of ["ext/", "core/"]) {
+        if (v.startsWith(prefix + space)) {
+          value = prefix + v.slice(prefix.length + space.length);
+          break;
+        }
+      }
+      const result = checkPrefixed(value, prefix, "[a-z0-9-]");
+      if (!result.ok && result.reason && !result.reason.startsWith("must start")) {
+        result.reason +=
+          " (allowed canonical spaces: …/fhir/<module>, …/fhir/ext/<module>, …/fhir/core/<module>)";
+      }
+      return result;
+    });
 
     field("M6 version", readTopLevel(sushiConfig, "version"), (v) => {
       if (isPlaceholder(v)) return { ok: true, parameterized: true };

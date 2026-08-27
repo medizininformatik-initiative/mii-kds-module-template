@@ -32,6 +32,47 @@ function ids(findings, status) {
   return findings.filter((f) => f.status === status).map((f) => f.id);
 }
 
+function m5(canonical, release = true) {
+  const sushi = CONCRETE.replace(
+    "canonical: https://www.medizininformatik-initiative.de/fhir/modul-base",
+    `canonical: ${canonical}`
+  );
+  const { findings } = evaluate({ sushiConfig: sushi, igIni: CONCRETE_IGINI, release });
+  return findings.find((f) => f.id === "M5 canonical");
+}
+
+test("M5 accepts all three MII canonical spaces (ext/core/bare are published reality)", () => {
+  // Measured 2026-08-27 across the medizininformatik-initiative repos:
+  // ext ×14, core ×7, bare ×5 — and a canonical is immutable, so the check
+  // must accept them all (raised by the Pathologie module team).
+  for (const canonical of [
+    "https://www.medizininformatik-initiative.de/fhir/modul-base",
+    "https://www.medizininformatik-initiative.de/fhir/ext/modul-patho",
+    "https://www.medizininformatik-initiative.de/fhir/core/modul-labor",
+  ]) {
+    assert.equal(m5(canonical).status, "pass", `${canonical} must pass M5`);
+  }
+});
+
+test("M5 still rejects what is genuinely outside the canonical universe", () => {
+  for (const canonical of [
+    "https://example.org/fhir/modul-x",                                   // wrong host
+    "https://www.medizininformatik-initiative.de/fhir/ext/",              // empty module
+    "https://www.medizininformatik-initiative.de/fhir/ext/a/b",           // nested deeper
+    "https://www.medizininformatik-initiative.de/fhir/core/ext/modul-x",  // stacked spaces
+    "https://www.medizininformatik-initiative.de/fhir/Modul-X",           // uppercase
+  ]) {
+    assert.equal(m5(canonical).status, "fail", `${canonical} must fail M5`);
+  }
+  assert.match(m5("https://www.medizininformatik-initiative.de/fhir/ext/a/b").message,
+    /allowed canonical spaces/);
+});
+
+test("M5 keeps placeholder handling in the ext/core spaces", () => {
+  const finding = m5("https://www.medizininformatik-initiative.de/fhir/ext/modul-{{MODULE_SLUG}}", false);
+  assert.equal(finding.status, "parameterized");
+});
+
 test("extractors read values, strip quotes and comments", () => {
   assert.equal(readTopLevel(SCAFFOLD, "id"), "mii-ig-{{MODULE_SLUG}}");
   assert.equal(readTopLevel(CONCRETE, "version"), "2026.0.1");
@@ -264,7 +305,15 @@ test("scanOptionalPages pairs the languages of this repository's scaffold", () =
   // migration's CI). In every repository, whatever optional pages DO exist
   // must agree across the two languages.
   const sushi = readFileSync(`${root}/sushi-config.yaml`, "utf8");
-  const isTemplateRepo = sushi.includes("{{MODULE_SLUG}}");
+  // Detected by the PARSED id value, never by a substring of the whole file:
+  // a module that keeps the placeholder documentation as COMMENTS still
+  // contains "{{MODULE_SLUG}}" textually, and the substring test forced the
+  // full-scaffold assertions below onto a real module that had legitimately
+  // removed optional pages per its M9 decision (issue #165, measured on the
+  // Onkologie migration). The full-scaffold pins further down are DELIBERATE
+  // for the template repository itself — they catch scanner regressions — and
+  // with this detection they can no longer reach a created module.
+  const isTemplateRepo = String(readTopLevel(sushi, "id") ?? "").includes("{{");
   for (const e of entries) {
     assert.equal(e.en, e.de,
       `${e.page}: the EN and DE copies must agree on the OPTIONAL-PAGE marker (undecided in both, or decided in both)`);

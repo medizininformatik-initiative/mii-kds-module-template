@@ -49,7 +49,7 @@ in sync:
 | Publication support repos (`HL7/fhir-ig-history-template`, `HL7/fhir-web-templates`) | commit-SHA `ref:` pins in `go-publish.yml` **only** (the two checkout steps). **Not watched by the checker** — re-resolve by hand when preparing a release; the comment at each pin records the last resolution date |
 | SU-TermServ proxy: the `medizininformatik-initiative/kerndatensatz-meta` `nginx.conf` ref **and** the nginx proxy image digest | commit-SHA / digest pins in all three build workflows — `ig-publisher.yml`, `module-release.yml`, `go-publish.yml`. Keep the three identical, for the same reason as the toolchain pins above; nothing cross-checks these. **Not watched by the checker** — re-resolve all three by hand when preparing a release |
 | MII reusable validation workflows (`kerndatensatz-meta/.github/workflows/ci_dotnet_validation.yml`, `ci_java_validation.yml`) | `uses: …@<commit-SHA>` in `validation.yml`. **Not watched by the checker** — re-resolve by hand; the trailing comment records the last resolution date |
-| Dev container (base-image digest, feature versions, SUSHI/Jekyll installs) | `.devcontainer/devcontainer.json` — features come as Dependabot PRs; the image digest and the `postCreateCommand` tool pins are bumped manually. **Kept pin-for-pin identical (same image digest and tool pins; the `name` field and comments differ) to the dev container in [`ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)** — the template package and the modules built from it must agree on the toolchain, so bump both repos in the same sweep; drifted pins mean a module builds in one environment and fails in the other |
+| Dev container (base-image digest, feature versions, SUSHI/Jekyll installs) | `.devcontainer/devcontainer.json` — features come as Dependabot PRs; the image digest and the `postCreateCommand` tool pins are bumped manually. **Kept pin-for-pin identical (same image digest and tool pins; the `name` field and comments differ) to the dev container in [`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)** — the template package and the modules built from it must agree on the toolchain, so bump both repos in the same sweep; drifted pins mean a module builds in one environment and fails in the other |
 
 Until a pin's file lands, the tracking issue shows a `pin not found` row — a
 reminder, not an error. Two more expected row states:
@@ -188,7 +188,7 @@ rather than assumed.
 This repository and the IG template share a number of documentation filenames —
 compare them with `comm -12` over `git ls-files docs` in both checkouts. That was
 once real duplication; it is not any more. **No shared file is identical**, and the
-closest pairs differ for good reasons — `project-status.md` because each names
+closest pairs differ for good reasons — `org-move.md` because each names
 the other repository, `glossary.md` because this scaffold defines nine terms the
 template repository has no use for, `further-reading.md` because Release Please
 is a template-repo entry a module must not follow.

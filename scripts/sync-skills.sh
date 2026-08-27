@@ -146,17 +146,56 @@ if [ "${MODE}" = "check" ]; then
   exit 0
 fi
 
-# Write mode. The runtime directories are committed as relative symlinks to
-# skills/, so the installer writes THROUGH them into the single source. If a
-# checkout materialised them as plain files (the Windows caveat in AGENTS.md),
-# the install would create real directories and quietly fork the content.
+# Write mode. Vendor via a TEMPORARY install and copy the result into skills/
+# — the single source — never through the runtime directories. The earlier
+# write-through-the-symlink route refused to run wherever .claude/skills was a
+# real directory, which is exactly the shape of a module that carries its OWN
+# project skills there (issue #165, measured on the Onkologie migration):
+# such modules could not use this script at all. Vendoring and runtime wiring
+# are now independent: skills/ is always written, the wiring below is
+# best-effort and never destructive.
+tmp="$(mktemp -d)"
+trap 'rm -rf "${tmp}"' EXIT
+echo "Fetching ${SOURCE} ..."
+install_into "${tmp}" >/dev/null
+
+mkdir -p "${repo_root}/skills"
+for s in "${SKILLS[@]}"; do
+  rm -rf "${repo_root}/skills/${s}"
+  cp -R "${tmp}/.claude/skills/${s}" "${repo_root}/skills/${s}"
+done
+cp "${tmp}/skills-lock.json" "${repo_root}/skills-lock.json"
+
+# Runtime wiring, per agent directory — three shapes, none of them an error:
+#   a symlinked directory  -> already resolves to skills/; nothing to do
+#   absent                 -> create the directory symlink (the template's shape)
+#   a REAL directory       -> the module keeps its own project skills there:
+#                             COEXIST by linking each catalog skill beside them;
+#                             an existing non-symlink entry is the module's and
+#                             is kept — warned, because it may be a stale copy
+#                             (the materialised-checkout caveat in AGENTS.md).
 for d in .claude/skills .agents/skills; do
-  [ -L "${repo_root}/${d}" ] || {
-    echo "ERROR: ${d} is not a symlink in this checkout — refusing to install." >&2
-    echo "       Enable git symlink support (see AGENTS.md, 'Windows caveat') and re-clone." >&2
-    exit 1
-  }
+  rt="${repo_root}/${d}"
+  if [ -L "${rt}" ]; then
+    continue
+  elif [ ! -e "${rt}" ]; then
+    mkdir -p "$(dirname "${rt}")"
+    ln -s "../skills" "${rt}"
+    echo "Linked ${d} -> ../skills."
+  else
+    for s in "${SKILLS[@]}"; do
+      entry="${rt}/${s}"
+      if [ -L "${entry}" ]; then
+        continue
+      elif [ -e "${entry}" ]; then
+        echo "WARN: ${d}/${s} exists and is not a symlink — kept as-is (the module's own entry wins)." >&2
+        echo "      The vendored copy in skills/${s} is authoritative; this entry may be STALE." >&2
+      else
+        ln -s "../../skills/${s}" "${entry}"
+        echo "Linked ${d}/${s} -> ../../skills/${s} (coexisting with the module's own skills)."
+      fi
+    done
+  fi
 done
 
-install_into "${repo_root}"
 echo "Vendored ${CATALOG_REPO}@${REF} into skills/ (${SKILLS[*]}); pin recorded in skills-lock.json."

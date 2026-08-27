@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.3](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/compare/v0.11.2...v0.11.3) (2026-08-27)
+
+
+### Bug Fixes
+
+* a created module passes its own self-test and vendors skills beside its own ([#169](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/issues/169)) ([3035e30](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/commit/3035e3073fc645e543392057d2d6fc145a0cb76f))
+
+## [0.11.2](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/compare/v0.11.1...v0.11.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* M5 accepts all three published MII canonical spaces ([#167](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/issues/167)) ([856ae71](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/commit/856ae71f18b068c2460eff2f47042b9235c28585))
+
 ## [0.11.1](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/compare/v0.11.0...v0.11.1) (2026-08-20)
 
 

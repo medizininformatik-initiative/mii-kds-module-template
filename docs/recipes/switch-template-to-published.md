@@ -10,7 +10,7 @@ visible.
 > **Why the module starts vendored:** the IG Publisher needs a template to
 > build, and while the template package has no registry entry a module cannot
 > reference one — see [concepts.md § 2](../concepts.md#2-how-it-references-the-mii-template--vendored-vs-published)
-> and [project-status.md](../project-status.md) for whether it is published yet.
+> and [org-move.md](../org-move.md) for whether it is published yet.
 > After this cleanup your module tracks a versioned dependency like every other
 > package, and the scheduled dependency checker proposes upgrades for you.
 
@@ -21,7 +21,7 @@ you start, so you can tell the switch apart from an unrelated breakage.
 ## When you do this
 
 Do this **once**, as soon as the template repository
-[`medizininformatik-initiative/ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)
+[`medizininformatik-initiative/ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
 has cut its first release **and** that release is resolvable by the IG Publisher
 (see the prerequisite below). Before that point, keep the vendored copy — a
 published reference that cannot be resolved makes the build fail.
@@ -33,7 +33,7 @@ Please — *not* CalVer (only modules use CalVer). Find the exact number to pin,
 in order of preference:
 
 1. **The template repo's Releases page** —
-   <https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds/releases>.
+   <https://github.com/medizininformatik-initiative/ig-template-mii-kds/releases>.
    Use the latest non-prerelease tag, e.g. `0.1.0` (drop the leading `v` in
    `ig.ini`; the reference is `de.medizininformatikinitiative.template#0.1.0`).
 2. **The template's `package-list.json`** (in that repo) — only once a formal
