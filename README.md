@@ -6,16 +6,16 @@ Implementation Guide**. Click *Use this template* and you get a working IG proje
 up — so you can start with profiles and content instead of setup.
 
 The MII look comes from the separate IG template
-[`ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds),
+[`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds),
 which this scaffold references (and keeps up to date automatically).
 
 See what it renders as before you start:
-<https://forschungsgruppe-digital-health.github.io/mii-kds-module-template/> — the
+<https://medizininformatik-initiative.github.io/mii-kds-module-template/> — the
 demo module of the current release, plus two real MII KDS modules migrated onto
 this template.
 
 > **Status: prototype.** Usable and released, but pending discussion in the MII
-> Taskforce Kerndatensatz — see [docs/project-status.md](docs/project-status.md).
+> Taskforce Kerndatensatz — see [docs/org-move.md](docs/org-move.md).
 
 > **⚠️ When you click *Use this template*, tick “Include all branches”.**
 > Otherwise you get `main` only, without the `dev` branch this scaffold works
@@ -82,7 +82,7 @@ newcomers. The three you are most likely to want first:
 
 - [Recipes](docs/recipes/) — step-by-step for the common tasks
 - [Create a new module](docs/recipes/create-a-new-module.md) — the path from *Use this template* to a module that builds
-- [Project status](docs/project-status.md) — prototype; what that means in practice
+- [Org move & governance status](docs/org-move.md) — the repository's home, and which decisions are still open
 
 Contributing and policies: [CONTRIBUTING.md](CONTRIBUTING.md) ·
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [SECURITY.md](SECURITY.md)

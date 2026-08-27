@@ -24,7 +24,7 @@ second linter next to it.
 
 This is the **same single convention checker** the project uses in the template
 package repo
-([`ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)):
+([`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)):
 both repos share the same check-matrix contract (`references/check-matrix.md`,
 Sections 1a module / 1b template package). This copy is **scoped to the module
 scaffold** — it additionally implements the hard Section-1a assertions
