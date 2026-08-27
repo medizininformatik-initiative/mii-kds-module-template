@@ -119,7 +119,7 @@ for free.
 
 **Nothing to do in a module.** If a base label is blank in some language, the
 fix belongs in the template repository
-([`ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)),
+([`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)),
 which vendors the base UI-string catalogs — see its
 `docs/recipes/add-translation.md` §3. Open an issue there rather than patching
 around it here.

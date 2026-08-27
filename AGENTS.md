@@ -11,7 +11,7 @@ Implementation Guide (IG)**. A user clicks "Use this template" to start a
 module; the scaffold's `sushi-config.yaml`, `ig.ini`, and workflows carry
 `{{PLACEHOLDER}}` values the new module fills in. The scaffold **references**
 the MII IG template package
-[`ig-template-mii-kds`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)
+[`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
 (`de.medizininformatikinitiative.template`) in `ig.ini` — **today as the
 vendored local folder `template = #ig-template`**, because that package has no
 published release yet; it switches to
@@ -42,7 +42,7 @@ agent must follow:
 - `dev` → `main` is the **release gate**: a human decision, merged as a merge
   commit (not a squash). Never open or merge it unprompted.
 - **Back-merge rule.** `main` and `dev` have diverged (see
-  [`docs/project-status.md`](docs/project-status.md)). If anything lands on
+  [`docs/org-move.md`](docs/org-move.md)). If anything lands on
   `main` without going through `dev`, `main` must be merged back into `dev`
   before the next `dev → main` merge. Check `git log origin/dev..origin/main`
   before branching.
@@ -149,7 +149,7 @@ To install a catalog skill **outside this repository** (globally, or into anothe
 catalog's own installer:
 
 ```bash
-CATALOG=https://github.com/forschungsgruppe-digital-health/agent-skills/tree/v0.15.1
+CATALOG=https://github.com/forschungsgruppe-digital-health/agent-skills/tree/v0.24.2
 npx skills add "$CATALOG" --list
 npx skills add "$CATALOG" --skill mii-ig-migration --agent claude-code codex --global --yes
 ```

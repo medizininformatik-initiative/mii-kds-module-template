@@ -18,7 +18,7 @@ MII-branded FHIR Implementation Guide.
 ## 2. How it references the MII template — vendored vs published
 
 The **look** of the IG comes from a separate template package,
-[`de.medizininformatikinitiative.template`](https://github.com/forschungsgruppe-digital-health/ig-template-mii-kds)
+[`de.medizininformatikinitiative.template`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
 This scaffold references it in `ig.ini`:
 
 - **Vendored (bring-up):** a copy lives in `ig-template/`, referenced as

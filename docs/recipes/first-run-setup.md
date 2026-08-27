@@ -177,7 +177,7 @@ The bootstrap printed it; the essentials:
    ```
 
    `<your-org>` is where **your module** lives; `<template-host-org>` is where
-   `ig-template-mii-kds` lives (currently `forschungsgruppe-digital-health`) —
+   `ig-template-mii-kds` lives (currently `medizininformatik-initiative`) —
    they are usually **not** the same.
 
    Without it the workflow probes the built-in target-organisation URL and, if

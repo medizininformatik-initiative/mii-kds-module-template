@@ -25,7 +25,7 @@ which creates `dev` for you.
 
 In *this* repository the two branches diverged once and were reconciled on
 2026-08-06; anything landing on `main` directly has to be back-merged into `dev`
-— [project-status.md](project-status.md#branch-state--main-and-dev-are-reconciled)
+— [org-move.md](org-move.md#branch-state--main-and-dev-are-reconciled)
 has the history and the rule.
 
 ---
@@ -153,7 +153,7 @@ passes to the MII reusable workflows, and unset means the pinned defaults there
 **Layer 1 only** — a module does not have one; skip this section if you are
 reading as a module author.
 
-The [Pages landing page](https://forschungsgruppe-digital-health.github.io/mii-kds-module-template/)
+The [Pages landing page](https://medizininformatik-initiative.github.io/mii-kds-module-template/)
 advertises one rendering as *what a module built from this template renders as,
 out of the box*, for the current template release. **It tracks the latest
 release automatically** via `release-demo.yml`; there is no manual promotion
@@ -202,10 +202,10 @@ Rewrites are idempotent. Dry-run it before changing the script:
 
 ```bash
 curl -sSL -o /tmp/index.html \
-  https://forschungsgruppe-digital-health.github.io/mii-kds-module-template/index.html
+  https://medizininformatik-initiative.github.io/mii-kds-module-template/index.html
 node scripts/update-demo-links.mjs --check --file /tmp/index.html \
   --version v9.9.9 \
-  --repo-url https://github.com/forschungsgruppe-digital-health/mii-kds-module-template
+  --repo-url https://github.com/medizininformatik-initiative/mii-kds-module-template
 ```
 
 ### Retention and the reserved paths

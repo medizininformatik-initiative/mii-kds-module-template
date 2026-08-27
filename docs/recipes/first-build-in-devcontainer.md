@@ -24,7 +24,7 @@ access (the first build downloads the base image and tools):
 ## Steps
 
 1. Create your module repository from this template: on
-   [the template's GitHub page](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template)
+   [the template's GitHub page](https://github.com/medizininformatik-initiative/mii-kds-module-template)
    click **"Use this template" → "Create a new repository"**.
    Mind the warning in the `README.md`: tick **"Include all branches"** (or
    run the first-run bootstrap afterwards) so your repository gets the `dev`
