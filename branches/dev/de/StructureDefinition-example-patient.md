@@ -228,7 +228,7 @@ Weitere Repräsentationen des Profils: [CSV](../StructureDefinition-example-pati
   },
   "status" : "active",
   "experimental" : false,
-  "date" : "2026-08-28T09:55:24+00:00",
+  "date" : "2026-08-28T09:59:46+00:00",
   "publisher" : "NUM-DIZ",
   "_publisher" : {
     "extension" : [{
