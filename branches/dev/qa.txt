@@ -3,7 +3,7 @@ MII_IG_Template : Validation Results
 
 err = 0, warn = 13, info = 120
 IG Publisher Version: 2.3.2 Out of date - current version is 2.3.3
-Generated Fri Aug 28 05:39:32 UTC 2026. FHIR version 4.0.1 for de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 (canonical = https://www.medizininformatik-initiative.de/fhir/modul-template)
+Generated Fri Aug 28 09:56:59 UTC 2026. FHIR version 4.0.1 for de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 (canonical = https://www.medizininformatik-initiative.de/fhir/modul-template)
  Build Errors : 0 / 6 / 0
  /home/runner/work/mii-kds-module-template/mii-kds-module-template/fsh-generated/resources/ImplementationGuide-mii-ig-template : 0 / 4 / 42
  /home/runner/work/mii-kds-module-template/mii-kds-module-template/fsh-generated/resources/Patient-ExamplePatientInstance : 0 / 1 / 2
