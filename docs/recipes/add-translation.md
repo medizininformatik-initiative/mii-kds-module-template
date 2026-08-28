@@ -124,9 +124,11 @@ which vendors the base UI-string catalogs — see its
 `docs/recipes/add-translation.md` §3. Open an issue there rather than patching
 around it here.
 
-> **Keep the template current** so you receive such fixes: the vendored copy in
-> `ig-template/` is refreshed by `scripts/sync-ig-template.sh` and the
-> `sync-ig-template` workflow.
+> **Keep the template current** so you receive such fixes: with the default
+> repository-URL reference in `ig.ini` every build fetches the template's
+> released `main` automatically; if you build from the vendored offline
+> fallback, the copy in `ig-template/` is refreshed by
+> `scripts/sync-ig-template.sh` and the `sync-ig-template` workflow.
 
 ---
 
@@ -284,7 +286,7 @@ moves between them.
 | Menu stays in one language everywhere | A `menu:` property crept into `sushi-config.yaml`, or the per-language menu file is missing | Remove the property; add `input/translations/<lang>/includes/menu.xml` (§2) |
 | Menu QA error about `href="#"` | A dropdown parent has no real target | Point it at a real page (§2) |
 | Navigation differs between languages | An entry was added to one menu file only | Keep both menu files in step (§2) |
-| Base/footer labels blank in some language | The template lacks that language's UI-string catalog | Fix in the template repo (§3); make sure your `ig-template/` mirror is current |
+| Base/footer labels blank in some language | The template lacks that language's UI-string catalog | Fix in the template repo (§3); rebuild once released (the URL default fetches it), or — if you build from the vendored fallback — make sure your `ig-template/` mirror is current |
 | A translated page does not appear on `/de/` | It is a `<name>-de.md` sibling, or the file name differs from the English source page | Move it to `input/translations/de/pagecontent/<same-filename>` (§1) |
 | A resource supplement does nothing | `msgid` mismatch, wrong file name, or an untranslatable field | Copy the `msgid` from `fsh-generated/resources/…`; check §4 |
 | **Page content is German but the title, breadcrumb and ToC entry stay English** | The IG-level catalogue was never renamed from `ImplementationGuide-mii-ig-{{MODULE_SLUG}}.po` to your IG id, so the publisher never matched it to the resource | Rename it to `ImplementationGuide-<your-ig-id>.po` (§5) |

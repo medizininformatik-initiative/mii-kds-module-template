@@ -114,7 +114,8 @@ subst() { # $1=file  (stdin: KEY|VALUE lines)
 
 # sushi-config.yaml + ig.ini (ig.ini's `ig =` line references
 # ImplementationGuide-mii-ig-{{MODULE_SLUG}}.json; the `template =` line is left
-# untouched — it already points at the vendored ig-template/).
+# untouched — it already names a buildable template: the repository-URL default,
+# or the vendored ig-template/ fallback).
 subst sushi-config.yaml < "${placeholders}"
 subst ig.ini < "${placeholders}"
 

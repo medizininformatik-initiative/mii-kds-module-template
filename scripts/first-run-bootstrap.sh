@@ -105,9 +105,11 @@ print_checklist() {
    comments — the module does NOT build until they are all replaced:
      - sushi-config.yaml   ({{MODULE_SLUG}}, {{MODULE_NAME}}, {{MODULE_TITLE}},
                             {{MODULE_DESCRIPTION}}, {{CALVER_VERSION}}, dates, …)
-     - ig.ini              (the {{MODULE_SLUG}} in the ig path; LEAVE
-                            `template = #ig-template` as it is until the MII
-                            template package is published — see
+     - ig.ini              (the {{MODULE_SLUG}} in the ig path; LEAVE the
+                            `template =` line as it is — the repository-URL
+                            default, with `#ig-template` as the vendored
+                            offline fallback — until the MII template package
+                            is published; see
                             docs/recipes/switch-template-to-published.md)
      - publication-request.json, .github/workflows/go-publish.yml
        ({{GITHUB_ORG}}, {{REPO_NAME}}, canonical, …)

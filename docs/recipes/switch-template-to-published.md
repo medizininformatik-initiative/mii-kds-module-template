@@ -1,15 +1,15 @@
-# Recipe: switch from the vendored template to the published package
+# Recipe: switch to the published template package
 
-**Goal.** Move your module's `ig.ini` from the **vendored** bring-up template
-(`ig-template/`, referenced as `template = #ig-template`) to the **pinned
-published** MII template package
+**Goal.** Move your module's `ig.ini` from the **interim** template reference
+(the repository URL, or the vendored `ig-template/` fallback referenced as
+`template = #ig-template`) to the **pinned published** MII template package
 (`template = de.medizininformatikinitiative.template#x.y.z`), and delete the
 `ig-template/` folder — proving with a rebuild that the switch changed nothing
 visible.
 
-> **Why the module starts vendored:** the IG Publisher needs a template to
+> **Why the module starts on the interim form:** the IG Publisher needs a template to
 > build, and while the template package has no registry entry a module cannot
-> reference one — see [concepts.md § 2](../concepts.md#2-how-it-references-the-mii-template--vendored-vs-published)
+> reference one — see [concepts.md § 2](../concepts.md#2-how-it-references-the-mii-template--url-now-published-package-later)
 > and [org-move.md](../org-move.md) for whether it is published yet.
 > After this cleanup your module tracks a versioned dependency like every other
 > package, and the scheduled dependency checker proposes upgrades for you.
@@ -23,7 +23,7 @@ you start, so you can tell the switch apart from an unrelated breakage.
 Do this **once**, as soon as the template repository
 [`medizininformatik-initiative/ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
 has cut its first release **and** that release is resolvable by the IG Publisher
-(see the prerequisite below). Before that point, keep the vendored copy — a
+(see the prerequisite below). Before that point, keep the interim reference — a
 published reference that cannot be resolved makes the build fail.
 
 ## Where the published version number comes from
@@ -63,7 +63,7 @@ in order of preference:
   (HTTP 200, not 404). Until the package is on the package server, the
   supported alternatives are the vendored folder you already have, or a GitHub
   URL reference.
-- Your module already builds green today against the vendored template (so you
+- Your module already builds green today against the current template reference (so you
   have a clean baseline to compare against).
 - `sushi` (`3.20.0`), the IG Publisher jar (`2.3.0`), and `jq` are available —
   the dev container has all three. Or push the branch and let the
@@ -71,7 +71,7 @@ in order of preference:
 
 ## Steps
 
-1. **Capture the baseline QA** from the current (vendored) build, so you can
+1. **Capture the baseline QA** from the current build, so you can
    prove the switch changes nothing. Build once, then save the QA summary:
 
    ```bash
@@ -81,12 +81,15 @@ in order of preference:
    jq '{errs, warnings, hints}' output/qa.json   # note these counts
    ```
 
-2. **Edit `ig.ini`** — replace the local-folder reference with the pinned
+2. **Edit `ig.ini`** — replace the current reference with the pinned
    published package. Change:
 
    ```ini
-   template = #ig-template
+   template = https://github.com/medizininformatik-initiative/ig-template-mii-kds
    ```
+
+   (or `template = #ig-template`, if your module still uses the vendored
+   fallback)
 
    to (use the real version from the section above):
 
@@ -101,7 +104,7 @@ in order of preference:
    > "this is a local folder." Without it, the value is a package reference
    > (`id#version`) the Publisher resolves from the registry.
 
-3. **Delete the vendored template folder** — it is no longer referenced:
+3. **Delete the vendored template folder, if your module carries one** — it is no longer referenced:
 
    ```bash
    git rm -r ig-template
@@ -132,7 +135,7 @@ in order of preference:
    ```
 
    Open `output/index.html` (or the branch preview the CI publishes) and eyeball
-   the header/footer against the vendored build.
+   the header/footer against the baseline build.
 
 6. **Open a PR to `dev`** with the `ig.ini` change and the `ig-template/`
    deletion. The `IG build and preview` workflow rebuilds and posts the preview
@@ -143,7 +146,7 @@ in order of preference:
 
 - `ig.ini` references `de.medizininformatikinitiative.template#x.y.z`; the
   `ig-template/` folder is gone.
-- The rebuilt IG looks identical to the vendored build (same branding, same
+- The rebuilt IG looks identical to the baseline build (same branding, same
   pages), and the QA error/warning counts did not increase.
 - The convention check passes (`M7 no floating pins` shows the pinned template
   reference), and future template releases arrive as dependency-checker PRs.

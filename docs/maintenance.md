@@ -35,8 +35,8 @@ in sync:
 
 | Pin | Location |
 |---|---|
-| `de.medizininformatikinitiative.template` | `ig.ini` → `template = de.medizininformatikinitiative.template#<version>`; when moving off a vendored copy, follow [`recipes/switch-template-to-published.md`](recipes/switch-template-to-published.md) |
-| `fhir2.base.template` | inside the template package (transitive) — locally only in a vendored bring-up copy (`ig-template/package/package.json`) |
+| `de.medizininformatikinitiative.template` | `ig.ini` → the `template =` line. Today it is the interim repository URL (follows the template's released `main` — no version pin; the checker reports it as unpinned); the endgame is `template = de.medizininformatikinitiative.template#<version>` once published — follow [`recipes/switch-template-to-published.md`](recipes/switch-template-to-published.md) |
+| `fhir2.base.template` | inside the template package (transitive) — locally only in the vendored fallback copy (`ig-template/package/package.json`) |
 | FHIR package dependencies (`de.basisprofil.r4`, `de.medizininformatikinitiative.kerndatensatz.meta`, `hl7.fhir.uv.crmi`, `hl7.fhir.uv.xver-r5.r4`, …) | `sushi-config.yaml` → `dependencies:` block |
 | The org skill catalog (`forschungsgruppe-digital-health/agent-skills`), whose skills are vendored into `skills/` | `skills-lock.json` → `skills.<name>.ref`, written by the catalog's own installer. Bump with `scripts/sync-skills.sh --ref vX.Y.Z` (re-vendors `skills/` and rewrites the lock in one diff). **Pin the `/tree/<ref>` form** — `owner/repo@<tag>` does not pin, `@` introduces a skill *name* there. `scripts/vendored-skills.test.mjs` fails the build if the lock pins a branch, if a pinned skill is not on disk, or if a documented install command names a different ref |
 | The skill installer CLI (`npx skills@<version>`) | `scripts/sync-skills.sh` → `SKILLS_CLI`. Unpinned, a new CLI release could change the vendored bytes and fail the drift check for a reason unrelated to the catalog. **Not watched by the checker** — bump it by hand when the drift check reports a change no catalog release explains |
