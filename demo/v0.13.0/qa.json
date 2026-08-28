@@ -1,0 +1,20 @@
+{
+  "url" : "https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template",
+  "name" : "MII_IG_Template",
+  "title" : "MII Implementation Guide Module Template",
+  "description" : "Self-check build of the mii-kds-module-template scaffold. This repository is a template for creating a new MII KDS module Implementation Guide, or a migration target for an existing Simplifier MII IG. Every value here is a placeholder — replace them all when you create a real module.",
+  "ig-date" : "2027-01-01",
+  "status" : "active",
+  "package-id" : "de.medizininformatikinitiative.kerndatensatz.template",
+  "ig-ver" : "2027.0.0-template.0.13.0",
+  "date" : "Fri, 28 Aug, 2026 09:58:50 +0000",
+  "dateISO8601" : "2026-08-28T09:58:50+00:00",
+  "errs" : 0,
+  "warnings" : 13,
+  "hints" : 120,
+  "suppressed-hints" : 0,
+  "suppressed-warnings" : 0,
+  "version" : "4.0.1",
+  "tool" : "5.0.0 (3)",
+  "maxMemory" : 1637030464
+}
