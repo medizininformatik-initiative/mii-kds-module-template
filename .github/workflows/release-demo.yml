@@ -8,10 +8,12 @@
 #   scripts/first-run-bootstrap.sh), and a repository guard makes it a no-op
 #   even if a copy survives.
 #
-# Purpose:   render the demo that the Pages landing page advertises as "the
+# Purpose:   render the demo that the Pages root index advertises as "the
 #            current release", FROM THE RELEASED TAG, publish it to
-#            gh-pages/demo/<tag>/ and repoint the landing page at it, in one
-#            commit. Replaces a manual promotion step.
+#            gh-pages/demo/<tag>/ and REGENERATE the root index
+#            (scripts/gen-pages-index.mjs — a plain autoindex-style listing of
+#            branches/dev/ + the latest demo), in one commit. Replaces a manual
+#            promotion step.
 #
 # THE BUG THIS FIXES: the demo used to be copied by hand out of a feature-branch
 #            preview built BEFORE Release Please bumped the version, so the path
@@ -26,9 +28,9 @@
 #            is merged by a human, the release is published, this runs), plus
 #            workflow_dispatch to re-render a given tag (input `tag`). A
 #            PRE-RELEASE is skipped on the release trigger: it is not "the
-#            current release" and must not move the landing-page links; dispatch
+#            current release" and must not move the root index's links; dispatch
 #            can still render one, and `update_landing_page: false` publishes
-#            demo/<tag>/ without repointing the page.
+#            demo/<tag>/ without regenerating the index.
 #
 # Toggle:    vars.ENABLE_RELEASE_DEMO — ON by default; set the repository
 #            variable to 'false' to skip the job (it shows as "skipped", not
@@ -91,7 +93,7 @@ on:
         required: true
         type: string
       update_landing_page:
-        description: "Repoint the gh-pages landing page at this tag"
+        description: "Regenerate the gh-pages root index after publishing this tag"
         required: false
         default: true
         type: boolean
@@ -102,13 +104,13 @@ on:
         required: true
         type: string
       update_landing_page:
-        description: "Repoint the gh-pages landing page at this tag"
+        description: "Regenerate the gh-pages root index after publishing this tag"
         required: false
         default: true
         type: boolean
 
 permissions:
-  contents: write # push the demo + landing page to the gh-pages branch
+  contents: write # push the demo + regenerated root index to the gh-pages branch
   pages: write # PAGES_ACTIONS_ENABLED deploy path
   id-token: write # deploy-pages OIDC
 
@@ -155,7 +157,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${IS_PRERELEASE:-false}" = "true" ]; then
-            echo "::notice::${RELEASE_TAG} is a pre-release — skipping the release demo. The landing page advertises the current stable release; dispatch this workflow manually to render a pre-release under demo/<tag>/."
+            echo "::notice::${RELEASE_TAG} is a pre-release — skipping the release demo. The root index advertises the current stable release; dispatch this workflow manually to render a pre-release under demo/<tag>/."
             echo "skip=true" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -178,11 +180,11 @@ jobs:
           echo "skip=false" >> "${GITHUB_OUTPUT}"
           echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
           echo "update_page=${update_page}" >> "${GITHUB_OUTPUT}"
-          echo "Rendering demo for ${tag} (landing page update: ${update_page})."
+          echo "Rendering demo for ${tag} (root index regeneration: ${update_page})."
 
       # Two checkouts on purpose:
       #   * the workspace root is THIS ref — it supplies the publishing tooling
-      #     (scripts/update-demo-links.mjs, scripts/self-check-substitute.sh).
+      #     (scripts/gen-pages-index.mjs, scripts/self-check-substitute.sh).
       #     Taking them from the tag instead would make re-rendering an OLD
       #     release impossible, because that tag predates the tooling.
       #   * release-src/ is the TAG — the only thing that gets built.
@@ -389,7 +391,7 @@ jobs:
             release-src/output/index.html
           if-no-files-found: warn
 
-      - name: Publish to gh-pages/demo/<tag>/ and repoint the landing page
+      - name: Publish to gh-pages/demo/<tag>/ and regenerate the root index
         id: publish
         if: ${{ steps.tag.outputs.skip != 'true' }}
         shell: bash
@@ -429,20 +431,14 @@ jobs:
           touch gh-pages/.nojekyll
 
           if [ "${UPDATE_PAGE}" = "true" ]; then
-            if [ ! -f gh-pages/index.html ]; then
-              echo "::error::gh-pages has no index.html to repoint. Restore the hand-authored landing page, or dispatch with update_landing_page=false to publish demo/${TAG}/ only."
-              exit 1
-            fi
-            # Conservative, anchored rewrite of the HAND-AUTHORED landing page —
-            # it is never regenerated. The script exits non-zero if a required
-            # anchor is missing, so a page that silently keeps linking the
-            # previous release fails the job instead of shipping.
-            node scripts/update-demo-links.mjs \
-              --file gh-pages/index.html \
-              --version "${TAG}" \
-              --repo-url "https://github.com/${REPO}" | tee "${RUNNER_TEMP}/landing-diff.txt"
+            # The root index is GENERATED (scripts/gen-pages-index.mjs): a plain
+            # autoindex-style listing of branches/dev/ + the highest-SemVer
+            # demo/<tag>/ that exists in the tree. It CREATES the page when it
+            # is missing, so the old "no index.html to repoint" guard is gone;
+            # a demo just published above is picked up here automatically.
+            node scripts/gen-pages-index.mjs gh-pages "${REPO}" | tee "${RUNNER_TEMP}/index-report.txt"
           else
-            echo "::notice::update_landing_page=false — demo/${TAG}/ published without repointing the landing page."
+            echo "::notice::update_landing_page=false — demo/${TAG}/ published without regenerating the root index."
           fi
 
           cd gh-pages
@@ -479,14 +475,14 @@ jobs:
             echo "### Release demo — ${TAG}"
             echo ""
             echo "- [Rendered demo IG](${url})"
-            echo "- Landing page: https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO#*/}/"
+            echo "- Root index: https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO#*/}/"
             echo "- Terminology: ${{ steps.tx.outputs.mode }}"
             echo ""
-            if [ -s "${RUNNER_TEMP}/landing-diff.txt" ]; then
-              echo "<details><summary>Landing-page changes</summary>"
+            if [ -s "${RUNNER_TEMP}/index-report.txt" ]; then
+              echo "<details><summary>Root-index regeneration</summary>"
               echo ""
-              echo '```diff'
-              cat "${RUNNER_TEMP}/landing-diff.txt"
+              echo '```text'
+              cat "${RUNNER_TEMP}/index-report.txt"
               echo '```'
               echo ""
               echo "</details>"

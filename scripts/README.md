@@ -41,7 +41,7 @@ list — not a glob, because this directory now holds unrelated helpers too.
 | `set-su-termserv-secrets.sh` | Validates an SU-TermServ client certificate and uploads it as repository secrets | a maintainer, once |
 | `seed-comparison-cache.sh` | Places the previous release's `package.tgz` (a GitHub Release asset) into `~/.fhir/packages` so the publisher's `version-comparison` can load it; no-op while the parameter is commented out | `ig-publisher.yml`, `module-release.yml`, `go-publish.yml`, `release-demo.yml` (before the publisher) |
 | `self-check-substitute.sh` | **Template repo only.** The single source of truth for the self-check placeholder values; substitutes them into workspace copies of `sushi-config.yaml`, `ig.ini` and `input/**` — contents *and* file names. With `SELF_CHECK_RELEASE_TAG=vX.Y.Z` the demo IG's CalVer is derived from the tag instead of the fixed draft value, and the value it wrote is reported as `demo_version` | `ig-publisher.yml` (preview), `release-demo.yml` (released demo) |
-| `update-demo-links.mjs` | **Template repo only.** Conservatively repoints the hand-authored `gh-pages/index.html` at a newly released demo; `--check` dry-runs it and prints the before/after diff | `release-demo.yml`, and manually |
+| `gen-pages-index.mjs` | **Template repo only.** Generates the `gh-pages` ROOT `index.html` — a plain autoindex-style listing of `branches/dev/` and the latest `demo/<tag>/` (only what exists in the checkout; older demos and other previews stay deployed but deliberately unlisted). Replaced `update-demo-links.mjs`, the conservative repointer of the retired hand-authored landing page | `release-demo.yml`, `ig-publisher.yml` (template repo only), and manually |
 
 ## Moved out of this directory
 
