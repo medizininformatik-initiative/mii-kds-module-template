@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.12.0...v0.13.0) (2026-08-28)
+
+
+### Features
+
+* catalog skills install on demand - and the ownership is decided ([#18](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/18)) ([00ade19](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/00ade19a530e22d772433768711f3bc1556aeb3a))
+
+
+### Bug Fixes
+
+* a quoted value with a trailing comment parses to its content ([#17](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/17)) ([e88bac0](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/e88bac028805dee39aa82bdc73d6de9345a93439))
+
 ## [0.12.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.11.3...v0.12.0) (2026-08-28)
 
 
