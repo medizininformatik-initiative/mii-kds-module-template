@@ -145,8 +145,10 @@ The bootstrap printed it; the essentials:
 
 1. **Replace every `{{PLACEHOLDER}}`.** Start in `sushi-config.yaml` (its header
    lists every placeholder and what it means), then `ig.ini` (the module slug in
-   the `ig =` path only — **leave `template = #ig-template` as it is** until the
-   MII template package is published; see
+   the `ig =` path only — **leave the `template =` line as it is**: the default
+   is the template repository URL, fetched at build time, and
+   `template = #ig-template` is the vendored offline fallback; both stay until
+   the MII template package is published, see
    [switch-template-to-published.md](switch-template-to-published.md)), then
    `publication-request.json` and `.github/workflows/go-publish.yml`. Run
    `node scripts/convention-check.mjs` — it must stay green.
@@ -169,7 +171,8 @@ The bootstrap printed it; the essentials:
 5. **Vendored IG template (while the template repos have not moved):** set the
    repository variable `IG_TEMPLATE_REPO_URL` to the clone URL of
    `ig-template-mii-kds`, so `sync-ig-template.yml` keeps your `ig-template/`
-   mirror current:
+   mirror — the offline/reproducibility fallback behind the URL default in
+   `ig.ini` — current:
 
    ```sh
    gh variable set IG_TEMPLATE_REPO_URL --repo <your-org>/<your-module-repo> \

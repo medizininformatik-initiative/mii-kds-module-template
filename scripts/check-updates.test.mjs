@@ -136,11 +136,24 @@ test("parseIgIniTemplate reads a pinned template reference", () => {
 });
 
 test("parseIgIniTemplate returns version null for the vendored path form", () => {
-  // bring-up fallback per docs/recipes/switch-template-to-published.md
+  // offline fallback per docs/recipes/switch-template-to-published.md
   assert.deepEqual(parseIgIniTemplate("[IG]\ntemplate = ig-template\n"), {
     id: "ig-template",
     version: null,
   });
+});
+
+test("parseIgIniTemplate returns version null for the interim URL form", () => {
+  // the default since 2026-08-28: the publisher fetches the repository zip of
+  // the released default branch at build time (docs/concepts.md section 2) —
+  // no version pin, so the dependency row reports it as not-a-pin.
+  assert.deepEqual(
+    parseIgIniTemplate("[IG]\ntemplate = https://github.com/medizininformatik-initiative/ig-template-mii-kds\n"),
+    {
+      id: "https://github.com/medizininformatik-initiative/ig-template-mii-kds",
+      version: null,
+    },
+  );
 });
 
 test("parseIgIniTemplate keeps floating labels visible (not silently ok)", () => {

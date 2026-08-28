@@ -68,7 +68,7 @@ Unfamiliar terms are in the [glossary](docs/glossary.md).
 | `input/translations/de/` | German translations of pages, menu and resources |
 | `input/includes/menu.xml` | The navigation menu (one file per language) |
 | `qc/custom.rules.yaml`, `advisor.json` | What the MII reusable validation reads: naming-convention rules and tolerated validator messages |
-| `ig-template/` | The MII IG template, mirrored automatically — don't edit |
+| `ig-template/` | The MII IG template, mirrored automatically as the offline/reproducibility fallback (builds default to the template repository URL in `ig.ini`) — don't edit |
 | `docs/` | Guides and step-by-step recipes |
 | `tests/` | FHIR validation test cases the build runs — see [tests/README.md](tests/README.md) |
 | `scripts/` | Helper scripts (first-run bootstrap, template sync, convention check, …) — see [scripts/README.md](scripts/README.md) |

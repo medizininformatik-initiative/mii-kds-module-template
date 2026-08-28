@@ -4,9 +4,10 @@ output/
 # IG Publisher scratch space.
 temp/
 # The template package the IG Publisher extracts into ./template at build
-# time. Why: this repo REFERENCES the template by version in ig.ini; the
-# extracted copy is a build artifact. (A deliberate vendored bring-up copy
-# would live under a different, tracked path.)
+# time. Why: this repo REFERENCES the template in ig.ini (repository URL today,
+# package pin once published); the extracted copy is a build artifact. (The
+# deliberate vendored fallback copy lives under a different, tracked path:
+# ig-template/.)
 template/
 # Downloaded FHIR package cache.
 input-cache/

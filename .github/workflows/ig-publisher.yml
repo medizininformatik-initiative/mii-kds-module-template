@@ -48,8 +48,9 @@
 #            WORKSPACE COPY that is NEVER committed, sed-substitutes the
 #            documented self-check values (MODULE_SLUG=template, …) into
 #            sushi-config.yaml, ig.ini and the build inputs so a real build can
-#            run. The template line itself is left alone: `#ig-template` (the
-#            vendored folder) is buildable, so the full build + preview run.
+#            run. The template line itself is left alone: both the repository-URL
+#            default and `#ig-template` (the vendored fallback folder) are
+#            buildable, so the full build + preview run.
 #            Should a repository ever carry a TODO template line instead, the
 #            build DEGRADES at runtime to a SUSHI-only check with a clear
 #            ::notice — no edit to this file needed either way. In a created
@@ -190,13 +191,14 @@ jobs:
           sushi .
           test -d fsh-generated/resources
           # A full IG Publisher build needs a buildable IG template in ig.ini.
-          # `#ig-template` (the vendored folder) is buildable, so this normally
-          # takes the full path; a TODO template line degrades to a SUSHI-only
-          # check. Detecting it at runtime keeps this file edit-free either way.
+          # The repository-URL default and `#ig-template` (the vendored
+          # fallback) are both buildable, so this normally takes the full path;
+          # a TODO template line degrades to a SUSHI-only check. Detecting it
+          # at runtime keeps this file edit-free either way.
           tmpl_line="$(grep -E '^[[:space:]]*template[[:space:]]*=' ig.ini || true)"
           if printf '%s' "${tmpl_line}" | grep -q 'TODO'; then
             echo "mode=sushi-only" >> "${GITHUB_OUTPUT}"
-            echo "::notice::ig.ini carries a TODO template placeholder — running a SUSHI-only check. The IG Publisher build and the Pages preview are skipped until ig.ini names a buildable template (the vendored #ig-template, or the published package once it exists — see docs/recipes/switch-template-to-published.md)."
+            echo "::notice::ig.ini carries a TODO template placeholder — running a SUSHI-only check. The IG Publisher build and the Pages preview are skipped until ig.ini names a buildable template (the template repository URL — the default, the vendored #ig-template fallback, or the published package once it exists — see docs/recipes/switch-template-to-published.md)."
           else
             echo "mode=full" >> "${GITHUB_OUTPUT}"
             echo "IG template reference present — running the full IG Publisher build + preview."
