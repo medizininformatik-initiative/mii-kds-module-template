@@ -19,9 +19,8 @@
 // This implementation is kept aligned with the sibling template repo
 // (medizininformatik-initiative/ig-template-mii-kds, same file) and with
 // the sample IG's scripts/check-updates.py; this repo extends the watch list
-// with de.medizininformatikinitiative.template, a fixed set of FHIR package
-// dependencies, and — only where a skills-lock.json exists — the org skill
-// catalog this repository vendors skills from.
+// with de.medizininformatikinitiative.template and a fixed set of FHIR package
+// dependencies.
 //
 // Usage:  node scripts/check-updates.mjs [--format=markdown]
 // Tests:  node --test scripts/check-updates.test.mjs   (offline, pure functions)
@@ -138,27 +137,6 @@ export function parseIgIniTemplate(iniText) {
     return { id: value.slice(0, hash), version: value.slice(hash + 1).trim() || null };
   }
   return null;
-}
-
-/**
- * Read the pinned catalog ref out of a skills-lock.json text — the lock file
- * the skill installer writes (`npx skills add …/tree/<ref> --copy`) and this
- * repository's pin for the VENDORED catalog skills in `skills/`. Only entries
- * whose `source` is the given catalog count. Returns the ref, or null when the
- * text is unparseable, carries no catalog entry, or (a genuine defect) pins two
- * different refs at once.
- */
-export function parseSkillsLockRef(jsonText, catalog) {
-  try {
-    const entries = Object.values(JSON.parse(jsonText)?.skills ?? {}).filter(
-      (e) => e?.source === catalog,
-    );
-    if (entries.length === 0) return null;
-    const refs = [...new Set(entries.map((e) => e?.ref))];
-    return refs.length === 1 && typeof refs[0] === "string" ? refs[0] : null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -289,13 +267,6 @@ const TEMPLATE_PKG_ID = "de.medizininformatikinitiative.template";
 // (docs/org-move.md); the pre-move repository is an archived snapshot.
 const TEMPLATE_REPO = "medizininformatik-initiative/ig-template-mii-kds";
 
-// The org skill catalog. `skills/fhir-ig-analysis` and `skills/fhir-ig-translation`
-// are VENDORED copies of its skills, pinned in skills-lock.json and refreshed by
-// scripts/sync-skills.sh — so a newer catalog release is a proposable bump like
-// any other pin. Repos that do not vendor catalog skills have no lock file and
-// get no row.
-const SKILLS_CATALOG_REPO = "forschungsgruppe-digital-health/agent-skills";
-
 // The FIXED FHIR package watch list: these always get a row, even
 // before sushi-config.yaml has landed. Extra pins found in sushi-config.yaml
 // are watched on top.
@@ -316,7 +287,6 @@ const LINKS = {
   jekyll: "https://github.com/jekyll/jekyll/releases",
   base2: "https://github.com/HL7/ig-template-base2/blob/main/package-list.json",
   template: `https://github.com/${TEMPLATE_REPO}/releases`,
-  skillsCatalog: `https://github.com/${SKILLS_CATALOG_REPO}/blob/main/CHANGELOG.md`,
   fhirPkg: (id) => `https://simplifier.net/packages/${id}`,
 };
 
@@ -352,15 +322,6 @@ const upstream = {
     );
     return resolveTemplateLatest(pkgMeta, latestRelease);
   },
-  skillsCatalog: async () =>
-    normalizeVersion(
-      (
-        await fetchJson(
-          `https://api.github.com/repos/${SKILLS_CATALOG_REPO}/releases/latest`,
-          { github: true, allow404: true },
-        )
-      )?.tag_name ?? null,
-    ),
   fhirPkg: async (id) => {
     const meta = await fetchJson(`https://packages.fhir.org/${id}`);
     return (
@@ -408,16 +369,6 @@ function readBaseTemplatePin() {
   const text = readFileIfExists("ig-template/package/package.json");
   if (text == null) return null;
   return parsePackageJsonPin(text, "fhir2.base.template");
-}
-
-/**
- * The vendored catalog skills are pinned in skills-lock.json, written by the
- * catalog's own installer. Returns the ref, or null when this repository does
- * not vendor catalog skills (no lock file) — then there is no row to render.
- */
-function readSkillsCatalogPin() {
-  const text = readFileIfExists("skills-lock.json");
-  return text == null ? null : parseSkillsLockRef(text, SKILLS_CATALOG_REPO);
 }
 
 /**
@@ -539,23 +490,6 @@ export async function collectRows() {
     link: LINKS.base2,
   });
 
-  // The org skill catalog, when this repository vendors skills from it. The
-  // row is what turns "the catalog released v0.13.0" into a proposed bump; the
-  // sync workflow only ever re-installs the PINNED ref, on purpose.
-  const skillsPin = readSkillsCatalogPin();
-  if (existsSync("skills-lock.json")) {
-    const skillsLatest = await lookup(upstream.skillsCatalog);
-    rows.push({
-      artifact: `\`${SKILLS_CATALOG_REPO}\` (vendored skills)`,
-      pinned:
-        skillsPin ??
-        "pin not found (no catalog entry in `skills-lock.json`, or two refs at once)",
-      latest: skillsLatest,
-      status: statusFor(skillsPin, skillsLatest),
-      link: LINKS.skillsCatalog,
-    });
-  }
-
   // FHIR package dependencies: the fixed watch list ALWAYS gets rows (also
   // before sushi-config.yaml lands — defensive); extra pins found in
   // sushi-config.yaml are watched on top.
@@ -589,11 +523,6 @@ export function renderReport(rows) {
     "> Review the linked changelog, update the pin in its real location, and —",
     "> for an IG Publisher bump — recompute the jar's SHA-256 next to the new",
     "> version. Steps: `docs/recipes/review-a-dependency-update.md`.",
-    "",
-    "> The skill-catalog row is bumped with `scripts/sync-skills.sh --ref vX.Y.Z`,",
-    "> which re-vendors `skills/` and rewrites `skills-lock.json` in one diff.",
-    "> Read the catalog's `CHANGELOG.md` first: a skill can be deprecated or",
-    "> removed between releases.",
     "",
     "> `pin not found` rows are expected until the file/workflow that carries",
     "> the pin has landed; they are a reminder, not an error. `not yet",
