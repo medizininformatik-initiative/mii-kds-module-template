@@ -77,6 +77,13 @@ test("extractors read values, strip quotes and comments", () => {
   assert.equal(readTopLevel(SCAFFOLD, "id"), "mii-ig-{{MODULE_SLUG}}");
   assert.equal(readTopLevel(CONCRETE, "version"), "2026.0.1");
   assert.equal(readTopLevel("status: active # a comment\n", "status"), "active");
+  // Quoted value WITH a trailing comment: the quotes end the value, the
+  // comment is not part of it (annotating above the line is no longer the
+  // only safe form - the measured M4 false-failure class).
+  assert.equal(readTopLevel('title: "MII Modul X" # decided 2026-08-28\n', "title"), "MII Modul X");
+  assert.equal(readTopLevel("license: 'CC0-1.0' # carried from the source\n", "license"), "CC0-1.0");
+  // A hash INSIDE the quotes is content, never a comment.
+  assert.equal(readTopLevel('title: "MII # 1"\n', "title"), "MII # 1");
   assert.equal(readDependencies(SCAFFOLD).length, 2);
   assert.equal(readIgIniTemplate(CONCRETE_IGINI), "de.medizininformatikinitiative.template#0.1.0");
 });
