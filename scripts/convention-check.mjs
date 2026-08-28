@@ -41,8 +41,15 @@ export function readTopLevel(yaml, key) {
   const m = yaml.match(re);
   if (!m) return null;
   let v = m[1].trim();
-  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
-    return v.slice(1, -1);
+  // A quoted value ends at its MATCHING quote, and whatever follows - a
+  // trailing comment included - is not part of it. The earlier order
+  // (quote-strip only when the whole string ends in a quote, comment-strip
+  // after) made `title: "MII X" # comment` keep its quotes and fail M4
+  // spuriously, while a ` #` INSIDE the quotes must survive.
+  const q = v[0];
+  if (q === '"' || q === "'") {
+    const end = v.indexOf(q, 1);
+    if (end > 0) return v.slice(1, end);
   }
   const c = v.search(/\s+#/);
   if (c >= 0) v = v.slice(0, c).trim();
