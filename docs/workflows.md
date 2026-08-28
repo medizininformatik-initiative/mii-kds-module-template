@@ -39,7 +39,7 @@ Please, previews its own demo build, and monitors its own dependencies.
 | --- | --- | --- | --- | --- |
 | `release-please.yml` | push to `main` | Opens the SemVer release PR (tag + changelog) | `ENABLE_RELEASE_PLEASE` (ON) | **REMOVED by bootstrap** |
 | `notify-zulip.yml` | `release: published` | Announces the template release to the MII Zulip (topic *Template Releases*) | `ENABLE_ZULIP_ANNOUNCE` (ON) · `ANNOUNCE_PUBLIC_ZULIP` (OFF) | **REMOVED by bootstrap** |
-| `release-demo.yml` | `release: published`; `workflow_dispatch` (inputs `tag`, `update_landing_page`) | Rebuilds the Pages **demo from the released tag** with the same pinned toolchain, verifies the render carries that version, publishes it to `gh-pages/demo/<tag>/` and repoints the landing page at it. See [§ The published demo](#the-published-demo) | `ENABLE_RELEASE_DEMO` (ON) · `ENABLE_VERSION_COMPARISON` (ON) · `PAGES_ACTIONS_ENABLED` | **REMOVED by bootstrap** |
+| `release-demo.yml` | `release: published`; `workflow_dispatch` (inputs `tag`, `update_landing_page`) | Rebuilds the Pages **demo from the released tag** with the same pinned toolchain, verifies the render carries that version, publishes it to `gh-pages/demo/<tag>/` and regenerates the root index (`scripts/gen-pages-index.mjs`). See [§ The published demo](#the-published-demo) | `ENABLE_RELEASE_DEMO` (ON) · `ENABLE_VERSION_COMPARISON` (ON) · `PAGES_ACTIONS_ENABLED` | **REMOVED by bootstrap** |
 
 > **How it is triggered.** Not by a `release` event: release-please publishes the
 > release with the default `GITHUB_TOKEN`, and GitHub suppresses workflow triggers
@@ -66,7 +66,7 @@ Everything below **propagates** to a module (the bootstrap keeps it). This is ho
 
 | Workflow | Trigger | What it does | Output | Toggle (default) | Human-gated? |
 | --- | --- | --- | --- | --- | --- |
-| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication | `gh-pages/branches/<branch>/` + PR comment | `ENABLE_PREVIEW` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
+| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication. **On this template repo only**, every preview deploy also regenerates the `gh-pages` root index (`scripts/gen-pages-index.mjs`) | `gh-pages/branches/<branch>/` + PR comment | `ENABLE_PREVIEW` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
 | `cleanup-gh-pages.yml` | schedule (Sun 00:00 UTC); `workflow_dispatch` (input `dry_run`: list stale previews without deleting) | Prunes previews of deleted branches; keeps root + version paths | pruned `gh-pages` | `ENABLE_PREVIEW` (ON) | no |
 | `validation.yml` | push to `dev`/`main`; any pull request; `workflow_dispatch` | Runs the **MII reusable validation** workflows | validation report | `ENABLE_VALIDATION` (ON) | no (skips on the template repo itself) |
 | `convention-check.yml` | push/PR to `dev`/`main`/`release/**`; `workflow_dispatch` (input `strict`: force release mode) | The **single** convention checker: metadata-contract patterns (hard on release branches) + the optional-page decision gate (M9, `docs/optional-pages.md`) + the language-model guard (`scripts/language-model-check.sh`) + the offline test suites (`scripts/*.test.mjs`, and on the template repo `scripts/*.template-test.mjs`); the advisory repo ↔ MII-wiki drift review is a manual review, not part of this workflow | check result | `ENABLE_CONVENTION_CHECK` (ON) | no |
@@ -151,7 +151,7 @@ passes to the MII reusable workflows, and unset means the pinned defaults there
 **Layer 1 only** — a module does not have one; skip this section if you are
 reading as a module author.
 
-The [Pages landing page](https://medizininformatik-initiative.github.io/mii-kds-module-template/)
+The [Pages root index](https://medizininformatik-initiative.github.io/mii-kds-module-template/)
 advertises one rendering as *what a module built from this template renders as,
 out of the box*, for the current template release. **It tracks the latest
 release automatically** via `release-demo.yml`; there is no manual promotion
@@ -161,9 +161,9 @@ step and there must not be one again.
 
 | | |
 | --- | --- |
-| **Built from the tag** | The job checks the released tag out into `release-src/` and builds only that. The workspace root stays on the workflow's own ref, so the publishing tooling (`scripts/update-demo-links.mjs`, `scripts/self-check-substitute.sh`) is current even when re-rendering an old tag. |
+| **Built from the tag** | The job checks the released tag out into `release-src/` and builds only that. The workspace root stays on the workflow's own ref, so the publishing tooling (`scripts/gen-pages-index.mjs`, `scripts/self-check-substitute.sh`) is current even when re-rendering an old tag. |
 | **The render names its release** | The demo's `{{CALVER_VERSION}}` is substituted by `scripts/self-check-substitute.sh` with `SELF_CHECK_RELEASE_TAG` set, producing `2027.0.0-template.<tag without v>`. After the build the generated `ImplementationGuide` is read back and the job **fails** unless it carries exactly that value. |
-| **The links follow** | `gh-pages/index.html` is rewritten in the same commit as the demo it points at, so path, rendered content and link move together or not at all. |
+| **The links follow** | `gh-pages/index.html` is regenerated in the same commit as the demo it points at, so path, rendered content and link move together or not at all. |
 | **Same toolchain as every other build** | The pins are copied under the same names as `ig-publisher.yml` / `go-publish.yml` / `module-release.yml`, and `scripts/toolchain-pins.test.mjs` fails the build if they drift apart. |
 
 > **Why this exists.** The demo used to be copied by hand out of a
@@ -186,24 +186,34 @@ the formula.
 The *preview* builds keep the fixed draft `2027.0.0-draft.1`: a branch preview
 is not a release and must not claim one.
 
-### How the landing page is edited
+### How the root index is produced
 
-`index.html` on `gh-pages` is **hand-authored** and never regenerated.
-`scripts/update-demo-links.mjs` changes four narrowly anchored things and
-nothing else: every `demo/<version>/` path segment, the version token in the
-`<h2>` that introduces the demo, the one-paragraph per-release note (replaced
-with a link to the actual release notes, which cannot go stale), and — once —
-an obsolete sentence about `dev` predating the release. The first two are
-**required**: a missing anchor exits non-zero and fails the job, because a page
-that silently keeps linking the previous release is the exact bug being fixed.
-Rewrites are idempotent. Dry-run it before changing the script:
+`index.html` on `gh-pages` is **generated**, never hand-edited (decision
+2026-08-28 — it replaced a hand-authored landing page that
+`scripts/update-demo-links.mjs`, now retired, conservatively repointed at each
+release). `scripts/gen-pages-index.mjs` writes a plain, autoindex-style page
+that enumerates exactly two surfaces, and only when they exist in the
+`gh-pages` checkout at generation time:
+
+- `branches/dev/` — the development preview, and
+- `demo/<latest-tag>/` — the latest release demo (the released state of
+  `main`; `main` deliberately has no branch preview). "Latest" is the highest
+  SemVer among the `demo/v*` directories (numeric — `v0.10.0` beats `v0.9.9`).
+  If that demo has no root `index.html`, its real entry points (`en/`, `de/`,
+  `qa.html`) are listed as sub-links instead.
+
+Nothing else is listed: older demos and other branch previews stay deployed
+and reachable by URL, deliberately unlisted (the page says so in an HTML
+comment, next to its do-not-edit marker). `release-demo.yml` regenerates the
+index after publishing a demo, and `ig-publisher.yml` regenerates it after
+every branch-preview deploy (template repository only), so it heals itself.
+Dry-run it against any checkout of the `gh-pages` branch:
 
 ```bash
-curl -sSL -o /tmp/index.html \
-  https://medizininformatik-initiative.github.io/mii-kds-module-template/index.html
-node scripts/update-demo-links.mjs --check --file /tmp/index.html \
-  --version v9.9.9 \
-  --repo-url https://github.com/medizininformatik-initiative/mii-kds-module-template
+git worktree add /tmp/gh-pages gh-pages
+node scripts/gen-pages-index.mjs /tmp/gh-pages \
+  medizininformatik-initiative/mii-kds-module-template
+git -C /tmp/gh-pages diff   # inspect, then discard: git worktree remove --force /tmp/gh-pages
 ```
 
 ### Retention and the reserved paths
@@ -213,7 +223,7 @@ externally linkable renderings, and removing one would break links this project
 does not control. `cleanup-gh-pages.yml` cannot sweep them either: it removes
 only directories carrying a `.branch-name` marker, and `release-demo.yml`
 deliberately writes none (a guard fails the job if one appears). Only the
-landing page's *current* links move; superseded demos stay reachable at their
+root index's *current* links move; superseded demos stay reachable at their
 stable URLs. The job prints the accumulated `demo/` size and warns above the
 1 GB Pages limit — retiring a demo means updating every link to it in the same
 change.
@@ -226,8 +236,8 @@ writes nowhere else.
 
 Dispatch `release-demo.yml` with the `tag` input — after a toolchain bump, or to
 publish the demo for a tag released before the workflow existed. Set
-`update_landing_page: false` to publish `demo/<tag>/` without moving the
-landing-page links. A **pre-release** is skipped on the `release: published`
+`update_landing_page: false` to publish `demo/<tag>/` without regenerating the
+root index. A **pre-release** is skipped on the `release: published`
 trigger; dispatch it manually if you want one rendered.
 
 ## Secrets & enabling the gated features

@@ -157,7 +157,7 @@ jobs:
         #
         # The value table itself lives in scripts/self-check-substitute.sh rather
         # than inline here, because release-demo.yml needs the SAME substitution
-        # to render the demo the Pages landing page advertises. Two copies of the
+        # to render the demo the Pages root index advertises. Two copies of the
         # table is how the two builds drift apart — exactly the class of bug
         # release-demo.yml exists to end. Leaving SELF_CHECK_RELEASE_TAG unset
         # keeps the fixed draft CALVER_VERSION that a preview should carry; the
@@ -445,6 +445,20 @@ jobs:
           cp -R "output/." "${branch_dir}/"
           # Marker consumed by cleanup-gh-pages.yml to detect deleted branches.
           echo "${BRANCH}" > "${branch_dir}/.branch-name"
+          # TEMPLATE REPOSITORY ONLY: (re)generate the root index — a plain
+          # autoindex-style listing of branches/dev/ + the latest demo/<tag>/ —
+          # so it heals on every preview deploy. A created module's site root
+          # stays reserved for the gated -go-publish output, so the generator
+          # never runs there (same guard as release-demo.yml's job).
+          case "${REPO}" in
+            */mii-kds-module-template)
+              if [ -f scripts/gen-pages-index.mjs ]; then
+                node scripts/gen-pages-index.mjs gh-pages "${REPO}"
+              else
+                echo "gen-pages-index.mjs not on this branch yet - root index unchanged (rebase onto dev/main to heal it)"
+              fi
+              ;;
+          esac
           cd gh-pages
           if [[ "${PAGES_ACTIONS_ENABLED}" == "true" ]]; then
             bytes="$(du --bytes --summarize --exclude=.git . | cut -f1)"
