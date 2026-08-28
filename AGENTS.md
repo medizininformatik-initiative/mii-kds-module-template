@@ -12,13 +12,16 @@ module; the scaffold's `sushi-config.yaml`, `ig.ini`, and workflows carry
 `{{PLACEHOLDER}}` values the new module fills in. The scaffold **references**
 the MII IG template package
 [`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
-(`de.medizininformatikinitiative.template`) in `ig.ini` — **today as the
-vendored local folder `template = #ig-template`**, because that package has no
-published release yet; it switches to
-`template = de.medizininformatikinitiative.template#<version>` once it does (see
+(`de.medizininformatikinitiative.template`) in `ig.ini` — **today by repository
+URL** (`template = https://github.com/medizininformatik-initiative/ig-template-mii-kds`;
+the IG Publisher fetches the released `main` at build time), because that
+package has no registry release yet. The vendored local folder
+`template = #ig-template` remains the offline/reproducibility fallback, and the
+endgame is `template = de.medizininformatikinitiative.template#<version>` once
+the package is published (see
 [`docs/recipes/switch-template-to-published.md`](docs/recipes/switch-template-to-published.md)
-and [issue #136](../../issues/136)). See [`README.md`](README.md)
-for the full picture.
+and issues [#1](../../issues/1)/[#2](../../issues/2)). See
+[`README.md`](README.md) for the full picture.
 
 **Two layers — do not confuse them:**
 
@@ -64,12 +67,16 @@ Author identity is the configured human committer.
   version label in anything built (dependencies, the IG template pin, tool
   versions). The convention check (M7) and the publication gate in
   `go-publish.yml` both reject that set; the dependency check proposes bumps.
+  The interim template URL in `ig.ini` is the one sanctioned exception — it
+  follows the template's released `main` by design (see `ig.ini`'s header);
+  the published package pin restores strict pinning.
 - **`ig-template/` is a machine-synced mirror**, maintained by
   `scripts/sync-ig-template.sh` (`--check` fails on drift; `sync-ig-template.yml`
-  runs it). Never hand-edit it, and never rewrite `template = #ig-template` into
-  a package pin — `scripts/first-run-bootstrap.sh` tells module owners to leave
-  that line alone until the package is published. Fix the source in
-  `ig-template-mii-kds` and re-sync.
+  runs it). It is the offline/reproducibility fallback (`template = #ig-template`)
+  behind the default URL form in `ig.ini`. Never hand-edit it, and never rewrite
+  the `template =` line into a package pin — `scripts/first-run-bootstrap.sh`
+  tells module owners to leave that line alone until the package is published.
+  Fix the source in `ig-template-mii-kds` and re-sync.
 - **The vendored skill folders are machine-synced too** (`skills/fhir-ig-analysis`,
   `skills/fhir-ig-translation`), maintained by `scripts/sync-skills.sh` at the ref
   pinned in `skills-lock.json` (`--check` fails on drift; `sync-skills.yml` runs

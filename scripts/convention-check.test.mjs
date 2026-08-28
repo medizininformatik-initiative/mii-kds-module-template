@@ -147,8 +147,12 @@ test("a #cibuild ig.ini template fails M7", () => {
   assert.ok(ids(findings, "fail").includes("M7 no floating pins"));
 });
 
-test("a pinned package reference and the vendored local folder both pass M7", () => {
-  for (const tmpl of ["de.medizininformatikinitiative.template#1.0.0", "#ig-template"]) {
+test("a pinned package reference, the vendored folder and the interim URL all pass M7", () => {
+  // The repository-URL form is the sanctioned interim (decision 2026-08-28,
+  // docs/concepts.md section 2): it carries no floating LABEL, and the
+  // published id#version pin replaces it once the package is on the registry.
+  for (const tmpl of ["de.medizininformatikinitiative.template#1.0.0", "#ig-template",
+    "https://github.com/medizininformatik-initiative/ig-template-mii-kds"]) {
     const { findings } = evaluate({ sushiConfig: CONCRETE, igIni: `template = ${tmpl}\n`, release: false });
     assert.ok(ids(findings, "pass").includes("M7 no floating pins"), tmpl);
   }

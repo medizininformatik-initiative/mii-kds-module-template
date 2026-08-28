@@ -119,8 +119,9 @@ export function parseSushiDependencies(yamlText) {
 
 /**
  * Parse the `template = <id>#<version>` line of an ig.ini.
- * Returns { id, version } — version is null for a path/floating reference
- * (e.g. the vendored bring-up form `template = ig-template`).
+ * Returns { id, version } — version is null for a path/URL/floating reference
+ * (e.g. the interim repository-URL form `template = https://…`, or a bare
+ * path form `template = ig-template`).
  * INI comments (`;` and `#` at line start) are skipped. Returns null when no
  * template line exists or the input is not a string.
  */
@@ -382,8 +383,10 @@ function readFileIfExists(file) {
 
 /**
  * The module template pin lives in ig.ini
- * (`template = de.medizininformatikinitiative.template#<version>`); during
- * bring-up it may be the vendored path form (`template = ig-template`).
+ * (`template = de.medizininformatikinitiative.template#<version>` — the
+ * endgame once the package is published); today it is the interim
+ * repository-URL form, or the vendored fallback `template = #ig-template`,
+ * both reported as not-a-pin.
  */
 function readTemplatePin() {
   const text = readFileIfExists("ig.ini");
@@ -398,8 +401,8 @@ function readTemplatePin() {
 
 /**
  * fhir2.base.template is pinned INSIDE the template package (the IG template's
- * package/package.json), i.e. transitively for this repo. Only a vendored
- * bring-up copy (ig-template/) carries a local pin to read.
+ * package/package.json), i.e. transitively for this repo. Only the vendored
+ * fallback copy (ig-template/) carries a local pin to read.
  */
 function readBaseTemplatePin() {
   const text = readFileIfExists("ig-template/package/package.json");
@@ -501,7 +504,7 @@ export async function collectRows() {
           ? "pin file not found (`ig.ini` missing)"
           : templatePin.state === "no-line"
             ? "pin not found (no `template =` line in `ig.ini`)"
-            : `\`${templatePin.ref}\` — not a version pin (vendored/floating); ` +
+            : `\`${templatePin.ref}\` — not a version pin (URL/vendored/floating); ` +
               "see docs/recipes/switch-template-to-published.md",
     latest:
       templateResolved.source === "not yet published"
@@ -515,7 +518,7 @@ export async function collectRows() {
   });
 
   // The base template underneath the MII IG template. Pinned transitively (in
-  // the template package); only a vendored bring-up copy has a local pin.
+  // the template package); only the vendored fallback copy has a local pin.
   const basePinned = readBaseTemplatePin();
   const baseLatest = await lookup(upstream.base2);
   const baseVendored = existsSync("ig-template/package/package.json");

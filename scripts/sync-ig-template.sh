@@ -2,11 +2,11 @@
 # sync-ig-template.sh — re-vendor the MII IG template into ig-template/.
 #
 # WHY THIS EXISTS
-#   During development the module IG must always build against the CURRENT MII IG
-#   template from `ig-template-mii-kds`. The published package
-#   `de.medizininformatikinitiative.template` is not on a FHIR package registry
-#   yet, so `ig.ini` points at the local folder (`template = #ig-template`) and
-#   that folder is a VENDORED MIRROR. A mirror goes stale silently — this script
+#   The published package `de.medizininformatikinitiative.template` is not on a
+#   FHIR package registry yet. `ig.ini` therefore defaults to the template
+#   repository's URL (fetched at build time), and the local folder
+#   `ig-template/` (`template = #ig-template`) is the OFFLINE/REPRODUCIBILITY
+#   FALLBACK — a VENDORED MIRROR. A mirror goes stale silently — this script
 #   (and the scheduled workflow that runs it) keeps it in step with the source of
 #   truth, and CI fails/opens a PR when it drifts.
 #
@@ -70,9 +70,10 @@ overwritten by the next sync.
 ## Why a mirror, and how it stays current
 
 The template package is not published to a FHIR package registry yet, so
-\`ig.ini\` references it as a local folder (\`template = #ig-template\`). To make
-sure the IG always builds against the CURRENT template during development, the
-mirror is refreshed by \`scripts/sync-ig-template.sh\`:
+\`ig.ini\` defaults to the template repository's URL (fetched at build time)
+and this folder is the OFFLINE/REPRODUCIBILITY FALLBACK, referenced as
+\`template = #ig-template\`. To keep the fallback in step with the CURRENT
+template, the mirror is refreshed by \`scripts/sync-ig-template.sh\`:
 
 - \`scripts/sync-ig-template.sh\` — re-vendor from \`dev\` (default).
 - \`scripts/sync-ig-template.sh --check\` — fail if the mirror has drifted (run in CI).

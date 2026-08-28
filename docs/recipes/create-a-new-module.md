@@ -103,8 +103,10 @@
    `ig.ini`'s `;` notes, `qc/custom.rules.yaml`, `go-publish.yml` and the FSH
    ruleset notes — are documentation, not values. They stay. The digit in
    `[A-Z0-9_]` matters: without it `{{SPECIAL_URL_1}}` is invisible to the sweep.
-6. **Template reference.** Leave `ig.ini` at `template = #ig-template` (the vendored
-   copy) until the MII template package is published; then follow
+6. **Template reference.** Leave `ig.ini`'s `template =` line at its default —
+   the template repository URL, which the publisher fetches at build time;
+   `template = #ig-template` (the vendored copy) is the offline/reproducibility
+   fallback — until the MII template package is published; then follow
    [switch-template-to-published.md](switch-template-to-published.md).
 7. **Add content.** Replace the example profile in `input/fsh/` with your own
    ([add-a-profile.md](add-a-profile.md)) and the English starter pages in
@@ -161,6 +163,6 @@ your profile, examples and pages. No Release Please anywhere.
 | The bootstrap PR's `build` check is red | Placeholders are still in `sushi-config.yaml`; SUSHI cannot compile them | Commit steps 2 and 3 on the same branch (step 2) |
 | Build fails on `{{…}}` | A placeholder was left unreplaced | Run both sweeps in step 5 and fill each hit |
 | German pages render with English titles, breadcrumbs and ToC | The IG-level translation catalogue was not renamed | Rename it to `ImplementationGuide-<your-ig-id>.po` (step 4) |
-| "template not found" | Published package not available yet | Keep the vendored `template = #ig-template` |
+| "template not found" | Published package not available yet | Keep the default repository-URL form (or the vendored `template = #ig-template` fallback for offline builds) |
 | Convention check fails | id/name/canonical/version pattern wrong | Match the MII naming convention (the check message names the field) |
 | The preview URL on the PR 404s | GitHub Pages is not enabled, or the Pages setting and `PAGES_ACTIONS_ENABLED` do not match | Enable Pages and pair it with the variable (step 8) |
