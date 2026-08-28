@@ -72,10 +72,9 @@ Everything below **propagates** to a module (the bootstrap keeps it). This is ho
 | `convention-check.yml` | push/PR to `dev`/`main`/`release/**`; `workflow_dispatch` (input `strict`: force release mode) | The **single** convention checker: metadata-contract patterns (hard on release branches) + the optional-page decision gate (M9, `docs/optional-pages.md`) + the language-model guard (`scripts/language-model-check.sh`) + the offline test suites (`scripts/*.test.mjs`, and on the template repo `scripts/*.template-test.mjs`); the advisory repo ↔ MII-wiki drift review is a manual review, not part of this workflow | check result | `ENABLE_CONVENTION_CHECK` (ON) | no |
 | `module-release.yml` | push of a CalVer tag `vYYYY.n.n`; `release: published` (the announcement); `workflow_dispatch` (dry run) | Builds, creates the GitHub Release, announces to the MII Zulip (topic *Releases*), hands off to `go-publish` | release | `ENABLE_MODULE_RELEASE` (ON) · `ENABLE_ZULIP_ANNOUNCE` (ON) | production publish is gated |
 | `go-publish.yml` | `workflow_dispatch` **only** | Production `-go-publish`; `publish:false` = full dry run by default | published IG | — | **always human-triggered** |
-| `dependency-check.yml` | schedule (Mon 06:00 UTC); `workflow_dispatch` | Version drift (IG Publisher, SUSHI, Jekyll, both templates, FHIR deps, the skill catalog) → one tracking issue | `dependencies` issue | `ENABLE_DEPENDENCY_CHECK` (ON) | proposals only |
+| `dependency-check.yml` | schedule (Mon 06:00 UTC); `workflow_dispatch` | Version drift (IG Publisher, SUSHI, Jekyll, both templates, FHIR deps) → one tracking issue | `dependencies` issue | `ENABLE_DEPENDENCY_CHECK` (ON) | proposals only |
 | `security-scan.yml` | schedule (Mon 07:00 UTC); PR to `dev`; `workflow_dispatch` | OSV + Trivy (fs + dev-container image) | SARIF in Security tab | `ENABLE_SECURITY_SCAN` (ON) | no |
 | `sync-ig-template.yml` | schedule (Mon 05:00 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps the vendored `ig-template/` (the offline/reproducibility fallback behind the URL default in `ig.ini`) in step with `ig-template-mii-kds@dev`; opens a PR on drift, fails a PR whose mirror is stale | sync PR | `ENABLE_TEMPLATE_SYNC` (ON) | never auto-merges |
-| `sync-skills.yml` | schedule (Mon 05:30 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps the vendored catalog skills (`skills/fhir-ig-analysis`, `skills/fhir-ig-translation`) in step with the ref pinned in `skills-lock.json`; opens a repair PR on drift, fails a PR whose copies are stale. Never moves the pin — that is `scripts/sync-skills.sh --ref vX.Y.Z`, proposed by `dependency-check.yml` | sync PR | `ENABLE_SKILLS_SYNC` (ON) | never auto-merges |
 
 Notes:
 - **The reusable validation needs two files in the repo root**, at fixed paths the
@@ -117,7 +116,6 @@ covers the *secrets* that enable the gated features.
 | Dependency check | `ENABLE_DEPENDENCY_CHECK` | ON |
 | Security scan | `ENABLE_SECURITY_SCAN` | ON |
 | Vendored template sync | `ENABLE_TEMPLATE_SYNC` | ON |
-| Vendored skills sync | `ENABLE_SKILLS_SYNC` | ON |
 | Publisher version comparison | `ENABLE_VERSION_COMPARISON` | ON (no-op while `version-comparison` is commented out) |
 | Module release (CalVer) | `ENABLE_MODULE_RELEASE` | ON |
 | Release Please (template only) | `ENABLE_RELEASE_PLEASE` | ON |
