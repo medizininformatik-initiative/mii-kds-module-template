@@ -452,7 +452,11 @@ jobs:
           # never runs there (same guard as release-demo.yml's job).
           case "${REPO}" in
             */mii-kds-module-template)
-              if [ -f scripts/gen-pages-index.mjs ]; then node scripts/gen-pages-index.mjs gh-pages; else echo "gen-pages-index.mjs not on this branch yet - root index unchanged (rebase onto dev/main to heal it)"; fi "${REPO}"
+              if [ -f scripts/gen-pages-index.mjs ]; then
+                node scripts/gen-pages-index.mjs gh-pages "${REPO}"
+              else
+                echo "gen-pages-index.mjs not on this branch yet - root index unchanged (rebase onto dev/main to heal it)"
+              fi
               ;;
           esac
           cd gh-pages
