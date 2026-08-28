@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.11.3...v0.12.0) (2026-08-28)
+
+
+### Features
+
+* the interim URL template reference is the scaffold default ([#14](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/14)) ([acee98a](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/acee98a6c1f86002e6a9b6bb626f74992ac95291))
+
 ## [0.11.3](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/compare/v0.11.2...v0.11.3) (2026-08-27)
 
 
