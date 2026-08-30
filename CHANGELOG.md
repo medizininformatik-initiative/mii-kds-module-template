@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.2](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.1...v0.13.2) (2026-08-30)
+
+
+### Bug Fixes
+
+* **convention-check:** M6 accepts CalVer prerelease suffixes ([#25](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/25)) ([3db9de0](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/3db9de0e7815b928e696af69fe50ac064d482291))
+
 ## [0.13.1](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.0...v0.13.1) (2026-08-28)
 
 
