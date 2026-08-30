@@ -131,6 +131,15 @@ test("malformed concrete values fail", () => {
   assert.ok(failed.includes("M6 version"));
 });
 
+test("a CalVer prerelease suffix passes M6 (create-a-new-module.md and go-publish.yml both sanction it)", () => {
+  const rc = CONCRETE.replace('version: "2026.0.1"', 'version: "2027.0.0-ballot.rc1"');
+  const { findings } = evaluate({ sushiConfig: rc, igIni: CONCRETE_IGINI, release: false });
+  assert.ok(!ids(findings, "fail").includes("M6 version"));
+  const draft = CONCRETE.replace('version: "2026.0.1"', 'version: "2027.0.0-draft.1"');
+  const r2 = evaluate({ sushiConfig: draft, igIni: CONCRETE_IGINI, release: false });
+  assert.ok(!ids(r2.findings, "fail").includes("M6 version"));
+});
+
 test("a floating dependency pin fails M7 on every branch", () => {
   const floating = CONCRETE.replace("de.basisprofil.r4: 1.5.4", "de.basisprofil.r4: current");
   const { ok, findings } = evaluate({ sushiConfig: floating, igIni: CONCRETE_IGINI, release: false });
