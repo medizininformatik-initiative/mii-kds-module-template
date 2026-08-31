@@ -9,7 +9,7 @@
 | | |
 | :--- | :--- |
 | *Official URL*:https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/example-patient | *Version*:2027.0.0-draft.1 |
-| Active as of 2026-08-28 | *Computable Name*:ExamplePatient |
+| Active as of 2026-08-31 | *Computable Name*:ExamplePatient |
 
  
 Minimal example profile shipped with the template so that a newly created module renders a complete IG immediately. Not an MII artifact — replace it with your module's profiles. 
@@ -182,7 +182,7 @@ Other representations of profile: [CSV](../StructureDefinition-example-patient.c
   },
   "status" : "active",
   "experimental" : false,
-  "date" : "2026-08-28T15:43:20+00:00",
+  "date" : "2026-08-31T15:04:35+00:00",
   "publisher" : "NUM-DIZ",
   "_publisher" : {
     "extension" : [{
