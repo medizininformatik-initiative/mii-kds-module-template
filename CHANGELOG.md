@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.13.1](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.0...v0.13.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* the gh-pages root is a generated plain index ([#21](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/21)) ([1bb8464](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/1bb84641c85125e561b856167cfdde9c940b816b))
+
+## [0.13.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.12.0...v0.13.0) (2026-08-28)
+
+
+### Features
+
+* catalog skills install on demand - and the ownership is decided ([#18](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/18)) ([00ade19](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/00ade19a530e22d772433768711f3bc1556aeb3a))
+
+
+### Bug Fixes
+
+* a quoted value with a trailing comment parses to its content ([#17](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/17)) ([e88bac0](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/e88bac028805dee39aa82bdc73d6de9345a93439))
+
+## [0.12.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.11.3...v0.12.0) (2026-08-28)
+
+
+### Features
+
+* the interim URL template reference is the scaffold default ([#14](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/14)) ([acee98a](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/acee98a6c1f86002e6a9b6bb626f74992ac95291))
+
 ## [0.11.3](https://github.com/forschungsgruppe-digital-health/mii-kds-module-template/compare/v0.11.2...v0.11.3) (2026-08-27)
 
 
