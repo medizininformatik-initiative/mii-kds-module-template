@@ -1,0 +1,298 @@
+---
+---
+{% comment %}
+  Instance validation page - a template-contributed page (NUM-DIZ request,
+  decided 2026-08-31): the Simplifier-substitute for validating an
+  implementer's OWN FHIR instance against THIS module. It lives in the IG
+  template so every module that references the template gets it on its
+  next build; a module adds nothing but (optionally) a menu entry and an
+  input/data/features.json override (docs/concepts.md section 7).
+
+  HOW IT RENDERS (verified with the pinned publisher 2.3.2 on 2026-09-08 by
+  building this repository's preview): the IG Publisher copies a template's
+  content/ folder into the Jekyll source tree - once at the site root AND
+  once into every language folder (that is why assets/ exists per language
+  folder too). A file WITH front matter is rendered like any page, so this
+  one lands at <site root>/validate.html and, in a multi-language build, at
+  <lang>/validate.html for every language. Each copy knows where it is from
+  page.dir ('/', '/en/', '/de/'): the language-folder copies render the
+  chrome AND the body in their language (German for de/, English for every
+  other folder - the page carries both texts); the root copy renders the
+  IG's default language, which in a single-language build is the only copy
+  there is. The footer's "Validate an instance" link is folder-relative, so
+  a reader always lands on the copy in the language they are reading.
+
+  Two fragments the template already overrides are root-aware for the root
+  copy: fragment-language.html renders no switcher on a root page (the
+  base's ../<lang>/ links would escape the site there), fragment-footer.html
+  prefixes qa.html with '' instead of '../' on a root page.
+
+  WHERE THE VALUES COME FROM: site.data.fhir.* is written by the publisher
+  itself (temp/pages/_data/fhir.json - keys packageId, igVer, canonical,
+  version = the FHIR version, ig.title, ig.tx-server); site.data.features.*
+  is the module's optional input/data/features.json (the base's pre-process
+  copies input/data into _data). No module change is required: both
+  validator settings carry a default.
+
+  The publish-box marker below is the one the base's template-page.html
+  carries; the publisher replaces it on every page.
+
+  The live box (assets/js/validate.js) is progressive enhancement; the page
+  loads nothing external and only the box's own POST leaves the browser.
+{% endcomment %}
+{% assign localPage = 'validate.html' %}
+{% assign folderlang = page.dir | remove: '/' %}
+{% assign chromelang = folderlang | default: site.data.languages.defLang | default: 'en' %}
+{% if chromelang == 'de' %}{% assign pagelang = 'de' %}{% else %}{% assign pagelang = 'en' %}{% endif %}
+{% assign validator_url = site.data.features.validator.url | default: 'https://validator.fhir.org' %}
+{% assign validator_tx = site.data.features.validator.tx | default: 'https://tx.fhir.org' %}
+{% capture pkg %}{{ site.data.fhir.packageId }}#{{ site.data.fhir.igVer }}{% endcapture %}
+{% include fragment-pagebegin.html lang=chromelang %}
+<div class="col-12">
+  <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
+{% if pagelang == 'en' %}
+<h2 data-page-title="Validate an instance">Validate an instance</h2>
+
+<p>This page replaces the ad-hoc validation that Simplifier offered: paste or
+upload your <strong>own</strong> FHIR instance and check it against the
+profiles of <strong>this</strong> guide. The values below are filled in from
+this build - nothing to look up:</p>
+
+<table class="table table-condensed" style="width:auto">
+  <tbody>
+    <tr><th scope="row">Package</th><td><code>{{ pkg }}</code></td></tr>
+    <tr><th scope="row">Canonical</th><td><code>{{ site.data.fhir.canonical }}</code></td></tr>
+    <tr><th scope="row">FHIR version</th><td><code>{{ site.data.fhir.version }}</code></td></tr>
+    <tr><th scope="row">Terminology server</th><td><code>{{ validator_tx }}</code></td></tr>
+  </tbody>
+</table>
+
+<div class="ig-highlight ig-highlight-red">
+<h5>Data protection - read before pasting anything</h5>
+<p>The public validator at <code>validator.fhir.org</code> is a
+<strong>best-effort service hosted by HL7 International outside the
+EU</strong>. Send it <strong>synthetic instances only</strong>. Real or
+realistic patient data - including pseudonymised records and test data derived
+from real cases - may <strong>only</strong> be validated against a
+<strong>self-hosted</strong> validator inside your own institution (route D
+below). Routes A, B (with a public terminology server) and C, and the live box
+on this page when it points at the public service, all transmit the instance
+to that external service.</p>
+</div>
+
+<h3>A. Online - validator.fhir.org</h3>
+<ol>
+  <li>Open <a href="https://validator.fhir.org/" target="_blank" rel="noopener">https://validator.fhir.org/</a>.</li>
+  <li>Under <em>FHIR Version</em> keep <code>{{ site.data.fhir.version }}</code>.</li>
+  <li>Under <em>Implementation Guides</em> type <code>{{ site.data.fhir.packageId }}</code>
+      and pick version <code>{{ site.data.fhir.igVer }}</code> - i.e. the entry
+      <code>{{ pkg }}</code>. If the version is not listed, the package is not
+      on the registry the validator reads (a CI build, for example): use route
+      B with the package file instead.</li>
+  <li>Under <em>Profiles</em> paste the canonical URL of the profile to check
+      against (from the profile's page in this guide, the <em>Defining
+      URL</em>). Without one, the validator uses the profiles the instance
+      declares in <code>meta.profile</code>.</li>
+  <li>Paste or upload the instance and press <em>Validate</em>.</li>
+</ol>
+
+<h3>B. Command line - validator_cli.jar</h3>
+<p>Download <code>validator_cli.jar</code> from the
+<a href="https://github.com/hapifhir/org.hl7.fhir.core/releases/latest" target="_blank" rel="noopener">HL7 FHIR core releases</a>
+(Java 11 or newer), then:</p>
+<pre><code>java -jar validator_cli.jar -version {{ site.data.fhir.version }} -ig {{ pkg }} -tx {{ validator_tx }} instance.json</code></pre>
+<p>Add <code>-profile &lt;canonical&gt;</code> to force a profile, or
+<code>-ig path/to/package.tgz</code> when the version is not on the registry.
+<code>-tx n/a</code> switches terminology checks off entirely.</p>
+
+<h3>C. API - the validator's REST interface</h3>
+<p>The same service takes a JSON request (<code>POST /validate</code>) - useful
+for CI pipelines and test suites. The interface is documented at
+<a href="https://validator.fhir.org/swagger-ui/index.html" target="_blank" rel="noopener">https://validator.fhir.org/swagger-ui/index.html</a>;
+the live box below uses exactly that call, with this guide's package preset.</p>
+
+<h3>D. Self-hosted - for a data integration centre (DIZ)</h3>
+<p>The public service runs as a container image you can host yourself, which
+is the <strong>only</strong> acceptable target for real or realistic data:</p>
+<pre><code>docker run -d --name fhir-validator -p 3500:3500 markiantorno/validator-wrapper</code></pre>
+<p>Then use <code>http://&lt;host&gt;:3500</code> as the base URL (route C; a
+module can point this page's live box at it via
+<code>input/data/features.json</code>). Route B stays fully offline with
+<code>-ig path/to/package.tgz</code> and a local terminology server. In both
+cases point <code>-tx</code> (or <code>txServer</code> in the API request) at
+a terminology server that carries the German value sets - see the note below.</p>
+
+<div class="ig-highlight ig-highlight-orange">
+<h5>Terminology - the public server may not know German codes</h5>
+<p>The public <code>tx.fhir.org</code> does not carry the complete German SNOMED
+CT extension and other German code systems, so codes bound in this guide's
+value sets can be reported as unknown even when they are correct. For the
+value sets of this guide point <code>-tx</code> at the SU-TermServ Ontoserver
+(<code>https://ontoserver.mii-termserv.de/fhir</code>, client certificate
+required) or at your own Ontoserver; otherwise read terminology messages with
+that limitation in mind.</p>
+</div>
+
+<h3>Live box - validate right here</h3>
+<div class="ig-highlight ig-highlight-grey">
+<p><strong>This box sends the pasted text to <code>{{ validator_url }}</code></strong>
+(the default is the public HL7 validator - see the data-protection note above).
+Nothing is stored on this site. The first run loads the package on the
+validator and can take a minute; later runs reuse that session.</p>
+</div>
+<form class="ig-validate" action="{{ validator_url }}/validate" method="post"
+      data-validator-url="{{ validator_url }}"
+      data-package-id="{{ site.data.fhir.packageId }}"
+      data-package-version="{{ site.data.fhir.igVer }}"
+      data-fhir-version="{{ site.data.fhir.version }}"{% if site.data.features.validator.tx %}
+      data-tx="{{ site.data.features.validator.tx }}"{% endif %}
+      data-locale="en"
+      data-label-severity="Severity" data-label-line="Line:Col"
+      data-label-location="Location" data-label-message="Message"
+      data-label-none="No issues reported - the instance is valid against the checked profiles."
+      data-label-errors="errors" data-label-warnings="warnings" data-label-information="information"
+      data-msg-empty="Paste an instance first."
+      data-msg-busy="Validating - the first run loads the package and can take a minute."
+      data-msg-done="Result:"
+      data-msg-failed="Validation failed:"
+      data-msg-timeout="The validator did not answer within three minutes.">
+  <div class="form-group">
+    <label for="ig-validate-instance-en">FHIR instance (JSON or XML)</label>
+    <textarea id="ig-validate-instance-en" class="form-control" rows="12" spellcheck="false" style="font-family:monospace"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="ig-validate-profile-en">Profile canonical (optional)</label>
+    <input id="ig-validate-profile-en" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
+  </div>
+  <button type="submit" class="btn btn-primary">Validate</button>
+  <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
+  <div class="ig-validate-result" aria-live="polite"></div>
+</form>
+{% endif %}
+{% if pagelang == 'de' %}
+<h2 data-page-title="Instanz validieren">Instanz validieren</h2>
+
+<p>Diese Seite ersetzt die Ad-hoc-Validierung, die Simplifier angeboten hat:
+Fügen Sie Ihre <strong>eigene</strong> FHIR-Instanz ein und prüfen Sie sie
+gegen die Profile <strong>dieses</strong> Leitfadens. Die Werte unten stammen
+aus diesem Build - nichts muss nachgeschlagen werden:</p>
+
+<table class="table table-condensed" style="width:auto">
+  <tbody>
+    <tr><th scope="row">Paket</th><td><code>{{ pkg }}</code></td></tr>
+    <tr><th scope="row">Canonical</th><td><code>{{ site.data.fhir.canonical }}</code></td></tr>
+    <tr><th scope="row">FHIR-Version</th><td><code>{{ site.data.fhir.version }}</code></td></tr>
+    <tr><th scope="row">Terminologieserver</th><td><code>{{ validator_tx }}</code></td></tr>
+  </tbody>
+</table>
+
+<div class="ig-highlight ig-highlight-red">
+<h5>Datenschutz - bitte vor dem Einfügen lesen</h5>
+<p>Der öffentliche Validator unter <code>validator.fhir.org</code> ist ein
+<strong>Best-Effort-Dienst, den HL7 International außerhalb der EU
+betreibt</strong>. Senden Sie ihm <strong>ausschließlich synthetische
+Instanzen</strong>. Echte oder realistische Patientendaten - auch
+pseudonymisierte Datensätze und aus echten Fällen abgeleitete Testdaten -
+dürfen <strong>nur</strong> gegen einen <strong>selbst betriebenen</strong>
+Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D unten). Die
+Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf
+dieser Seite, solange sie auf den öffentlichen Dienst zeigt, übertragen die
+Instanz an diesen externen Dienst.</p>
+</div>
+
+<h3>A. Online - validator.fhir.org</h3>
+<ol>
+  <li><a href="https://validator.fhir.org/" target="_blank" rel="noopener">https://validator.fhir.org/</a> öffnen.</li>
+  <li>Unter <em>FHIR Version</em> <code>{{ site.data.fhir.version }}</code> belassen.</li>
+  <li>Unter <em>Implementation Guides</em> <code>{{ site.data.fhir.packageId }}</code>
+      eingeben und die Version <code>{{ site.data.fhir.igVer }}</code> wählen -
+      also den Eintrag <code>{{ pkg }}</code>. Fehlt die Version, liegt das
+      Paket nicht in der Registry, die der Validator liest (etwa ein CI-Build):
+      dann Weg B mit der Paketdatei nutzen.</li>
+  <li>Unter <em>Profiles</em> die kanonische URL des zu prüfenden Profils
+      einfügen (auf der Profilseite dieses Leitfadens die <em>Defining
+      URL</em>). Ohne Angabe nutzt der Validator die Profile, die die Instanz
+      in <code>meta.profile</code> deklariert.</li>
+  <li>Instanz einfügen oder hochladen und <em>Validate</em> drücken.</li>
+</ol>
+
+<h3>B. Kommandozeile - validator_cli.jar</h3>
+<p><code>validator_cli.jar</code> aus den
+<a href="https://github.com/hapifhir/org.hl7.fhir.core/releases/latest" target="_blank" rel="noopener">HL7-FHIR-Core-Releases</a>
+herunterladen (Java 11 oder neuer), dann:</p>
+<pre><code>java -jar validator_cli.jar -version {{ site.data.fhir.version }} -ig {{ pkg }} -tx {{ validator_tx }} instance.json</code></pre>
+<p><code>-profile &lt;canonical&gt;</code> erzwingt ein Profil,
+<code>-ig pfad/zu/package.tgz</code> ersetzt die Registry, wenn die Version
+dort nicht liegt. <code>-tx n/a</code> schaltet Terminologieprüfungen ganz ab.</p>
+
+<h3>C. API - die REST-Schnittstelle des Validators</h3>
+<p>Derselbe Dienst nimmt eine JSON-Anfrage entgegen (<code>POST /validate</code>)
+- geeignet für CI-Pipelines und Testsuiten. Die Schnittstelle ist unter
+<a href="https://validator.fhir.org/swagger-ui/index.html" target="_blank" rel="noopener">https://validator.fhir.org/swagger-ui/index.html</a>
+dokumentiert; die Live-Box unten nutzt genau diesen Aufruf mit dem
+voreingestellten Paket dieses Leitfadens.</p>
+
+<h3>D. Selbst betrieben - für ein Datenintegrationszentrum (DIZ)</h3>
+<p>Der öffentliche Dienst steht als Container-Image zum Selbstbetrieb bereit -
+das <strong>einzige</strong> zulässige Ziel für echte oder realistische Daten:</p>
+<pre><code>docker run -d --name fhir-validator -p 3500:3500 markiantorno/validator-wrapper</code></pre>
+<p>Danach <code>http://&lt;host&gt;:3500</code> als Basis-URL verwenden (Weg
+C; ein Modul kann die Live-Box dieser Seite über
+<code>input/data/features.json</code> dorthin zeigen lassen). Weg B bleibt mit
+<code>-ig pfad/zu/package.tgz</code> und einem lokalen Terminologieserver
+vollständig offline. In beiden Fällen <code>-tx</code> (bzw.
+<code>txServer</code> in der API-Anfrage) auf einen Terminologieserver
+richten, der die deutschen Value Sets kennt - siehe den Hinweis unten.</p>
+
+<div class="ig-highlight ig-highlight-orange">
+<h5>Terminologie - der öffentliche Server kennt deutsche Codes nicht vollständig</h5>
+<p>Der öffentliche <code>tx.fhir.org</code> führt die deutsche SNOMED-CT-Extension
+und andere deutsche Codesysteme nicht vollständig; Codes aus den Value Sets
+dieses Leitfadens können daher als unbekannt gemeldet werden, obwohl sie
+korrekt sind. Für die Value Sets dieses Leitfadens <code>-tx</code> auf den
+SU-TermServ-Ontoserver richten
+(<code>https://ontoserver.mii-termserv.de/fhir</code>, Client-Zertifikat
+erforderlich) oder auf einen eigenen Ontoserver; andernfalls
+Terminologiemeldungen mit dieser Einschränkung lesen.</p>
+</div>
+
+<h3>Live-Box - direkt hier validieren</h3>
+<div class="ig-highlight ig-highlight-grey">
+<p><strong>Diese Box sendet den eingefügten Text an <code>{{ validator_url }}</code></strong>
+(Voreinstellung: der öffentliche HL7-Validator - siehe den Datenschutzhinweis
+oben). Auf dieser Website wird nichts gespeichert. Der erste Lauf lädt das
+Paket auf dem Validator und kann eine Minute dauern; weitere Läufe nutzen diese
+Sitzung.</p>
+</div>
+<form class="ig-validate" action="{{ validator_url }}/validate" method="post"
+      data-validator-url="{{ validator_url }}"
+      data-package-id="{{ site.data.fhir.packageId }}"
+      data-package-version="{{ site.data.fhir.igVer }}"
+      data-fhir-version="{{ site.data.fhir.version }}"{% if site.data.features.validator.tx %}
+      data-tx="{{ site.data.features.validator.tx }}"{% endif %}
+      data-locale="de"
+      data-label-severity="Schweregrad" data-label-line="Zeile:Spalte"
+      data-label-location="Ort" data-label-message="Meldung"
+      data-label-none="Keine Meldungen - die Instanz ist gegen die geprüften Profile gültig."
+      data-label-errors="Fehler" data-label-warnings="Warnungen" data-label-information="Hinweise"
+      data-msg-empty="Bitte zuerst eine Instanz einfügen."
+      data-msg-busy="Validierung läuft - der erste Lauf lädt das Paket und kann eine Minute dauern."
+      data-msg-done="Ergebnis:"
+      data-msg-failed="Validierung fehlgeschlagen:"
+      data-msg-timeout="Der Validator hat nicht innerhalb von drei Minuten geantwortet.">
+  <div class="form-group">
+    <label for="ig-validate-instance-de">FHIR-Instanz (JSON oder XML)</label>
+    <textarea id="ig-validate-instance-de" class="form-control" rows="12" spellcheck="false" style="font-family:monospace"></textarea>
+  </div>
+  <div class="form-group">
+    <label for="ig-validate-profile-de">Kanonische Profil-URL (optional)</label>
+    <input id="ig-validate-profile-de" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
+  </div>
+  <button type="submit" class="btn btn-primary">Validieren</button>
+  <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
+  <div class="ig-validate-result" aria-live="polite"></div>
+</form>
+{% endif %}
+</div>
+<script src="{{ site.data.info.assets }}assets/js/validate.js" defer></script>
+{% include fragment-pageend.html lang=chromelang %}

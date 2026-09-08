@@ -28,6 +28,9 @@
       <li><a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Conformance#must-support-ms">Must-Support</a></li>
       <li><a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Conformance#fehlende-daten">Umgang mit fehlenden Daten</a></li>
       <li><a href="security-and-privacy.html">Sicherheit und Datenschutz</a></li>
+      <!-- Nur-Link-Eintrag: die Seite liefert das IG-Template
+           (content/validate.html; Begründung im Quell-Menü). -->
+      <li><a href="validate.html">Instanz validieren</a></li>
     </ul>
   </li>
   <li class="dropdown">

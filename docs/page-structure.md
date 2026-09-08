@@ -56,6 +56,7 @@ for the decision checklist and the per-entry removal procedure.
 | — Must Support | 1..1 | **link-only** → Meta module (interim: `Conformance#must-support-ms`) |
 | — Handling Missing Data | 1..1 | **link-only** → Meta module (interim: `Conformance#fehlende-daten`) |
 | — Security and Privacy | 1..1 | `security-and-privacy.html` (three-stage static content: overarching data protection concept → DIMP → module-specific aspects; stage 3's CONTENT is optional — a module without own aspects adopts the section's default text, and the scaffold's highlighted *Person* example must be removed before the first release, gated by convention check M11) |
+| — Validate an instance | 1..1 | **link-only** → `validate.html`, a page the **IG template** contributes (added on NUM-DIZ request, 2026-08-31 — not in the original TF-KDS list); not in the `pages:` tree, no `.po` msgid — see below |
 | **Artifacts** | 1..1 | dropdown (parent → `artifacts.html`) |
 | — Artifacts Summary | 1..1 | `artifacts.html` (generated) |
 | — Profiles | 1..1 | `profiles.html` |
@@ -81,7 +82,7 @@ hand-authored intro of the generated ImplementationGuide resource page
 cross-version analysis, global profiles, copyright statements — the
 kerndatensatz-basis idiom; linked from the Home page's Contents list).
 
-## Link-only entries — the two mechanisms
+## Link-only entries — the three mechanisms
 
 **Datasets and Descriptions → `logical-models.html`.** The module's datasets
 ARE its logical models, so the entry shares its target with *Artifacts →
@@ -135,6 +136,27 @@ sections:
 > menu entries, switch the four links (both menu files, plus the Conformance
 > mentions on `index.md` and `guidance.md`, both languages) to those pages. Do
 > not invent the URLs before they exist.
+
+**Validate an instance → `validate.html` (a template-contributed page).** The
+page is the substitute for the ad-hoc validation Simplifier used to offer: an
+implementer pastes their **own** FHIR instance and checks it against **this**
+module (NUM-DIZ request, decided 2026-08-31). It is **not authored here** — the
+IG template ships it as `content/validate.html`, and the IG Publisher copies a
+template's `content/` folder into the site root *and* into every language
+folder, so `en/validate.html` and `de/validate.html` exist in a build of this
+scaffold exactly like the `pages:` pages do. The page fills in this module's
+package `id#version`, canonical and FHIR version from the publisher's own build
+data, carries both languages, and is also linked from the footer's `Links:`
+row. That is why the menu entry is link-only: there is **no** `validate.md`
+under `input/pagecontent/`, **no** entry in the `pages:` tree and **no** `.po`
+msgid — and the entry is the module's only contribution besides the optional
+`input/data/features.json` override (the validator and terminology-server
+URLs a DIZ points at its self-hosted instances). A module removes the entry by
+deleting the `<li>` in both menu files; the footer link and the page remain,
+because they belong to the template. How the page works, the four validation
+routes and the synthetic-data-only rule for the public validator:
+[recipes/validate-instances.md](recipes/validate-instances.md); the page's
+own design: the IG template's `docs/concepts.md`, section 7.
 
 ## Retired pages (explicit retirement, no redirects)
 

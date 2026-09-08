@@ -8,7 +8,17 @@
   already carries "Language" -> "Sprache".
   REMOVAL: delete this file the day the pinned base reads its catalog here —
   a same-path override is invisible drift on base updates (styleguide §1).
+
+  One addition on top of the verbatim copy (2026-09-08): NO switcher on a
+  ROOT page (page.dir == '/'). The base builds the alternate-language links
+  as ../<lang>/<page>, which is right for the IG's pages (they live in the
+  language folders) but escapes the site for a template-contributed root
+  page such as the root copy of content/validate.html - and the publisher's
+  HTML check then aborts the whole build. The root copy renders the IG's
+  default language and is the only copy in a single-language build, so it
+  simply renders no switcher; the per-language copies keep theirs.
 {% endcomment %}
+{% if page.dir != '/' %}
 {% if site.data.languages.langs.size() != 1 %}
 {% if dir == 'rtl' %}
 {% assign langside = 'left' %}
@@ -31,4 +41,5 @@
 {% endif %}{% endfor %}
   </div>
 </div>
+{% endif %}
 {% endif %}

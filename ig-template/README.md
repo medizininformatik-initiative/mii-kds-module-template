@@ -2,8 +2,8 @@
 
 A **vendored mirror** of the MII IG-Publisher template package
 `de.medizininformatikinitiative.template` (version `1.3.4`), copied from
-<https://github.com/medizininformatik-initiative/ig-template-mii-kds>
-at commit `211d3e0d0fdf10267630d0d332337198a8201677`.
+<file:///private/tmp/claude-503/-Users-marcel-Development-cross-hub-patientportal/e2e22580-543a-4bf5-88cc-83677866f38a/scratchpad/mii-igtpl>
+at commit `1aeb9d161d003bf11ae0496f73d10ff2218f8f12`.
 
 **Do not edit these files here.** The single source of truth is the
 `ig-template-mii-kds` repository; local edits would silently drift and be
@@ -25,3 +25,9 @@ template, the mirror is refreshed by `scripts/sync-ig-template.sh`:
 Once the package is published to a registry, switch `ig.ini` to the pinned
 package and delete this folder — see
 [`docs/recipes/switch-template-to-published.md`](../docs/recipes/switch-template-to-published.md).
+
+<!-- PREVIEW-ONLY: revert before merge — this mirror was vendored from the
+     local feat/instance-validation branch of ig-template-mii-kds (not `dev`)
+     so the branch preview shows the integrated Validate-an-instance page;
+     re-sync from `dev` (scripts/sync-ig-template.sh) once that branch is
+     merged. -->
