@@ -26,16 +26,82 @@ What replaces it:
 
 | Simplifier | Here |
 | --- | --- |
-| `{{tree}}` | `{% include StructureDefinition-<id>-snapshot.xhtml %}` (or `-diff`, `-dict`) |
+| `{{tree}}` | `{% include StructureDefinition-<id>-snapshot.xhtml %}` (or `-diff`, `-dict-diff`) |
 | `{{xml}}` / `{{json}}` | `{% include StructureDefinition-<id>-xml.xhtml %}` / `-json-html` |
-| `<fql … select …>` over one artifact's elements | `{% include StructureDefinition-<id>-dict.xhtml %}` |
+| `<fql … select …>` over one artifact's elements | a profile: `{% include StructureDefinition-<id>-dict-diff.xhtml %}` (differential only); a logical model's data-element table: the `{% sql %}` query in [Logical models](#logical-models-a-compact-data-element-table) — not `-dict`, which renders the snapshot |
 | `<fql …>` across many artifacts | `{% sql … %}` over `package.db` |
 | `{{render:<canonical>}}` | usually nothing — the Publisher already generates that artifact's page |
+
+## Logical models: a compact data-element table
+
+Simplifier pages for logical models usually rendered a two-column table over
+`differential.element` — *Datensatz* (path) and *Erklärung* (definition). The
+obvious replacement, the `-dict` fragment, does not scale for that: it renders
+the **snapshot**, so `.id`, `.extension` and `.modifierExtension` appear between
+your own elements with their FHIR boilerplate, and every element gets eight
+label rows. Measured with IG Publisher 2.3.2 on a synthetic 8-element model
+(9 differential elements, 14 in the snapshot):
+
+| Rendering | Size | Elements | Shows |
+| --- | --- | --- | --- |
+| `-dict` | 35.7 KB | 14 (snapshot) | definition, short, comments, control, type, invariants … |
+| `-dict-diff` | 16.4 KB | 9 (differential) | definition, short, control, type — no inherited boilerplate |
+| `-diff` | 20.8 KB | 9 | the tree: name, flags, cardinality, type, **short** — not the definition |
+| the `{% sql %}` below | 1.0 KB | 9 | element, cardinality, definition |
+
+A 98-element model came to 458 KB with `-dict`
+([issue #29](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/29)).
+
+`package.db` has no element table — but the `Resources` row of every artifact
+carries the full resource in its `Json` column, and the Publisher's SQLite has
+the JSON1 functions. So the differential can be queried directly: no generator,
+no static copy that drifts from the model.
+
+```
+{% sql {
+  "query" : "select json_extract(e.value, '$.path') as Element, json_extract(e.value, '$.min') || '..' || json_extract(e.value, '$.max') as Cardinality, json_extract(e.value, '$.definition') as Definition from Resources r, json_each(json_extract(r.Json, '$.differential.element')) e where r.Url = 'https://www.medizininformatik-initiative.de/fhir/<space>/<module>/StructureDefinition/<id>'",
+  "class" : "grid",
+  "columns" : [
+    { "name" : "Element", "type" : "text", "source" : "Element" },
+    { "name" : "Card.", "type" : "text", "source" : "Cardinality" },
+    { "name" : "Definition", "type" : "markdown", "source" : "Definition" }
+  ]
+} %}
+```
+
+Put it into `input/intro-notes/StructureDefinition-<id>-intro.md` to show the
+table on the model's own page, or into any narrative page; the German page gets
+German column names (`"name"` is the title, `"source"` the query alias). The
+`where` clause takes the model's canonical URL exactly as declared.
+
+Verified by building it: IG Publisher 2.3.2, bundled sqlite-jdbc 3.53. Re-check
+after a Publisher bump — neither the `package.db` schema nor the bundled SQLite
+is part of any contract.
+
+- **Type the element column `text`.** The default column type (`auto`) turns a
+  cell that equals a known artifact name into a link, and for logical models
+  that link lacks `.html` in 2.3.2 — the page renders, the QA report counts a
+  broken link.
+- **Indentation.** `auto` and `text` columns escape HTML, so `&nbsp;` shows
+  literally. A `markdown`-typed column passes entities through:
+  `replace(json_extract(e.value, '$.path'), '.', '&nbsp;&nbsp;&nbsp;&nbsp;')`
+  as the element expression indents by depth. Raw HTML tags stay escaped in
+  every column type.
+- **Profiles are different.** A profile's differential carries only what the
+  profile changes, so `min`/`max` and `definition` are often absent there —
+  use `-dict-diff` for profiles.
+- **`-dict` and `-diff` on one page** emit the same element anchors and the
+  build warns about duplicate anchor ids; `-dict-diff` prefixes its anchors
+  (`diff_…`) and coexists with either.
+- The stored JSON holds both `differential` and `snapshot`; swap the path in
+  `json_extract(r.Json, '$.differential.element')` to table the snapshot.
 
 ## Steps
 
 1. **Decide which of the three families you need.**
    - One artifact, a view the Publisher already renders → an `include`.
+   - A logical model's data-element table → `{% sql %}` over the model's own
+     JSON, [above](#logical-models-a-compact-data-element-table).
    - Part of one example instance → `{% fragment %}`.
    - Something across several artifacts → `{% sql %}`.
 2. **Write the directive** into any page under `input/pagecontent/`. Use the
@@ -188,5 +254,7 @@ Then include one, build, and check the broken-link count.
 | `Tag '{%! include … %}' was not properly terminated` | `{%!` used on a Jekyll tag, which the Publisher does not touch | Use `{% raw %}…{% endraw %}` for Jekyll tags |
 | The page shows "Error processing command: …" | A directive ran and failed — often one you meant to display | Same fix. Note the build reports **no error** for this and stays green; read the rendered page |
 | `{% sql %}` returns nothing | The table or column does not exist | Open `package.db` from the build output with any SQLite client and look at the real schema |
+| A `{% sql %}` table adds a broken link `StructureDefinition-<id>` to the QA report | The default `auto` column type linked an artifact name; for logical models the link lacks `.html` (2.3.2) | Give the column `"type" : "text"` in the JSON form |
+| `&nbsp;` or `<b>` shows literally in a `{% sql %}` cell | `auto` and `text` columns escape HTML | Use a `markdown`-typed column for entities; raw tags stay escaped either way |
 | The build fails after adding a page | The page is not registered | Add it to `pages:` in `sushi-config.yaml`; a `pages:` entry also needs the file to exist |
 | It worked, then broke after a toolchain bump | An undocumented mechanism changed | Check the list above; prefer the documented three |
