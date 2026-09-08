@@ -140,7 +140,7 @@ that limitation in mind.</p>
 Nothing is stored on this site. The first run loads the package on the
 validator and can take a minute; later runs reuse that session.</p>
 </div>
-<form class="ig-validate" action="{{ validator_url }}/validate" method="post"
+<form class="ig-validate" onsubmit="return false"
       data-validator-url="{{ validator_url }}"
       data-package-id="{{ site.data.fhir.packageId }}"
       data-package-version="{{ site.data.fhir.igVer }}"
@@ -167,6 +167,7 @@ validator and can take a minute; later runs reuse that session.</p>
   <button type="submit" class="btn btn-primary">Validate</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
   <div class="ig-validate-result" aria-live="polite"></div>
+<noscript><p class="ig-validate-status">This live box needs JavaScript; without it use routes A to D above.</p></noscript>
 </form>
 {% endif %}
 {% if pagelang == 'de' %}
@@ -264,7 +265,7 @@ oben). Auf dieser Website wird nichts gespeichert. Der erste Lauf lädt das
 Paket auf dem Validator und kann eine Minute dauern; weitere Läufe nutzen diese
 Sitzung.</p>
 </div>
-<form class="ig-validate" action="{{ validator_url }}/validate" method="post"
+<form class="ig-validate" onsubmit="return false"
       data-validator-url="{{ validator_url }}"
       data-package-id="{{ site.data.fhir.packageId }}"
       data-package-version="{{ site.data.fhir.igVer }}"
@@ -291,6 +292,7 @@ Sitzung.</p>
   <button type="submit" class="btn btn-primary">Validieren</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
   <div class="ig-validate-result" aria-live="polite"></div>
+<noscript><p class="ig-validate-status">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p></noscript>
 </form>
 {% endif %}
 </div>

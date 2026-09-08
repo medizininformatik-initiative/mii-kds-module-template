@@ -193,8 +193,46 @@
     flattenIssues: flattenIssues,
     summarizeIssues: summarizeIssues,
     escapeHtml: escapeHtml,
-    renderIssuesTable: renderIssuesTable
+    renderIssuesTable: renderIssuesTable,
+    runValidation: runValidation
   };
+
+  /* The network flow, separated from the DOM so every failure path is
+   * testable with a fake fetch: resolves {issues, summary, sessionId}; rejects
+   * with an Error whose .kind is "timeout" | "http" | "parse" | "network". */
+  function kindError(kind, message) { var e = new Error(message); e.kind = kind; return e; }
+
+  function runValidation(opts) {
+    var fetchImpl = opts.fetchImpl || (typeof fetch === "function" ? fetch : null);
+    if (!fetchImpl) return Promise.reject(kindError("network", "fetch is not available in this browser"));
+    var controller = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, opts.timeoutMs || REQUEST_TIMEOUT_MS) : null;
+    function done(v) { if (timer) clearTimeout(timer); return v; }
+    function fail(e) { if (timer) clearTimeout(timer); throw e; }
+    return fetchImpl(opts.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(opts.body),
+      signal: controller ? controller.signal : undefined
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.text().then(function (txt) {
+          throw kindError("http", "HTTP " + res.status + (txt ? ": " + txt : ""));
+        });
+      }
+      return res.json().then(null, function () {
+        throw kindError("parse", "the validator answered with something that is not JSON");
+      });
+    }).then(function (json) {
+      var issues = flattenIssues(json);
+      return { issues: issues, summary: summarizeIssues(issues),
+               sessionId: typeof json.sessionId === "string" ? json.sessionId : "" };
+    }, function (err) {
+      if (err && err.kind) throw err;
+      if (err && err.name === "AbortError") throw kindError("timeout", "the validator did not answer in time");
+      throw kindError("network", err && err.message ? err.message : String(err));
+    }).then(done, fail);
+  }
 
   /* Browser bootstrap - one handler per form.ig-validate on the page. */
   function wireForm(form) {
@@ -227,35 +265,21 @@
         sessionId: sessionId
       });
       var url = validateEndpoint(d.validatorUrl);
-      var controller = typeof AbortController === "function" ? new AbortController() : null;
-      var timer = controller ? setTimeout(function () { controller.abort(); }, REQUEST_TIMEOUT_MS) : null;
       if (button) button.disabled = true;
       if (result) result.innerHTML = "";
       say(d.msgBusy || "Validating - the first run loads the package and can take a minute.");
-      fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal: controller ? controller.signal : undefined
-      }).then(function (res) {
-        if (!res.ok) {
-          return res.text().then(function (t) { throw new Error("HTTP " + res.status + (t ? ": " + t : "")); });
-        }
-        return res.json();
-      }).then(function (json) {
-        if (typeof json.sessionId === "string") sessionId = json.sessionId;
-        var issues = flattenIssues(json);
-        var s = summarizeIssues(issues);
+      runValidation({ url: url, body: body }).then(function (v) {
+        if (v.sessionId) sessionId = v.sessionId;
+        var s = v.summary;
         say((d.msgDone || "Result:") + " " + (s.fatal + s.error) + " " + (d.labelErrors || "errors") +
           ", " + s.warning + " " + (d.labelWarnings || "warnings") +
           ", " + s.information + " " + (d.labelInformation || "information"));
-        if (result) result.innerHTML = renderIssuesTable(issues, labels);
+        if (result) result.innerHTML = renderIssuesTable(v.issues, labels);
       }).catch(function (err) {
-        var aborted = err && err.name === "AbortError";
+        var aborted = err && err.kind === "timeout";
         say((aborted ? (d.msgTimeout || "The validator did not answer in time.") : (d.msgFailed || "Validation failed:")) +
           (aborted ? "" : " " + (err && err.message ? err.message : String(err))));
       }).then(function () {
-        if (timer) clearTimeout(timer);
         if (button) button.disabled = false;
       });
     });
