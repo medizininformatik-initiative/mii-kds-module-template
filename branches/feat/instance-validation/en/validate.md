@@ -1,0 +1,65 @@
+#  - MII Implementation Guide Module Template v2027.0.0-draft.1
+
+## Validate an instance
+
+This page replaces the ad-hoc validation that Simplifier offered: paste or upload your **own** FHIR instance and check it against the profiles of **this** guide. The values below are filled in from this build - nothing to look up:
+
+* Package: Canonical
+  * `de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1`: `https://www.medizininformatik-initiative.de/fhir/modul-template`
+* Package: FHIR version
+  * `de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1`: `4.0.1`
+* Package: Terminology server
+  * `de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1`: `https://tx.fhir.org`
+
+##### Data protection - read before pasting anything
+
+The public validator at `validator.fhir.org` is a **best-effort service hosted by HL7 International outside the EU**. Send it **synthetic instances only**. Real or realistic patient data - including pseudonymised records and test data derived from real cases - may **only** be validated against a **self-hosted** validator inside your own institution (route D below). Routes A, B (with a public terminology server) and C, and the live box on this page when it points at the public service, all transmit the instance to that external service.
+
+### A. Online - validator.fhir.org
+
+1. Open[https://validator.fhir.org/](https://validator.fhir.org/).
+1. Under**FHIR Version**keep`4.0.1`.
+1. Under**Implementation Guides**type`de.medizininformatikinitiative.kerndatensatz.template`and pick version`2027.0.0-draft.1`- i.e. the entry`de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1`. If the version is not listed, the package is not on the registry the validator reads (a CI build, for example): use route B with the package file instead.
+1. Under**Profiles**paste the canonical URL of the profile to check against (from the profile's page in this guide, the**Defining URL**). Without one, the validator uses the profiles the instance declares in`meta.profile`.
+1. Paste or upload the instance and press**Validate**.
+
+### B. Command line - validator_cli.jar
+
+Download `validator_cli.jar` from the [HL7 FHIR core releases](https://github.com/hapifhir/org.hl7.fhir.core/releases/latest) (Java 11 or newer), then:
+
+```
+java -jar validator_cli.jar -version 4.0.1 -ig de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 -tx https://tx.fhir.org instance.json
+```
+
+Add `-profile <canonical>` to force a profile, or `-ig path/to/package.tgz` when the version is not on the registry. `-tx n/a` switches terminology checks off entirely.
+
+### C. API - the validator's REST interface
+
+The same service takes a JSON request (`POST /validate`) - useful for CI pipelines and test suites. The interface is documented at [https://validator.fhir.org/swagger-ui/index.html](https://validator.fhir.org/swagger-ui/index.html); the live box below uses exactly that call, with this guide's package preset.
+
+### D. Self-hosted - for a data integration centre (DIZ)
+
+The public service runs as a container image you can host yourself, which is the **only** acceptable target for real or realistic data:
+
+```
+docker run -d --name fhir-validator -p 3500:3500 markiantorno/validator-wrapper
+```
+
+Then use `http://<host>:3500` as the base URL (route C; a module can point this page's live box at it via `input/data/features.json`). Route B stays fully offline with `-ig path/to/package.tgz` and a local terminology server. In both cases point `-tx` (or `txServer` in the API request) at a terminology server that carries the German value sets - see the note below.
+
+##### Terminology - the public server may not know German codes
+
+The public `tx.fhir.org` does not carry the complete German SNOMED CT extension and other German code systems, so codes bound in this guide's value sets can be reported as unknown even when they are correct. For the value sets of this guide point `-tx` at the SU-TermServ Ontoserver (`https://ontoserver.mii-termserv.de/fhir`, client certificate required) or at your own Ontoserver; otherwise read terminology messages with that limitation in mind.
+
+### Live box - validate right here
+
+**This box sends the pasted text to `https://validator.fhir.org`** (the default is the public HL7 validator - see the data-protection note above). Nothing is stored on this site. The first run loads the package on the validator and can take a minute; later runs reuse that session.
+
+FHIR instance (JSON or XML)
+
+Profile canonical (optional)
+
+Validate
+
+This live box needs JavaScript; without it use routes A to D above.
+
