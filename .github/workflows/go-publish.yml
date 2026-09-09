@@ -619,6 +619,8 @@ jobs:
         env:
           CANONICAL: ${{ steps.release.outputs.canonical }}
           PUBLICATION_BASE: ${{ steps.release.outputs.publication_base }}
+          # The seed step runs under set -u and builds the RSS dates from this.
+          PUBLICATION_DATE: ${{ steps.release.outputs.publication_date }}
         run: |
           set -euo pipefail
           # The very first -go-publish needs the webroot configuration that
@@ -653,10 +655,76 @@ jobs:
             }' > site/publish-setup.json
           touch site/.nojekyll
 
+          # package-feed.xml / publication-feed.xml — the two RSS feeds that the
+          # publish-setup.json written just above DECLARES under "feeds", but that
+          # nothing here creates. -go-publish reads the declaration, looks for the
+          # files and dies:
+          #   java.lang.Error: Attempt to copy .../site/package-feed.xml but it
+          #   doesn't exist   (PublicationProcess.updateFeed)
+          # The reference module keeps them as checked-in files under
+          # publication/webroot/; a generated module has no such folder, so they are
+          # seeded here in the same shape: an empty channel the Publisher fills.
+          # First publication only — afterwards the feeds live on in the webroot.
+          # LC_ALL=C: RFC-822 dates in RSS need English day and month abbreviations.
+          # Without it a localised runner writes "Do., 03 Sep. 2026" instead of
+          # "Wed, 02 Sep 2026". Caught by running this block on a German-locale machine,
+          # where the GNU -d form also silently fell through to the fallback and used
+          # today instead of the publication date.
+          feed_date="$(LC_ALL=C date -u -d "${PUBLICATION_DATE}" '+%a, %d %b %Y 00:00:00 GMT')"
+          seed_feed() {
+            local file="$1" title="$2" description="$3"
+            [[ -e "site/${file}" ]] && return 0
+            cat > "site/${file}" <<XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <rss xmlns:dc="http://purl.org/dc/elements/1.1/"
+               xmlns:content="http://purl.org/rss/1.0/modules/content/"
+               xmlns:fhir="http://hl7.org/fhir/feed"
+               xmlns:atom="http://www.w3.org/2005/Atom"
+               version="2.0">
+            <channel>
+              <title>${title}</title>
+              <description>${description}</description>
+              <link>${PUBLICATION_BASE}</link>
+              <generator>Medical Informatics Initiative (MII)</generator>
+              <lastBuildDate>${feed_date}</lastBuildDate>
+              <atom:link href="${PUBLICATION_BASE}/${file}"
+                         rel="self"
+                         type="application/rss+xml"/>
+              <pubDate>${feed_date}</pubDate>
+              <language>en</language>
+              <ttl>600</ttl>
+            </channel>
+          </rss>
+          XML
+            test -s "site/${file}"
+          }
+          seed_feed package-feed.xml \
+            "${EXPECTED_PACKAGE_ID} FHIR packages" \
+            "FHIR packages published by the Medical Informatics Initiative"
+          seed_feed publication-feed.xml \
+            "${EXPECTED_PACKAGE_ID} FHIR publications" \
+            "FHIR Implementation Guide releases published by the Medical Informatics Initiative"
+
+
+          # package-registry.json — REQUIRED by -go-publish, and not created by
+          # anything above. Without it the Publisher stops before doing any work:
+          #   "ERROR @ parameters: There is no package-registry.json file. Create
+          #    one by running the publisher -generate-package-registry {folder}"
+          # Only the FIRST publication hits this: every follow-up finds the file
+          # already in the webroot, which is why it stayed unnoticed. The command
+          # is the one the Publisher's own error message prescribes.
+          if [[ ! -e site/package-registry.json ]]; then
+            java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" \
+              -generate-package-registry "${GITHUB_WORKSPACE}/site"
+            test -s site/package-registry.json
+          fi
+
           {
             echo "### First-publication webroot seeded"
             echo
             echo "- Generated publish-setup.json for ${PUBLICATION_BASE}"
+            echo "- Generated package-registry.json (required by -go-publish)"
+            echo "- Generated package-feed.xml and publication-feed.xml (declared in publish-setup.json)"
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Prepare publication workspace
@@ -691,6 +759,13 @@ jobs:
           TX_URL: ${{ steps.terminology.outputs.tx_url }}
         run: |
           set -euo pipefail
+          # -fhir-settings: the SAME allowlist the build invocation above passes.
+          # Without it, publisher 2.3.1+ SSRF hardening refuses the local proxy:
+          #   "Refusing to fetch from non-https URL: http://127.0.0.1:8090/fhir/metadata"
+          # The flag was added to the build call and missed here, although both use
+          # the same -tx URL, so the defect only surfaces once a module actually
+          # publishes — found by the first formal publication of
+          # kerndatensatzmodul-GenetischeTests on 2026-09-03.
           java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" -go-publish \
             -source "${GITHUB_WORKSPACE}/source" \
             -web "${GITHUB_WORKSPACE}/site" \
@@ -701,6 +776,7 @@ jobs:
             -zips "${RUNNER_TEMP}/publication-zips" \
             -date "${PUBLICATION_DATE}" \
             -tx "${TX_URL}" \
+            -fhir-settings "${GITHUB_WORKSPACE}/source/.github/fhir-settings.json" \
             2>&1 | tee "${RUNNER_TEMP}/go-publish.log"
 
       - name: Correct and validate FHIR IG registry entry
