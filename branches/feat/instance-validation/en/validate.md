@@ -57,7 +57,12 @@ The public `tx.fhir.org` does not carry the complete German SNOMED CT extension 
 
 FHIR instance (JSON or XML)
 
-Profile canonical (optional)
+Profile of this guide (optional)
+
+- none: the validator uses the instance's meta.profile -
+Example Patient — template starter (Patient)
+
+Profile canonical (optional - filled in by the picker; paste any other canonical, for example one from a dependency package, to override it)
 
 Validate
 

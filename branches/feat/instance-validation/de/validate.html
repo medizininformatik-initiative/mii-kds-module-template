@@ -6,6 +6,9 @@
 
 
 
+
+
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML>
 
@@ -406,19 +409,28 @@ Sitzung.</p>
       data-msg-busy="Validierung läuft - der erste Lauf lädt das Paket und kann eine Minute dauern."
       data-msg-done="Ergebnis:"
       data-msg-failed="Validierung fehlgeschlagen:"
-      data-msg-timeout="Der Validator hat nicht innerhalb von drei Minuten geantwortet.">
+      data-msg-timeout="Der Validator hat nicht innerhalb von drei Minuten geantwortet."
+      data-msg-noprofile="Der Validator konnte diese kanonische Profil-URL nicht auflösen - er hat mit einem leeren Fehler geantwortet. Auflösbar ist ein Profil nur aus einem Paket, das der Validator geladen hat. Prüfen Sie die URL, oder validieren Sie ohne Profil."
+      data-msg-nopackage="Der Validator konnte das Paket dieses Leitfadens nicht laden. Ein Paket ist erst auflösbar, wenn es in einer FHIR-Paket-Registry veröffentlicht ist - ein Vorschau-Build ist das nicht.">
   <div class="form-group">
     <label for="ig-validate-instance-de">FHIR-Instanz (JSON oder XML)</label>
     <textarea id="ig-validate-instance-de" class="form-control" rows="12" spellcheck="false" style="font-family:monospace"></textarea>
   </div>
   <div class="form-group">
-    <label for="ig-validate-profile-de">Kanonische Profil-URL (optional)</label>
+    <label for="ig-validate-profile-pick-de">Profil dieses Leitfadens (optional)</label>
+    <select id="ig-validate-profile-pick-de" name="profile-pick" class="form-control">
+      <option value="">- keines: der Validator nutzt meta.profile der Instanz -</option>
+      <option value="https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/example-patient">Beispiel-Patient — Vorlagenbeispiel (Patient)</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="ig-validate-profile-de">Kanonische Profil-URL (optional - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen)</label>
     <input id="ig-validate-profile-de" name="profile" type="url" class="form-control" placeholder="https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/..."/>
   </div>
   <button type="submit" class="btn btn-primary">Validieren</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
   <div class="ig-validate-result" aria-live="polite"></div>
-<noscript><p class="ig-validate-status">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p></noscript>
+<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p>
 </form>
 
 </div>
@@ -444,7 +456,7 @@ Sitzung.</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 basiert auf <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Erstellt <span title="Tue, Sep 8, 2026 15:19+0000">2026-09-08</span>
+          Erstellt <span title="Wed, Sep 9, 2026 13:12+0000">2026-09-09</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.

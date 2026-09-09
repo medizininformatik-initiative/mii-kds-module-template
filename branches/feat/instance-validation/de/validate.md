@@ -57,7 +57,12 @@ Der öffentliche `tx.fhir.org` führt die deutsche SNOMED-CT-Extension und ander
 
 FHIR-Instanz (JSON oder XML)
 
-Kanonische Profil-URL (optional)
+Profil dieses Leitfadens (optional)
+
+- keines: der Validator nutzt meta.profile der Instanz -
+Beispiel-Patient — Vorlagenbeispiel (Patient)
+
+Kanonische Profil-URL (optional - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen)
 
 Validieren
 
