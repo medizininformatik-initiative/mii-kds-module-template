@@ -50,6 +50,9 @@ standardized secondary use of routine clinical data for medical research.
   [Meta module](https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Conformance);
   the module-specific [Security and Privacy](security-and-privacy.html)
   considerations are part of this guide.
+- **[Validate an instance](validate.html)** — check your own FHIR instance
+  against this module's profiles (online, command line, API, or a self-hosted
+  validator; synthetic data only against the public service).
 - **[Profiles](profiles.html)** and the further
   **[artifact pages](artifacts.html)** — the technical artifacts.
 - **[Examples](examples.html)** — example instances.
