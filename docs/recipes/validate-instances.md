@@ -38,7 +38,7 @@ There is no `validate.md` in `input/pagecontent/`, no `pages:` entry and no
 > validated against a self-hosted instance (route D). The page says so in
 > red, in both languages, and there is no switch to hide the box — a module
 > that wants readers to validate more than synthetic data sets the override
-> in step 3 and says so in its own guidance.
+> in step 4 and says so in its own guidance.
 
 ## Steps
 
@@ -50,7 +50,38 @@ the table at the top shows **your** package (`de.medizininformatikinitiative.ker
 canonical and FHIR version. Switch the language: `de/validate.html` renders
 German, `en/validate.html` English.
 
-### 2. Validate an instance — the four routes
+### 2. Pick one of your profiles in the live box
+
+The live box's **profile picker** lists **your** guide's own resource
+profiles: the template builds the list from what the publisher writes about
+this build, so it needs no lookup and no configuration. What it shows follows
+from that, and is worth knowing before you wonder why an entry is missing:
+
+- **only this guide's profiles.** A profile from a dependency — a MII
+  Basismodul profile, say — is not part of your build's own artifact list and
+  therefore not in the picker. Paste its canonical into the box below the
+  picker instead; that box always wins, and the request is built from it.
+- **only profiles an instance can be validated against**, that is
+  `kind = resource`. Logical models, extensions and datatype profiles are
+  left out: handing one to the validator answers *"Specified profile type was
+  Extension, but found type Patient"*.
+- **no picker at all** when your guide has no resource profile yet — a module
+  that so far ships only a logical model sees just the free-text box.
+- the label is the profile's **title in the page's language**, so a German
+  title needs the usual translation, and the entries are sorted by it.
+
+Leaving the picker on *none* validates against the instance's own
+`meta.profile`, which is what most examples carry.
+
+Two failures of the live box are worth recognising, because the validator
+reports neither as a validation issue:
+
+| What you see | What it means |
+| --- | --- |
+| *The validator could not load this guide's package* | the package is not on a FHIR package registry — a branch preview or an unreleased version never is. Validate with route B against the package file from your *Downloads* page. |
+| *The validator could not resolve that profile canonical* | the canonical you pasted is in no package the validator loaded. Check it, or validate without a profile. |
+
+### 3. Validate an instance — the four routes
 
 **A. Online (synthetic data only).** Open <https://validator.fhir.org/>, keep
 the FHIR version at `4.0.1`, type your package id under *Implementation
@@ -93,7 +124,7 @@ terminology server at the SU-TermServ or your DIZ Ontoserver (next step). The
 wrapper downloads a package from the registry on the first request that names
 it — a version that is not on the registry (a CI build) needs route B.
 
-### 3. Point the page at your self-hosted validator (optional)
+### 4. Point the page at your self-hosted validator (optional)
 
 The page reads `input/data/features.json`; the scaffold ships it with the
 public defaults:

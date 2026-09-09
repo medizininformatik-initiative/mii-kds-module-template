@@ -27,7 +27,16 @@
  *         level: "FATAL"|"ERROR"|"WARNING"|"INFORMATION", html, ... } -
  *       the severity key is "level", NOT "severity" (the OperationOutcome
  *       field name). flattenIssues() accepts either.
- *     errors 400/500 come back as text/plain.
+ *     errors 400/500 come back as text/plain. Two of them carry no
+ *     validation issue at all and need their own message (probed live
+ *     2026-09-09):
+ *       - a package no registry serves -> HTTP 500, body "Unable to resolve
+ *         package id <id>#<version>" (an unpublished preview build is the
+ *         usual cause);
+ *       - a profile canonical the loaded packages do not define -> HTTP 500
+ *         with an EMPTY body (the wrapper's route catches Exception, and the
+ *         resolver throws java.lang.Error, so nothing is reported).
+ *     failureHint() maps both; everything else keeps the generic message.
  *   CORS (verified with an Origin header): Access-Control-Allow-Origin
  *   reflects the caller's origin, Access-Control-Allow-Headers includes
  *   Content-Type, and a preflight OPTIONS answers 200 - so a browser page on
@@ -194,13 +203,29 @@
     summarizeIssues: summarizeIssues,
     escapeHtml: escapeHtml,
     renderIssuesTable: renderIssuesTable,
-    runValidation: runValidation
+    runValidation: runValidation,
+    failureHint: failureHint
   };
 
   /* The network flow, separated from the DOM so every failure path is
    * testable with a fake fetch: resolves {issues, summary, sessionId}; rejects
    * with an Error whose .kind is "timeout" | "http" | "parse" | "network". */
-  function kindError(kind, message) { var e = new Error(message); e.kind = kind; return e; }
+  function kindError(kind, message, extra) {
+    var e = new Error(message); e.kind = kind;
+    if (extra) { e.status = extra.status; e.body = extra.body; }
+    return e;
+  }
+
+  /* Which of the two issue-less failures the wrapper reported, if either:
+   * "package" (no registry serves it), "profile" (canonical not resolvable),
+   * "" (anything else - the generic message applies). */
+  function failureHint(err) {
+    if (!err || err.kind !== "http") return "";
+    var body = typeof err.body === "string" ? err.body : "";
+    if (/unable to resolve package/i.test(body)) return "package";
+    if (err.status === 500 && body.trim() === "") return "profile";
+    return "";
+  }
 
   function runValidation(opts) {
     var fetchImpl = opts.fetchImpl || (typeof fetch === "function" ? fetch : null);
@@ -217,7 +242,8 @@
     }).then(function (res) {
       if (!res.ok) {
         return res.text().then(function (txt) {
-          throw kindError("http", "HTTP " + res.status + (txt ? ": " + txt : ""));
+          throw kindError("http", "HTTP " + res.status + (txt ? ": " + txt : ""),
+            { status: res.status, body: txt || "" });
         });
       }
       return res.json().then(null, function () {
@@ -237,8 +263,24 @@
   /* Browser bootstrap - one handler per form.ig-validate on the page. */
   function wireForm(form) {
     var d = form.dataset;
+    /* The no-JavaScript notice is a plain <p> (the publisher's HTML inspector
+     * rejects <noscript>), so this script takes it away - before the status
+     * element is looked up, since both carry .ig-validate-status. */
+    var nojs = form.querySelectorAll(".ig-validate-nojs");
+    for (var n = 0; n < nojs.length; n++) {
+      if (nojs[n].parentNode) nojs[n].parentNode.removeChild(nojs[n]);
+    }
     var textarea = form.querySelector("textarea");
     var profileInput = form.querySelector("input[name=profile]");
+    /* The picker is rendered only when this guide has resource profiles.
+     * Choosing one copies its canonical into the text box, which stays the
+     * single source the request is built from: a canonical pasted by hand -
+     * a dependency's profile, say - keeps working, and buildRequestBody does
+     * not change. */
+    var profilePick = form.querySelector("select[name=profile-pick]");
+    if (profilePick && profileInput) {
+      profilePick.addEventListener("change", function () { profileInput.value = profilePick.value; });
+    }
     var button = form.querySelector("button[type=submit]");
     var status = form.querySelector(".ig-validate-status");
     var result = form.querySelector(".ig-validate-result");
@@ -276,9 +318,11 @@
           ", " + s.information + " " + (d.labelInformation || "information"));
         if (result) result.innerHTML = renderIssuesTable(v.issues, labels);
       }).catch(function (err) {
-        var aborted = err && err.kind === "timeout";
-        say((aborted ? (d.msgTimeout || "The validator did not answer in time.") : (d.msgFailed || "Validation failed:")) +
-          (aborted ? "" : " " + (err && err.message ? err.message : String(err))));
+        if (err && err.kind === "timeout") { say(d.msgTimeout || "The validator did not answer in time."); return; }
+        var hint = failureHint(err);
+        if (hint === "package" && d.msgNopackage) { say(d.msgNopackage); return; }
+        if (hint === "profile" && d.msgNoprofile) { say(d.msgNoprofile); return; }
+        say((d.msgFailed || "Validation failed:") + " " + (err && err.message ? err.message : String(err)));
       }).then(function () {
         if (button) button.disabled = false;
       });

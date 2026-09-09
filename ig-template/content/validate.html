@@ -32,7 +32,20 @@
   version = the FHIR version, ig.title, ig.tx-server); site.data.features.*
   is the module's optional input/data/features.json (the base's pre-process
   copies input/data into _data). No module change is required: both
-  validator settings carry a default.
+  validator settings carry a default. The profile picker reads
+  site.data.structuredefinitions (temp/pages/_data/structuredefinitions.json,
+  also publisher-written: id -> {url, name, title, titlelang, kind, type,
+  derivation, abstract, ...} for THIS guide's own StructureDefinitions only -
+  a dependency's profiles are not in it, which is why the free-text box
+  stays). site.data is global, so the root copy and every language copy see
+  the same list.
+
+  HTML the publisher accepts: its inspector converts every output page to
+  Markdown and reports an element it does not know as a QA warning ("Illegal
+  HTML: Illegal HTML element: <name>"). form/input/select/option/textarea/
+  button/label pass; datalist, optgroup and noscript do not - so the picker
+  is a <select>, and the no-JavaScript notice is a <p> the script removes
+  once it runs (verified with publisher 2.3.2).
 
   The publish-box marker below is the one the base's template-page.html
   carries; the publisher replaces it on every page.
@@ -47,6 +60,18 @@
 {% assign validator_url = site.data.features.validator.url | default: 'https://validator.fhir.org' %}
 {% assign validator_tx = site.data.features.validator.tx | default: 'https://tx.fhir.org' %}
 {% capture pkg %}{{ site.data.fhir.packageId }}#{{ site.data.fhir.igVer }}{% endcapture %}
+{% comment %}
+  The resource profiles of THIS guide, for the picker. where_exp turns the
+  id->object map into a list (a `sort` straight on the map aborts the build);
+  the guard covers a build without the file (`sort` on nil aborts too). Only
+  kind == 'resource': an extension or a datatype profile (kind
+  'complex-type') and a logical model are not profiles an instance validates
+  against - the validator answers "Specified profile type was X, but found
+  type Y". An empty list renders no picker (a module with only a logical
+  model), leaving the free-text box alone.
+{% endcomment %}
+{% assign own_profiles = "" | split: "" %}
+{% if site.data.structuredefinitions %}{% assign own_profiles = site.data.structuredefinitions | where_exp: "sd", "sd.kind == 'resource' and sd.derivation == 'constraint' and sd.abstract != true" | sort_natural: "title" %}{% endif %}
 {% include fragment-pagebegin.html lang=chromelang %}
 <div class="col-12">
   <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
@@ -155,19 +180,28 @@ validator and can take a minute; later runs reuse that session.</p>
       data-msg-busy="Validating - the first run loads the package and can take a minute."
       data-msg-done="Result:"
       data-msg-failed="Validation failed:"
-      data-msg-timeout="The validator did not answer within three minutes.">
+      data-msg-timeout="The validator did not answer within three minutes."
+      data-msg-noprofile="The validator could not resolve that profile canonical - it answered with an empty error. A profile is only resolvable when it is part of a package the validator has loaded. Check the canonical, or validate without a profile."
+      data-msg-nopackage="The validator could not load this guide's package. A package is resolvable only once it is published to a FHIR package registry; a preview build is not.">
   <div class="form-group">
     <label for="ig-validate-instance-en">FHIR instance (JSON or XML)</label>
     <textarea id="ig-validate-instance-en" class="form-control" rows="12" spellcheck="false" style="font-family:monospace"></textarea>
   </div>
-  <div class="form-group">
-    <label for="ig-validate-profile-en">Profile canonical (optional)</label>
+{% if own_profiles.size > 0 %}  <div class="form-group">
+    <label for="ig-validate-profile-pick-en">Profile of this guide (optional)</label>
+    <select id="ig-validate-profile-pick-en" name="profile-pick" class="form-control">
+      <option value="">- none: the validator uses the instance's meta.profile -</option>{% for sd in own_profiles %}{% assign sd_label = sd.titlelang.en | default: sd.title | default: sd.name %}
+      <option value="{{ sd.url | escape }}">{{ sd_label | escape }} ({{ sd.type | escape }})</option>{% endfor %}
+    </select>
+  </div>
+{% endif %}  <div class="form-group">
+    <label for="ig-validate-profile-en">Profile canonical (optional{% if own_profiles.size > 0 %} - filled in by the picker; paste any other canonical, for example one from a dependency package, to override it{% endif %})</label>
     <input id="ig-validate-profile-en" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
   </div>
   <button type="submit" class="btn btn-primary">Validate</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
   <div class="ig-validate-result" aria-live="polite"></div>
-<noscript><p class="ig-validate-status">This live box needs JavaScript; without it use routes A to D above.</p></noscript>
+<p class="ig-validate-status ig-validate-nojs">This live box needs JavaScript; without it use routes A to D above.</p>
 </form>
 {% endif %}
 {% if pagelang == 'de' %}
@@ -280,19 +314,28 @@ Sitzung.</p>
       data-msg-busy="Validierung läuft - der erste Lauf lädt das Paket und kann eine Minute dauern."
       data-msg-done="Ergebnis:"
       data-msg-failed="Validierung fehlgeschlagen:"
-      data-msg-timeout="Der Validator hat nicht innerhalb von drei Minuten geantwortet.">
+      data-msg-timeout="Der Validator hat nicht innerhalb von drei Minuten geantwortet."
+      data-msg-noprofile="Der Validator konnte diese kanonische Profil-URL nicht auflösen - er hat mit einem leeren Fehler geantwortet. Auflösbar ist ein Profil nur aus einem Paket, das der Validator geladen hat. Prüfen Sie die URL, oder validieren Sie ohne Profil."
+      data-msg-nopackage="Der Validator konnte das Paket dieses Leitfadens nicht laden. Ein Paket ist erst auflösbar, wenn es in einer FHIR-Paket-Registry veröffentlicht ist - ein Vorschau-Build ist das nicht.">
   <div class="form-group">
     <label for="ig-validate-instance-de">FHIR-Instanz (JSON oder XML)</label>
     <textarea id="ig-validate-instance-de" class="form-control" rows="12" spellcheck="false" style="font-family:monospace"></textarea>
   </div>
-  <div class="form-group">
-    <label for="ig-validate-profile-de">Kanonische Profil-URL (optional)</label>
+{% if own_profiles.size > 0 %}  <div class="form-group">
+    <label for="ig-validate-profile-pick-de">Profil dieses Leitfadens (optional)</label>
+    <select id="ig-validate-profile-pick-de" name="profile-pick" class="form-control">
+      <option value="">- keines: der Validator nutzt meta.profile der Instanz -</option>{% for sd in own_profiles %}{% assign sd_label = sd.titlelang.de | default: sd.title | default: sd.name %}
+      <option value="{{ sd.url | escape }}">{{ sd_label | escape }} ({{ sd.type | escape }})</option>{% endfor %}
+    </select>
+  </div>
+{% endif %}  <div class="form-group">
+    <label for="ig-validate-profile-de">Kanonische Profil-URL (optional{% if own_profiles.size > 0 %} - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen{% endif %})</label>
     <input id="ig-validate-profile-de" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
   </div>
   <button type="submit" class="btn btn-primary">Validieren</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
   <div class="ig-validate-result" aria-live="polite"></div>
-<noscript><p class="ig-validate-status">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p></noscript>
+<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p>
 </form>
 {% endif %}
 </div>
