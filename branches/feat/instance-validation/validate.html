@@ -338,10 +338,10 @@ this build - nothing to look up:</p>
 EU</strong>. Send it <strong>synthetic instances only</strong>. Real or
 realistic patient data - including pseudonymised records and test data derived
 from real cases - may <strong>only</strong> be validated against a
-<strong>self-hosted</strong> validator inside your own institution (route D
-below). Routes A, B (with a public terminology server) and C, and the live box
-on this page when it points at the public service, all transmit the instance
-to that external service.</p>
+<strong>self-hosted</strong> validator inside your own institution (route D or
+E below). Routes A, B (with a public terminology server) and C, and the live
+box on this page when it points at the public service, all transmit the
+instance to that external service.</p>
 </div>
 
 <h3>A. Online - validator.fhir.org</h3>
@@ -386,6 +386,27 @@ module can point this page's live box at it via
 cases point <code>-tx</code> (or <code>txServer</code> in the API request) at
 a terminology server that carries the German value sets - see the note below.</p>
 
+<h3>E. MII FHIR Validator - the MII-curated container</h3>
+<p>The MII publishes its own validator container for a data integration
+centre: it wraps the same HL7 validator, but ships with the KDS packages in
+its cache, so it validates <strong>offline</strong> once its terminology
+server is in place. It is part of the FDPG data-node stack:</p>
+<pre><code>docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator</code></pre>
+<p>Documentation:
+<a href="https://medizininformatik-initiative.github.io/mii-fhir-validator/" target="_blank" rel="noopener">the validator's own guide</a>
+and its
+<a href="https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html" target="_blank" rel="noopener">page in the data-node documentation</a>.
+Which guides it loads is fixed when the container starts, through
+<code>IG_PARAMS</code> - add <code>-ig de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1</code>, or point it at a
+package file for a version that is not on the registry.</p>
+<p><strong>Its interface is not the one route C describes.</strong> It answers
+<code>POST /validateResource</code> with the bare resource as the body, the
+options as query parameters, and an <code>OperationOutcome</code> as the
+result. So it fits a pipeline or a script, and it cannot serve the live box
+below - a browser page needs the wrapper's <code>POST /validate</code>. Note
+also that it is published as a pre-release
+<a href="https://github.com/medizininformatik-initiative/mii-fhir-validator/releases" target="_blank" rel="noopener">(<code>0.0.1-alpha</code> at the time of writing)</a>.</p>
+
 <div class="ig-highlight ig-highlight-orange">
 <h5>Terminology - the public server may not know German codes</h5>
 <p>The public <code>tx.fhir.org</code> does not carry the complete German SNOMED
@@ -397,7 +418,7 @@ required) or at your own Ontoserver; otherwise read terminology messages with
 that limitation in mind.</p>
 </div>
 
-<h3>Live box - validate right here</h3>
+<h3>F. Live box - validate right here</h3>
 <div class="ig-highlight ig-highlight-grey">
 <p><strong>This box sends the pasted text to <code>https://validator.fhir.org</code></strong>
 (the default is the public HL7 validator - see the data-protection note above).
@@ -437,10 +458,10 @@ validator and can take a minute; later runs reuse that session.</p>
     <label for="ig-validate-profile-en">Profile canonical (optional - filled in by the picker; paste any other canonical, for example one from a dependency package, to override it)</label>
     <input id="ig-validate-profile-en" name="profile" type="url" class="form-control" placeholder="https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/..."/>
   </div>
-  <button type="submit" class="btn btn-primary">Validate</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
-  <div class="ig-validate-result" aria-live="polite"></div>
-<p class="ig-validate-status ig-validate-nojs">This live box needs JavaScript; without it use routes A to D above.</p>
+  <div class="ig-validate-result"></div>
+  <button type="submit" class="btn btn-primary">Validate</button>
+<p class="ig-validate-status ig-validate-nojs">This live box needs JavaScript; without it use routes A to E above.</p>
 </form>
 
 
@@ -467,7 +488,7 @@ validator and can take a minute; later runs reuse that session.</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 based on <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Generated <span title="Wed, Sep 9, 2026 13:12+0000">2026-09-09</span>
+          Generated <span title="Wed, Sep 9, 2026 18:27+0000">2026-09-09</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.

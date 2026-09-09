@@ -324,8 +324,8 @@ betreibt</strong>. Senden Sie ihm <strong>ausschließlich synthetische
 Instanzen</strong>. Echte oder realistische Patientendaten - auch
 pseudonymisierte Datensätze und aus echten Fällen abgeleitete Testdaten -
 dürfen <strong>nur</strong> gegen einen <strong>selbst betriebenen</strong>
-Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D unten). Die
-Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf
+Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D oder E
+unten). Die Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf
 dieser Seite, solange sie auf den öffentlichen Dienst zeigt, übertragen die
 Instanz an diesen externen Dienst.</p>
 </div>
@@ -374,6 +374,27 @@ vollständig offline. In beiden Fällen <code>-tx</code> (bzw.
 <code>txServer</code> in der API-Anfrage) auf einen Terminologieserver
 richten, der die deutschen Value Sets kennt - siehe den Hinweis unten.</p>
 
+<h3>E. MII FHIR Validator - der Container der MII</h3>
+<p>Die MII veröffentlicht einen eigenen Validator-Container für ein
+Datenintegrationszentrum: Er nutzt denselben HL7-Validator, bringt die
+KDS-Pakete aber bereits im Cache mit und validiert daher <strong>offline</strong>,
+sobald ein Terminologieserver bereitsteht. Er gehört zum FDPG-Data-Node-Stack:</p>
+<pre><code>docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator</code></pre>
+<p>Dokumentation:
+<a href="https://medizininformatik-initiative.github.io/mii-fhir-validator/" target="_blank" rel="noopener">der Leitfaden des Validators</a>
+sowie seine
+<a href="https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html" target="_blank" rel="noopener">Seite in der Data-Node-Dokumentation</a>.
+Welche Leitfäden er lädt, steht beim Start des Containers fest und wird über
+<code>IG_PARAMS</code> gesetzt - dort <code>-ig de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1</code> ergänzen oder
+auf eine Paketdatei zeigen, wenn die Version nicht in der Registry liegt.</p>
+<p><strong>Seine Schnittstelle ist nicht die aus Weg C.</strong> Er beantwortet
+<code>POST /validateResource</code> mit der Ressource als Rumpf, den Optionen
+als Query-Parametern und einem <code>OperationOutcome</code> als Ergebnis. Er
+passt damit in eine Pipeline oder ein Skript, kann die Live-Box unten aber
+nicht bedienen - eine Browser-Seite benötigt <code>POST /validate</code> des
+Wrappers. Er erscheint zudem bislang als Vorabversion
+<a href="https://github.com/medizininformatik-initiative/mii-fhir-validator/releases" target="_blank" rel="noopener">(derzeit <code>0.0.1-alpha</code>)</a>.</p>
+
 <div class="ig-highlight ig-highlight-orange">
 <h5>Terminologie - der öffentliche Server kennt deutsche Codes nicht vollständig</h5>
 <p>Der öffentliche <code>tx.fhir.org</code> führt die deutsche SNOMED-CT-Extension
@@ -386,7 +407,7 @@ erforderlich) oder auf einen eigenen Ontoserver; andernfalls
 Terminologiemeldungen mit dieser Einschränkung lesen.</p>
 </div>
 
-<h3>Live-Box - direkt hier validieren</h3>
+<h3>F. Live-Box - direkt hier validieren</h3>
 <div class="ig-highlight ig-highlight-grey">
 <p><strong>Diese Box sendet den eingefügten Text an <code>https://validator.fhir.org</code></strong>
 (Voreinstellung: der öffentliche HL7-Validator - siehe den Datenschutzhinweis
@@ -427,10 +448,10 @@ Sitzung.</p>
     <label for="ig-validate-profile-de">Kanonische Profil-URL (optional - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen)</label>
     <input id="ig-validate-profile-de" name="profile" type="url" class="form-control" placeholder="https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/..."/>
   </div>
-  <button type="submit" class="btn btn-primary">Validieren</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
-  <div class="ig-validate-result" aria-live="polite"></div>
-<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p>
+  <div class="ig-validate-result"></div>
+  <button type="submit" class="btn btn-primary">Validieren</button>
+<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis E oben.</p>
 </form>
 
 </div>
@@ -456,7 +477,7 @@ Sitzung.</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 basiert auf <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Erstellt <span title="Wed, Sep 9, 2026 13:12+0000">2026-09-09</span>
+          Erstellt <span title="Wed, Sep 9, 2026 18:27+0000">2026-09-09</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.

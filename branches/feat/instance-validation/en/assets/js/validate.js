@@ -43,6 +43,11 @@
  *   any host may POST to it. Allow-Methods lists only DELETE/OPTIONS/PATCH/
  *   PUT, which is fine: POST is a CORS-safelisted method and needs no entry.
  *
+ * RENDERING uses the Bootstrap 3 the base template already ships (see
+ * BOOTSTRAP_ROW_CLASS): the issues table is table/table-condensed/table-hover
+ * with a contextual tint per row, and the summary line turns .text-danger
+ * when the instance has errors. No stylesheet of our own is involved.
+ *
  * CONFIGURATION comes from data-* attributes the page renders with Liquid
  * (see content/validate.html): the validator base URL (a module overrides it
  * in input/data/features.json -> validator.url; empty falls back to the
@@ -168,6 +173,17 @@
 
   /* An HTML table of the issues; labels = { severity, line, location,
    * message, none }. Everything from the response is escaped. */
+  /* Bootstrap 3 is what the publisher's base template ships (bootstrap-fhir.css
+   * declares "Bootstrap v3.0.0"), and it defines exactly four contextual row
+   * classes: danger, warning, success and active. There is NO .info in this
+   * version, so "information" maps to active - mapping it to info would look
+   * right and do nothing. Body text on all four tints measures above 9:1
+   * contrast. The tint is never the only carrier of severity: the first
+   * column keeps the word, which is what survives the print stylesheet
+   * (bootstrap-fhir.css forces every colour to black for print) and what a
+   * screen reader reads. */
+  var BOOTSTRAP_ROW_CLASS = { fatal: "danger", error: "danger", warning: "warning", information: "active" };
+
   function renderIssuesTable(issues, labels) {
     var l = labels || {};
     var head = "<thead><tr><th>" + escapeHtml(l.severity || "Severity") +
@@ -181,7 +197,8 @@
       for (var i = 0; i < issues.length; i++) {
         var it = issues[i];
         var pos = it.line === "" ? "" : (it.line + (it.col === "" ? "" : ":" + it.col));
-        rows += "<tr class=\"ig-validate-" + escapeHtml(it.severity) + "\">" +
+        var tint = BOOTSTRAP_ROW_CLASS[it.severity] || "";
+        rows += "<tr class=\"ig-validate-" + escapeHtml(it.severity) + (tint ? " " + tint : "") + "\">" +
           "<td>" + escapeHtml(it.severity) + "</td>" +
           "<td>" + escapeHtml(pos) + "</td>" +
           "<td><code>" + escapeHtml(it.location) + "</code></td>" +
@@ -189,7 +206,7 @@
           (it.type ? " <small>(" + escapeHtml(it.type) + ")</small>" : "") + "</td></tr>";
       }
     }
-    return "<table class=\"table table-condensed ig-validate-issues\">" + head +
+    return "<table class=\"table table-condensed table-hover ig-validate-issues\">" + head +
       "<tbody>" + rows + "</tbody></table>";
   }
 
@@ -290,12 +307,19 @@
     };
     var sessionId = "";
 
-    function say(text) { if (status) status.textContent = text; }
+    /* .text-danger (#b94a48) is the only contextual text colour in the shipped
+     * Bootstrap that clears the template's 4.5:1 bar, so it is the only one
+     * used: errors colour the summary, everything else stays body colour. */
+    function say(text, danger) {
+      if (!status) return;
+      status.textContent = text;
+      status.className = "ig-validate-status" + (danger ? " text-danger" : "");
+    }
 
     form.addEventListener("submit", function (ev) {
       ev.preventDefault();
       var content = textarea ? textarea.value : "";
-      if (content.trim() === "") { say(d.msgEmpty || "Paste an instance first."); return; }
+      if (content.trim() === "") { say(d.msgEmpty || "Paste an instance first.", true); return; }
       var body = buildRequestBody({
         content: content,
         packageId: d.packageId,
@@ -315,14 +339,15 @@
         var s = v.summary;
         say((d.msgDone || "Result:") + " " + (s.fatal + s.error) + " " + (d.labelErrors || "errors") +
           ", " + s.warning + " " + (d.labelWarnings || "warnings") +
-          ", " + s.information + " " + (d.labelInformation || "information"));
+          ", " + s.information + " " + (d.labelInformation || "information"),
+          (s.fatal + s.error) > 0);
         if (result) result.innerHTML = renderIssuesTable(v.issues, labels);
       }).catch(function (err) {
-        if (err && err.kind === "timeout") { say(d.msgTimeout || "The validator did not answer in time."); return; }
+        if (err && err.kind === "timeout") { say(d.msgTimeout || "The validator did not answer in time.", true); return; }
         var hint = failureHint(err);
-        if (hint === "package" && d.msgNopackage) { say(d.msgNopackage); return; }
-        if (hint === "profile" && d.msgNoprofile) { say(d.msgNoprofile); return; }
-        say((d.msgFailed || "Validation failed:") + " " + (err && err.message ? err.message : String(err)));
+        if (hint === "package" && d.msgNopackage) { say(d.msgNopackage, true); return; }
+        if (hint === "profile" && d.msgNoprofile) { say(d.msgNoprofile, true); return; }
+        say((d.msgFailed || "Validation failed:") + " " + (err && err.message ? err.message : String(err)), true);
       }).then(function () {
         if (button) button.disabled = false;
       });

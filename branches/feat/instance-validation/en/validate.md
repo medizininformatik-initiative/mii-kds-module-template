@@ -13,7 +13,7 @@ This page replaces the ad-hoc validation that Simplifier offered: paste or uploa
 
 ##### Data protection - read before pasting anything
 
-The public validator at `validator.fhir.org` is a **best-effort service hosted by HL7 International outside the EU**. Send it **synthetic instances only**. Real or realistic patient data - including pseudonymised records and test data derived from real cases - may **only** be validated against a **self-hosted** validator inside your own institution (route D below). Routes A, B (with a public terminology server) and C, and the live box on this page when it points at the public service, all transmit the instance to that external service.
+The public validator at `validator.fhir.org` is a **best-effort service hosted by HL7 International outside the EU**. Send it **synthetic instances only**. Real or realistic patient data - including pseudonymised records and test data derived from real cases - may **only** be validated against a **self-hosted** validator inside your own institution (route D or E below). Routes A, B (with a public terminology server) and C, and the live box on this page when it points at the public service, all transmit the instance to that external service.
 
 ### A. Online - validator.fhir.org
 
@@ -47,11 +47,23 @@ docker run -d --name fhir-validator -p 3500:3500 markiantorno/validator-wrapper
 
 Then use `http://<host>:3500` as the base URL (route C; a module can point this page's live box at it via `input/data/features.json`). Route B stays fully offline with `-ig path/to/package.tgz` and a local terminology server. In both cases point `-tx` (or `txServer` in the API request) at a terminology server that carries the German value sets - see the note below.
 
+### E. MII FHIR Validator - the MII-curated container
+
+The MII publishes its own validator container for a data integration centre: it wraps the same HL7 validator, but ships with the KDS packages in its cache, so it validates **offline** once its terminology server is in place. It is part of the FDPG data-node stack:
+
+```
+docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator
+```
+
+Documentation: [the validator's own guide](https://medizininformatik-initiative.github.io/mii-fhir-validator/) and its [page in the data-node documentation](https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html). Which guides it loads is fixed when the container starts, through `IG_PARAMS` - add `-ig de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1`, or point it at a package file for a version that is not on the registry.
+
+**Its interface is not the one route C describes.** It answers `POST /validateResource` with the bare resource as the body, the options as query parameters, and an `OperationOutcome` as the result. So it fits a pipeline or a script, and it cannot serve the live box below - a browser page needs the wrapper's `POST /validate`. Note also that it is published as a pre-release [(`0.0.1-alpha` at the time of writing)](https://github.com/medizininformatik-initiative/mii-fhir-validator/releases).
+
 ##### Terminology - the public server may not know German codes
 
 The public `tx.fhir.org` does not carry the complete German SNOMED CT extension and other German code systems, so codes bound in this guide's value sets can be reported as unknown even when they are correct. For the value sets of this guide point `-tx` at the SU-TermServ Ontoserver (`https://ontoserver.mii-termserv.de/fhir`, client certificate required) or at your own Ontoserver; otherwise read terminology messages with that limitation in mind.
 
-### Live box - validate right here
+### F. Live box - validate right here
 
 **This box sends the pasted text to `https://validator.fhir.org`** (the default is the public HL7 validator - see the data-protection note above). Nothing is stored on this site. The first run loads the package on the validator and can take a minute; later runs reuse that session.
 
@@ -65,6 +77,5 @@ Example Patient — template starter (Patient)
 Profile canonical (optional - filled in by the picker; paste any other canonical, for example one from a dependency package, to override it)
 
 Validate
-
-This live box needs JavaScript; without it use routes A to D above.
+This live box needs JavaScript; without it use routes A to E above.
 

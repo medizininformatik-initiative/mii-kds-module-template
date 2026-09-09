@@ -13,7 +13,7 @@ Diese Seite ersetzt die Ad-hoc-Validierung, die Simplifier angeboten hat: Fügen
 
 ##### Datenschutz - bitte vor dem Einfügen lesen
 
-Der öffentliche Validator unter `validator.fhir.org` ist ein **Best-Effort-Dienst, den HL7 International außerhalb der EU betreibt**. Senden Sie ihm **ausschließlich synthetische Instanzen**. Echte oder realistische Patientendaten - auch pseudonymisierte Datensätze und aus echten Fällen abgeleitete Testdaten - dürfen **nur** gegen einen **selbst betriebenen** Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D unten). Die Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf dieser Seite, solange sie auf den öffentlichen Dienst zeigt, übertragen die Instanz an diesen externen Dienst.
+Der öffentliche Validator unter `validator.fhir.org` ist ein **Best-Effort-Dienst, den HL7 International außerhalb der EU betreibt**. Senden Sie ihm **ausschließlich synthetische Instanzen**. Echte oder realistische Patientendaten - auch pseudonymisierte Datensätze und aus echten Fällen abgeleitete Testdaten - dürfen **nur** gegen einen **selbst betriebenen** Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D oder E unten). Die Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf dieser Seite, solange sie auf den öffentlichen Dienst zeigt, übertragen die Instanz an diesen externen Dienst.
 
 ### A. Online - validator.fhir.org
 
@@ -47,11 +47,23 @@ docker run -d --name fhir-validator -p 3500:3500 markiantorno/validator-wrapper
 
 Danach `http://<host>:3500` als Basis-URL verwenden (Weg C; ein Modul kann die Live-Box dieser Seite über `input/data/features.json` dorthin zeigen lassen). Weg B bleibt mit `-ig pfad/zu/package.tgz` und einem lokalen Terminologieserver vollständig offline. In beiden Fällen `-tx` (bzw. `txServer` in der API-Anfrage) auf einen Terminologieserver richten, der die deutschen Value Sets kennt - siehe den Hinweis unten.
 
+### E. MII FHIR Validator - der Container der MII
+
+Die MII veröffentlicht einen eigenen Validator-Container für ein Datenintegrationszentrum: Er nutzt denselben HL7-Validator, bringt die KDS-Pakete aber bereits im Cache mit und validiert daher **offline**, sobald ein Terminologieserver bereitsteht. Er gehört zum FDPG-Data-Node-Stack:
+
+```
+docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator
+```
+
+Dokumentation: [der Leitfaden des Validators](https://medizininformatik-initiative.github.io/mii-fhir-validator/) sowie seine [Seite in der Data-Node-Dokumentation](https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html). Welche Leitfäden er lädt, steht beim Start des Containers fest und wird über `IG_PARAMS` gesetzt - dort `-ig de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1` ergänzen oder auf eine Paketdatei zeigen, wenn die Version nicht in der Registry liegt.
+
+**Seine Schnittstelle ist nicht die aus Weg C.** Er beantwortet `POST /validateResource` mit der Ressource als Rumpf, den Optionen als Query-Parametern und einem `OperationOutcome` als Ergebnis. Er passt damit in eine Pipeline oder ein Skript, kann die Live-Box unten aber nicht bedienen - eine Browser-Seite benötigt `POST /validate` des Wrappers. Er erscheint zudem bislang als Vorabversion [(derzeit `0.0.1-alpha`)](https://github.com/medizininformatik-initiative/mii-fhir-validator/releases).
+
 ##### Terminologie - der öffentliche Server kennt deutsche Codes nicht vollständig
 
 Der öffentliche `tx.fhir.org` führt die deutsche SNOMED-CT-Extension und andere deutsche Codesysteme nicht vollständig; Codes aus den Value Sets dieses Leitfadens können daher als unbekannt gemeldet werden, obwohl sie korrekt sind. Für die Value Sets dieses Leitfadens `-tx` auf den SU-TermServ-Ontoserver richten (`https://ontoserver.mii-termserv.de/fhir`, Client-Zertifikat erforderlich) oder auf einen eigenen Ontoserver; andernfalls Terminologiemeldungen mit dieser Einschränkung lesen.
 
-### Live-Box - direkt hier validieren
+### F. Live-Box - direkt hier validieren
 
 **Diese Box sendet den eingefügten Text an `https://validator.fhir.org`** (Voreinstellung: der öffentliche HL7-Validator - siehe den Datenschutzhinweis oben). Auf dieser Website wird nichts gespeichert. Der erste Lauf lädt das Paket auf dem Validator und kann eine Minute dauern; weitere Läufe nutzen diese Sitzung.
 
@@ -65,6 +77,5 @@ Beispiel-Patient — Vorlagenbeispiel (Patient)
 Kanonische Profil-URL (optional - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen)
 
 Validieren
-
-Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.
+Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis E oben.
 

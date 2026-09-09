@@ -5,7 +5,7 @@
   "tool-build" : "3",
   "webUrl" : "https://www.medizininformatik-initiative.de/fhir/modul-template",
   "date" : "2026-09-09",
-  "date-time" : "20260909011203+0000",
+  "date-time" : "20260909062757+0000",
   "paths" : {
     "https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template|2027.0.0-draft.1" : "index.html",
     "https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template" : "index.html",
