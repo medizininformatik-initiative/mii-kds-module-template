@@ -1,7 +1,7 @@
 # Recipe: let implementers validate their own instances against your module
 
 **Goal.** Your rendered guide carries a working *Validate an instance* /
-*Instanz validieren* page, you know the four ways an implementer can validate
+*Instanz validieren* page, you know the five ways an implementer can validate
 an instance against your module's package, and — if your institution must
 validate anything beyond synthetic examples — the page points at a validator
 you host yourself.
@@ -29,6 +29,7 @@ There is no `validate.md` in `input/pagecontent/`, no `pages:` entry and no
 | **B. Command line** | `validator_cli.jar` with `-ig <packageId>#<version>` — works offline with `-tx n/a` or against a package file | nowhere (terminology lookups go to the `-tx` server you name) |
 | **C. API** | `POST /validate` on a validator wrapper — the same call the page's live box makes; documented at <https://validator.fhir.org/swagger-ui/index.html> | whatever base URL you call |
 | **D. Self-hosted** | the wrapper as a container in your own institution | your host only |
+| **E. MII FHIR Validator** | `ghcr.io/medizininformatik-initiative/mii-fhir-validator` — the MII's own container, KDS packages in its cache, validates offline; a **different** API (`POST /validateResource`), so it serves scripts and pipelines, never the live box | your host only |
 
 > **The data-protection rule is not negotiable.** The public validator is a
 > best-effort service hosted by HL7 International outside the EU. Send it
@@ -81,7 +82,7 @@ reports neither as a validation issue:
 | *The validator could not load this guide's package* | the package is not on a FHIR package registry — a branch preview or an unreleased version never is. Validate with route B against the package file from your *Downloads* page. |
 | *The validator could not resolve that profile canonical* | the canonical you pasted is in no package the validator loaded. Check it, or validate without a profile. |
 
-### 3. Validate an instance — the four routes
+### 3. Validate an instance — the five routes
 
 **A. Online (synthetic data only).** Open <https://validator.fhir.org/>, keep
 the FHIR version at `4.0.1`, type your package id under *Implementation
@@ -123,6 +124,25 @@ Then use `http://<host>:3500` as the base URL for route C, and point the
 terminology server at the SU-TermServ or your DIZ Ontoserver (next step). The
 wrapper downloads a package from the registry on the first request that names
 it — a version that is not on the registry (a CI build) needs route B.
+
+**E. The MII's own validator container.** The MII publishes
+`ghcr.io/medizininformatik-initiative/mii-fhir-validator`, part of the FDPG
+data-node stack. It wraps the same HL7 validator but ships with the KDS
+packages in its cache, so it validates offline once a terminology server is
+reachable:
+
+```bash
+docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator
+```
+
+Which guides it loads is fixed at container start through `IG_PARAMS`
+(`-ig <packageId>#<version>`, or a package file). Two things follow, and the
+page states both: it answers `POST /validateResource` with the bare resource
+and query parameters — **not** the wrapper's `POST /validate` — so it cannot
+be the value of `validator.url` in step 4, and it is published as
+`0.0.1-alpha`. Documentation:
+<https://medizininformatik-initiative.github.io/mii-fhir-validator/> and its
+[page in the data-node docs](https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html).
 
 ### 4. Point the page at your self-hosted validator (optional)
 

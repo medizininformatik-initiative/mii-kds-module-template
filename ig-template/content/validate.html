@@ -40,6 +40,11 @@
   stays). site.data is global, so the root copy and every language copy see
   the same list.
 
+  The status line and the results table sit ABOVE the Validate button, so a
+  long issues table never pushes the button off the screen for a second run.
+  Only the status paragraph is a live region: the results div carries no
+  aria-live, or a screen reader would announce the summary twice.
+
   HTML the publisher accepts: its inspector converts every output page to
   Markdown and reports an element it does not know as a QA warning ("Illegal
   HTML: Illegal HTML element: <name>"). form/input/select/option/textarea/
@@ -99,10 +104,10 @@ this build - nothing to look up:</p>
 EU</strong>. Send it <strong>synthetic instances only</strong>. Real or
 realistic patient data - including pseudonymised records and test data derived
 from real cases - may <strong>only</strong> be validated against a
-<strong>self-hosted</strong> validator inside your own institution (route D
-below). Routes A, B (with a public terminology server) and C, and the live box
-on this page when it points at the public service, all transmit the instance
-to that external service.</p>
+<strong>self-hosted</strong> validator inside your own institution (route D or
+E below). Routes A, B (with a public terminology server) and C, and the live
+box on this page when it points at the public service, all transmit the
+instance to that external service.</p>
 </div>
 
 <h3>A. Online - validator.fhir.org</h3>
@@ -147,6 +152,27 @@ module can point this page's live box at it via
 cases point <code>-tx</code> (or <code>txServer</code> in the API request) at
 a terminology server that carries the German value sets - see the note below.</p>
 
+<h3>E. MII FHIR Validator - the MII-curated container</h3>
+<p>The MII publishes its own validator container for a data integration
+centre: it wraps the same HL7 validator, but ships with the KDS packages in
+its cache, so it validates <strong>offline</strong> once its terminology
+server is in place. It is part of the FDPG data-node stack:</p>
+<pre><code>docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator</code></pre>
+<p>Documentation:
+<a href="https://medizininformatik-initiative.github.io/mii-fhir-validator/" target="_blank" rel="noopener">the validator's own guide</a>
+and its
+<a href="https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html" target="_blank" rel="noopener">page in the data-node documentation</a>.
+Which guides it loads is fixed when the container starts, through
+<code>IG_PARAMS</code> - add <code>-ig {{ pkg }}</code>, or point it at a
+package file for a version that is not on the registry.</p>
+<p><strong>Its interface is not the one route C describes.</strong> It answers
+<code>POST /validateResource</code> with the bare resource as the body, the
+options as query parameters, and an <code>OperationOutcome</code> as the
+result. So it fits a pipeline or a script, and it cannot serve the live box
+below - a browser page needs the wrapper's <code>POST /validate</code>. Note
+also that it is published as a pre-release
+<a href="https://github.com/medizininformatik-initiative/mii-fhir-validator/releases" target="_blank" rel="noopener">(<code>0.0.1-alpha</code> at the time of writing)</a>.</p>
+
 <div class="ig-highlight ig-highlight-orange">
 <h5>Terminology - the public server may not know German codes</h5>
 <p>The public <code>tx.fhir.org</code> does not carry the complete German SNOMED
@@ -158,7 +184,7 @@ required) or at your own Ontoserver; otherwise read terminology messages with
 that limitation in mind.</p>
 </div>
 
-<h3>Live box - validate right here</h3>
+<h3>F. Live box - validate right here</h3>
 <div class="ig-highlight ig-highlight-grey">
 <p><strong>This box sends the pasted text to <code>{{ validator_url }}</code></strong>
 (the default is the public HL7 validator - see the data-protection note above).
@@ -198,10 +224,10 @@ validator and can take a minute; later runs reuse that session.</p>
     <label for="ig-validate-profile-en">Profile canonical (optional{% if own_profiles.size > 0 %} - filled in by the picker; paste any other canonical, for example one from a dependency package, to override it{% endif %})</label>
     <input id="ig-validate-profile-en" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
   </div>
-  <button type="submit" class="btn btn-primary">Validate</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
-  <div class="ig-validate-result" aria-live="polite"></div>
-<p class="ig-validate-status ig-validate-nojs">This live box needs JavaScript; without it use routes A to D above.</p>
+  <div class="ig-validate-result"></div>
+  <button type="submit" class="btn btn-primary">Validate</button>
+<p class="ig-validate-status ig-validate-nojs">This live box needs JavaScript; without it use routes A to E above.</p>
 </form>
 {% endif %}
 {% if pagelang == 'de' %}
@@ -229,8 +255,8 @@ betreibt</strong>. Senden Sie ihm <strong>ausschließlich synthetische
 Instanzen</strong>. Echte oder realistische Patientendaten - auch
 pseudonymisierte Datensätze und aus echten Fällen abgeleitete Testdaten -
 dürfen <strong>nur</strong> gegen einen <strong>selbst betriebenen</strong>
-Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D unten). Die
-Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf
+Validator innerhalb der eigenen Einrichtung geprüft werden (Weg D oder E
+unten). Die Wege A, B (mit öffentlichem Terminologieserver) und C sowie die Live-Box auf
 dieser Seite, solange sie auf den öffentlichen Dienst zeigt, übertragen die
 Instanz an diesen externen Dienst.</p>
 </div>
@@ -279,6 +305,27 @@ vollständig offline. In beiden Fällen <code>-tx</code> (bzw.
 <code>txServer</code> in der API-Anfrage) auf einen Terminologieserver
 richten, der die deutschen Value Sets kennt - siehe den Hinweis unten.</p>
 
+<h3>E. MII FHIR Validator - der Container der MII</h3>
+<p>Die MII veröffentlicht einen eigenen Validator-Container für ein
+Datenintegrationszentrum: Er nutzt denselben HL7-Validator, bringt die
+KDS-Pakete aber bereits im Cache mit und validiert daher <strong>offline</strong>,
+sobald ein Terminologieserver bereitsteht. Er gehört zum FDPG-Data-Node-Stack:</p>
+<pre><code>docker run -d -p 8080:8080 ghcr.io/medizininformatik-initiative/mii-fhir-validator</code></pre>
+<p>Dokumentation:
+<a href="https://medizininformatik-initiative.github.io/mii-fhir-validator/" target="_blank" rel="noopener">der Leitfaden des Validators</a>
+sowie seine
+<a href="https://medizininformatik-initiative.github.io/dataportal/data-node/mii-fhir-validator.html" target="_blank" rel="noopener">Seite in der Data-Node-Dokumentation</a>.
+Welche Leitfäden er lädt, steht beim Start des Containers fest und wird über
+<code>IG_PARAMS</code> gesetzt - dort <code>-ig {{ pkg }}</code> ergänzen oder
+auf eine Paketdatei zeigen, wenn die Version nicht in der Registry liegt.</p>
+<p><strong>Seine Schnittstelle ist nicht die aus Weg C.</strong> Er beantwortet
+<code>POST /validateResource</code> mit der Ressource als Rumpf, den Optionen
+als Query-Parametern und einem <code>OperationOutcome</code> als Ergebnis. Er
+passt damit in eine Pipeline oder ein Skript, kann die Live-Box unten aber
+nicht bedienen - eine Browser-Seite benötigt <code>POST /validate</code> des
+Wrappers. Er erscheint zudem bislang als Vorabversion
+<a href="https://github.com/medizininformatik-initiative/mii-fhir-validator/releases" target="_blank" rel="noopener">(derzeit <code>0.0.1-alpha</code>)</a>.</p>
+
 <div class="ig-highlight ig-highlight-orange">
 <h5>Terminologie - der öffentliche Server kennt deutsche Codes nicht vollständig</h5>
 <p>Der öffentliche <code>tx.fhir.org</code> führt die deutsche SNOMED-CT-Extension
@@ -291,7 +338,7 @@ erforderlich) oder auf einen eigenen Ontoserver; andernfalls
 Terminologiemeldungen mit dieser Einschränkung lesen.</p>
 </div>
 
-<h3>Live-Box - direkt hier validieren</h3>
+<h3>F. Live-Box - direkt hier validieren</h3>
 <div class="ig-highlight ig-highlight-grey">
 <p><strong>Diese Box sendet den eingefügten Text an <code>{{ validator_url }}</code></strong>
 (Voreinstellung: der öffentliche HL7-Validator - siehe den Datenschutzhinweis
@@ -332,10 +379,10 @@ Sitzung.</p>
     <label for="ig-validate-profile-de">Kanonische Profil-URL (optional{% if own_profiles.size > 0 %} - wird aus der Auswahl übernommen; eine andere kanonische URL, etwa aus einem abhängigen Paket, einfach einfügen{% endif %})</label>
     <input id="ig-validate-profile-de" name="profile" type="url" class="form-control" placeholder="{{ site.data.fhir.canonical }}/StructureDefinition/..."/>
   </div>
-  <button type="submit" class="btn btn-primary">Validieren</button>
   <p class="ig-validate-status" role="status" aria-live="polite" style="margin-top:10px"></p>
-  <div class="ig-validate-result" aria-live="polite"></div>
-<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis D oben.</p>
+  <div class="ig-validate-result"></div>
+  <button type="submit" class="btn btn-primary">Validieren</button>
+<p class="ig-validate-status ig-validate-nojs">Dieses Live-Feld braucht JavaScript; ohne JavaScript nutzen Sie die Wege A bis E oben.</p>
 </form>
 {% endif %}
 </div>
