@@ -80,10 +80,10 @@ RuleSet: CRMIApprovalDateInstance(approvalDate)
 // inherited entries, which is not readable anywhere (the parent package declares
 // 17 where the child shows 14), and too high an index pads the array with nulls.
 RuleSet: CRMIArtifactTopic(system, code)
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
+* ^extension[$artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
 
 RuleSet: CRMIArtifactTopicInstance(system, code)
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
+* extension[$artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
 
 // ── Artifact contributors ────────────────────────────────────────────────────
 // Author = the module author ({{MODULE_AUTHOR_EMAIL}}). Editor / reviewer /
@@ -92,38 +92,38 @@ RuleSet: CRMIArtifactTopicInstance(system, code)
 // module's governance differs.
 
 RuleSet: CRMIArtifactContributors
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-author][+].valueContactDetail.telecom[0].system = #email
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].system = #url
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].system = #url
-* ^extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
+* ^extension[$artifact-author][+].valueContactDetail.telecom[0].system = #email
+* ^extension[$artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
+* ^extension[$artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
+* ^extension[$artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
+* ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
+* ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
+* ^extension[$artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
+* ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
+* ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
+* ^extension[$artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
+* ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
+* ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
+* ^extension[$artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
+* ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
+* ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
 
 RuleSet: CRMIArtifactContributorsInstance
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-author][+].valueContactDetail.telecom[0].system = #email
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].system = #url
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].system = #url
-* extension[http://hl7.org/fhir/StructureDefinition/artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
+* extension[$artifact-author][+].valueContactDetail.telecom[0].system = #email
+* extension[$artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
+* extension[$artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
+* extension[$artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
+* extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
+* extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
+* extension[$artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
+* extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
+* extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
+* extension[$artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
+* extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
+* extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
+* extension[$artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
+* extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
+* extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
 
 // ── StructureDefinition ──────────────────────────────────────────────────────
 
