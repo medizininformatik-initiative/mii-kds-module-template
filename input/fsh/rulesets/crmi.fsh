@@ -79,11 +79,25 @@ RuleSet: CRMIApprovalDateInstance(approvalDate)
 // either case. An absolute index is no alternative: it depends on the number of
 // inherited entries, which is not readable anywhere (the parent package declares
 // 17 where the child shows 14), and too high an index pads the array with nulls.
-RuleSet: CRMIArtifactTopic(system, code)
-* ^extension[$artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
+// ANCHORED AT [0], FURTHER ENTRIES WITH [+]. `[+]` alone is a soft index relative
+// to the preceding reference in the FSH, so its first use lands on group position
+// 0 only as long as nothing else in the same definition touched the group before
+// it. Passing the position explicitly makes the first entry deterministic and
+// leaves the rest to the soft index, which needs no knowledge of how many entries
+// the parent brought.
+//
+// CALL PATTERN: `0` for the module's first topic, `+` for each further one.
+//   insert CRMIArtifactTopic(0, http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, Cxxxxx)
+//   insert CRMIArtifactTopic(+, http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, Cyyyyy)
+// Do not pass an absolute position above the end of the group: SUSHI pads the gap
+// with extensions carrying a url and no value, which violates ext-1, and reports
+// no error while doing it (measured 2026-09-11: index 5 against two inherited
+// topics produced three empty artifact-topic entries).
+RuleSet: CRMIArtifactTopic(index, system, code)
+* ^extension[$artifact-topic][{index}].valueCodeableConcept.coding[0] = {system}#{code}
 
-RuleSet: CRMIArtifactTopicInstance(system, code)
-* extension[$artifact-topic][+].valueCodeableConcept.coding[0] = {system}#{code}
+RuleSet: CRMIArtifactTopicInstance(index, system, code)
+* extension[$artifact-topic][{index}].valueCodeableConcept.coding[0] = {system}#{code}
 
 // ── Artifact contributors ────────────────────────────────────────────────────
 // Author = the module author ({{MODULE_AUTHOR_EMAIL}}). Editor / reviewer /
@@ -92,16 +106,16 @@ RuleSet: CRMIArtifactTopicInstance(system, code)
 // module's governance differs.
 
 RuleSet: CRMIArtifactContributors
-* ^extension[$artifact-author][+].valueContactDetail.telecom[0].system = #email
+* ^extension[$artifact-author][0].valueContactDetail.telecom[0].system = #email
 * ^extension[$artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
-* ^extension[$artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
-* ^extension[$artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
+* ^extension[$artifact-editor][0].valueContactDetail.name = "Taskforce Core Data Set"
+* ^extension[$artifact-reviewer][0].valueContactDetail.name = "Interoperability Working Group"
 * ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
 * ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
 * ^extension[$artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
 * ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
 * ^extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
-* ^extension[$artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
+* ^extension[$artifact-endorser][0].valueContactDetail.name = "Interoperability Working Group"
 * ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
 * ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
 * ^extension[$artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
@@ -109,16 +123,16 @@ RuleSet: CRMIArtifactContributors
 * ^extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
 
 RuleSet: CRMIArtifactContributorsInstance
-* extension[$artifact-author][+].valueContactDetail.telecom[0].system = #email
+* extension[$artifact-author][0].valueContactDetail.telecom[0].system = #email
 * extension[$artifact-author][=].valueContactDetail.telecom[0].value = "{{MODULE_AUTHOR_EMAIL}}"
-* extension[$artifact-editor][+].valueContactDetail.name = "Taskforce Core Data Set"
-* extension[$artifact-reviewer][+].valueContactDetail.name = "Interoperability Working Group"
+* extension[$artifact-editor][0].valueContactDetail.name = "Taskforce Core Data Set"
+* extension[$artifact-reviewer][0].valueContactDetail.name = "Interoperability Working Group"
 * extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
 * extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
 * extension[$artifact-reviewer][+].valueContactDetail.name = "National Steering Committee"
 * extension[$artifact-reviewer][=].valueContactDetail.telecom[0].system = #url
 * extension[$artifact-reviewer][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/national-steering-committee"
-* extension[$artifact-endorser][+].valueContactDetail.name = "Interoperability Working Group"
+* extension[$artifact-endorser][0].valueContactDetail.name = "Interoperability Working Group"
 * extension[$artifact-endorser][=].valueContactDetail.telecom[0].system = #url
 * extension[$artifact-endorser][=].valueContactDetail.telecom[0].value = "https://www.medizininformatik-initiative.de/en/collaboration/interoperability-working-group"
 * extension[$artifact-endorser][+].valueContactDetail.name = "National Steering Committee"
