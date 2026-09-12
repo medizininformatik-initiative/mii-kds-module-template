@@ -52,7 +52,7 @@ Description: "Minimal example profile shipped with the template so that a newly 
 * insert CRMIArtifactUsageProfile
 * insert CRMIApprovalDate({{APPROVAL_DATE}})
 * insert CRMIResourceEffectivePeriod
-* insert CRMIArtifactTopic(http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, {{TOPIC_NCI_CODE}})
+* insert CRMIArtifactTopic(0, http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, {{TOPIC_NCI_CODE}})
 * insert CRMIArtifactContributors
 * ^status = #active
 * ^experimental = false
