@@ -143,6 +143,16 @@ concepts, designations, extension usage and package metadata. The schema is not
 stable between Publisher releases, so open `package.db` from your own build with
 any SQLite client and look before relying on a column.
 
+One thing to know about this plain form: every column is rendered as `auto`,
+which turns a cell that names a known artifact into a link. For **logical
+models** that link lacks `.html` in Publisher 2.3.2, so the QA report counts a
+broken link while the page renders fine — give such a column
+`"type" : "text"` in the JSON form below. The `Json` column holds each
+artifact's full resource, and the Publisher's SQLite understands
+`json_extract` / `json_each`; that is how a logical model gets a compact
+data-element table instead of the `-dict` fragment — see the recipe
+[render existing artifacts](https://github.com/medizininformatik-initiative/mii-kds-module-template/blob/main/docs/recipes/render-existing-artifacts.md#logical-models-a-compact-data-element-table).
+
 A JSON form of the same tag controls the column titles, the CSS class and how
 each column is rendered — `link`, `markdown`, `canonical`, `resource` and
 others:
