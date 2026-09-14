@@ -146,6 +146,14 @@ They have no local equivalent, so they are inherited rather than mapped. Note
 that the .NET validator is configured to always pass — if the sign-in fails,
 the job is still green and only its **log** says so.
 
+The same two secrets also drive `publish-simplifier.yml` (the gated registry
+publication of the go-publish package). ⚠️ For **publishing**, credentials are
+not enough: Simplifier authorizes package publishing **per project**, so the
+account behind `SIMPLIFIER_USERNAME` must be granted publish rights
+(Editor/Admin membership) in the module's Simplifier project by a project
+admin — once per module. QC sign-in works without that grant; publishing does
+not.
+
 ## Zulip release announcement (optional)
 
 Your module's release announcement is the `notify_zulip` job of
