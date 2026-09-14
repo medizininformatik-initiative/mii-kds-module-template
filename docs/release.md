@@ -271,6 +271,12 @@ published**. Do that through the gated
 
 - [ ] Verify the release is visible on GitHub.
 - [ ] Run `go-publish` (dry run → publish) and submit the IG-registry PR.
+- [ ] Publish the package to the Simplifier registry: Actions →
+      **"Publish package to Simplifier"** (`publish-simplifier.yml`) — it
+      downloads the package.tgz of the formal Pages publication and pushes
+      exactly that artifact. Never Firely Bake (its status filter drops draft
+      terminology). Requires the `SIMPLIFIER_*` secrets **and** publish rights
+      of that account in the module's Simplifier project (docs/secrets.md).
 - [ ] Announce to any other relevant stakeholders.
 - [ ] Update the MII
       [CDS Modules version overview](https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/%C3%9Cbersicht-%C3%BCber-Versionen-der-Kerndatensatz%E2%80%90Module).
