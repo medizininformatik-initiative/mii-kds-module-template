@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>MII_IG_Template : Terminology Server Report</title>
+  <link href="fhir.css" rel="stylesheet"/>
+  <meta charset="utf-8"/>
+  <style>
+    span.flip  { background-color: #4CAF50; color: white; border: solid 1px #a6d8a8; padding: 2px }
+    span.toggle  { background-color: #e6f2ff; color: black; border: solid 1px #0056b3; padding: 2px; font-size: 10px }
+    span.toggle  { font-size: 10px }
+  </style>
+</head>
+<body style="margin: 20px; background-color: #ffffff">
+ <h1>Terminology Server Report for MII_IG_Template</h1>
+ <p>Generated Mon Sep 14 19:36:00 UTC 2026, FHIR version 4.0.1 for de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 (canonical = <a href="https://www.medizininformatik-initiative.de/fhir/modul-template">https://www.medizininformatik-initiative.de/fhir/modul-template</a> (<a href="https://www.medizininformatik-initiative.de/fhir/modul-template/history.html">history</a>))</p>
+<p>This page provides a report on which terminology servers were used while publishing this IG. Note that terminology caching reduces the server hit count - this page only reports content that wasn't cached</p>
+<h2>Terminology Parameters</h2>
+<ul>
+  <li>
+    <b>system-version</b>
+:     <code>http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701</code>
+  </li>
+  <li>
+    <b>system-version</b>
+:     <code>http://terminology.hl7.org/CodeSystem/artifact-version-policy-codes|3.0.0</code>
+  </li>
+  <li>
+    <b>default-canonical-version</b>
+:     <code>http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-shareableimplementationguide|2.0.0</code>
+  </li>
+  <li>
+    <b>default-canonical-version</b>
+:     <code>http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-publishableimplementationguide|2.0.0</code>
+  </li>
+  <li>
+    <b>default-canonical-version</b>
+:     <code>http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-implementationguide|2.0.0</code>
+  </li>
+  <li>
+    <b>default-canonical-version</b>
+:     <code>https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/example-patient|2027.0.0-draft.1</code>
+  </li>
+</ul>
+<h2>Tx Manager report for 'http://127.0.0.1:8090/tx-reg'</h2>
+<p>
+  <b>Decisions</b>
+</p>
+<table class="grid">
+  <tr>
+    <td>
+      <b>Message</b>
+    </td>
+    <td>
+      <b>Server</b>
+    </td>
+    <td>
+      <b>ValueSet</b>
+    </td>
+    <td>
+      <b>Systems</b>
+    </td>
+    <td>
+      <b>Choices</b>
+    </td>
+  </tr>
+  <tr>
+    <td>Found candidate server http://127.0.0.1:8090/fhir</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>null</td>
+    <td>http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl</td>
+    <td>[http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:ietf:bcp:47</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>urn:uuid:77f62e7c-a732-4a8f-8542-8fc78f426b12|1</td>
+    <td>urn:ietf:bcp:47</td>
+    <td>[urn:ietf:bcp:47]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:ietf:bcp:47</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/all-languages|4.0.1</td>
+    <td>urn:ietf:bcp:47</td>
+    <td>[urn:ietf:bcp:47]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:ietf:bcp:47</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>urn:uuid:77f62e7c-a732-4a8f-8542-8fc78f426b12|1</td>
+    <td>urn:ietf:bcp:47</td>
+    <td>[urn:ietf:bcp:47]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:ietf:bcp:47</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/all-languages|4.0.1</td>
+    <td>urn:ietf:bcp:47</td>
+    <td>[urn:ietf:bcp:47]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:iso:std:iso:3166</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>null</td>
+    <td>urn:iso:std:iso:3166</td>
+    <td>[urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for urn:ietf:bcp:47</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/languages|4.0.1</td>
+    <td>urn:ietf:bcp:47</td>
+    <td>[urn:ietf:bcp:47]: authoritative = , candidates=http://127.0.0.1:8090/fhir</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+  <tr>
+    <td>Use primary server for http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td>http://127.0.0.1:8090/fhir</td>
+    <td>http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1</td>
+    <td>[http://unstats.un.org/unsd/methods/m49/m49.htm, urn:iso:std:iso:3166, urn:iso:std:iso:3166:-2]</td>
+    <td>[[http://unstats.un.org/unsd/methods/m49/m49.htm]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166]: authoritative = , candidates=http://127.0.0.1:8090/fhir, [urn:iso:std:iso:3166:-2]: authoritative = , candidates=http://127.0.0.1:8090/fhir]</td>
+  </tr>
+</table>
+<p>
+  <b>Errors</b>
+</p>
+<table class="grid">
+  <tr>
+    <td>
+      <b>URL</b>
+    </td>
+    <td>
+      <b>Message</b>
+    </td>
+  </tr>
+  <tr>
+    <td>http://fhir.org/packages/de.basisprofil.r4/ImplementationGuide/de.basisprofil.r4</td>
+    <td style="background-color: #ffe3e3">
+      <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;valueSet=http%3A%2F%2Ffhir.org%2Fpackages%2Fde.basisprofil.r4%2FImplementationGuide%2Fde.basisprofil.r4&amp;usage=publication">Error resolving valueSet http://fhir.org/packages/de.basisprofil.r4/ImplementationGuide/de.basisprofil.r4: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;valueSet=http%3A%2F%2Ffhir.org%2Fpackages%2Fde.basisprofil.r4%2FImplementationGuide%2Fde.basisprofil.r4&amp;usage=publication&amp;nocache=1789414518721</span>
+    </td>
+  </tr>
+  <tr>
+    <td>http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl</td>
+    <td style="background-color: #ffe3e3">
+      <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Fncicb.nci.nih.gov%2Fxml%2Fowl%2FEVS%2FThesaurus.owl&amp;usage=publication&amp;language=en">Error resolving system http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Fncicb.nci.nih.gov%2Fxml%2Fowl%2FEVS%2FThesaurus.owl&amp;usage=publication&amp;language=en&amp;nocache=1789414512665</span>
+    </td>
+  </tr>
+  <tr>
+    <td>http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701</td>
+    <td style="background-color: #ffe3e3">
+      <ul>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Fsnomed.info%2Fsct%7Chttp%3A%2F%2Fsnomed.info%2Fsct%2F900000000000207008%2Fversion%2F20250701&amp;usage=publication">Error resolving CodeSystem http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Fsnomed.info%2Fsct%7Chttp%3A%2F%2Fsnomed.info%2Fsct%2F900000000000207008%2Fversion%2F20250701&amp;usage=publication&amp;nocache=1789414533576</span>
+        </li>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;valueSet=http%3A%2F%2Fsnomed.info%2Fsct%7Chttp%3A%2F%2Fsnomed.info%2Fsct%2F900000000000207008%2Fversion%2F20250701&amp;usage=publication">Error resolving valueSet http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;valueSet=http%3A%2F%2Fsnomed.info%2Fsct%7Chttp%3A%2F%2Fsnomed.info%2Fsct%2F900000000000207008%2Fversion%2F20250701&amp;usage=publication&amp;nocache=1789414533582</span>
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>http://unstats.un.org/unsd/methods/m49/m49.htm</td>
+    <td style="background-color: #ffe3e3">
+      <ul>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Funstats.un.org%2Funsd%2Fmethods%2Fm49%2Fm49.htm&amp;usage=publication&amp;language=en">Error resolving system http://unstats.un.org/unsd/methods/m49/m49.htm: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Funstats.un.org%2Funsd%2Fmethods%2Fm49%2Fm49.htm&amp;usage=publication&amp;language=en&amp;nocache=1789414515298</span>
+        </li>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Funstats.un.org%2Funsd%2Fmethods%2Fm49%2Fm49.htm&amp;usage=publication&amp;language=en-US">Error resolving system http://unstats.un.org/unsd/methods/m49/m49.htm: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=http%3A%2F%2Funstats.un.org%2Funsd%2Fmethods%2Fm49%2Fm49.htm&amp;usage=publication&amp;language=en-US&amp;nocache=1789414539804</span>
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>urn:ietf:bcp:47</td>
+    <td style="background-color: #ffe3e3">
+      <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aietf%3Abcp%3A47&amp;usage=publication&amp;language=en">Error resolving system urn:ietf:bcp:47: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aietf%3Abcp%3A47&amp;usage=publication&amp;language=en&amp;nocache=1789414513573</span>
+    </td>
+  </tr>
+  <tr>
+    <td>urn:iso:std:iso:3166</td>
+    <td style="background-color: #ffe3e3">
+      <ul>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication">Error resolving system urn:iso:std:iso:3166: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication&amp;nocache=1789414515288</span>
+        </li>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication&amp;language=en">Error resolving system urn:iso:std:iso:3166: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication&amp;language=en&amp;nocache=1789414515303</span>
+        </li>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication&amp;language=en-US">Error resolving system urn:iso:std:iso:3166: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166&amp;usage=publication&amp;language=en-US&amp;nocache=1789414539807</span>
+        </li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td>urn:iso:std:iso:3166:-2</td>
+    <td style="background-color: #ffe3e3">
+      <ul>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166%3A-2&amp;usage=publication&amp;language=en">Error resolving system urn:iso:std:iso:3166:-2: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166%3A-2&amp;usage=publication&amp;language=en&amp;nocache=1789414515309</span>
+        </li>
+        <li>
+          <span title="http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166%3A-2&amp;usage=publication&amp;language=en-US">Error resolving system urn:iso:std:iso:3166:-2: Refusing to fetch from non-https URL: http://127.0.0.1:8090/tx-reg/resolve?fhirVersion=4.0&amp;url=urn%3Aiso%3Astd%3Aiso%3A3166%3A-2&amp;usage=publication&amp;language=en-US&amp;nocache=1789414539810</span>
+        </li>
+      </ul>
+    </td>
+  </tr>
+</table>
+<h2>Primary Server: http://127.0.0.1:8090/fhir</h2>
+<a href="http://127.0.0.1:8090/fhir"></a>
+<p>Use Count: 22. Code Systems used: </p>
+<table class="grid">
+  <tr>
+    <th>
+      <b>System</b>
+    </th>
+    <th>
+      <b>#Exp.</b>
+    </th>
+    <th>
+      <b>#Val.</b>
+    </th>
+    <th>
+      <b>Details</b>
+    </th>
+  </tr>
+  <tr>
+    <td>http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl</td>
+    <td>0</td>
+    <td>1</td>
+    <td></td>
+  </tr>
+</table>
+<p>ValueSets fetched:</p>
+<ul>
+  <li>http://fhir.org/packages/de.basisprofil.r4/ImplementationGuide/de.basisprofil.r4</li>
+  <li>http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701</li>
+</ul>
+</body>
+</html>

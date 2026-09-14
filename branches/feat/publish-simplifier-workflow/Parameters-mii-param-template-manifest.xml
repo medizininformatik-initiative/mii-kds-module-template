@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Parameters xmlns="http://hl7.org/fhir">
+  <id value="mii-param-template-manifest"/>
+  <meta>
+    <profile value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-manifestparameters"/>
+  </meta>
+  <parameter>
+    <name value="system-version"/>
+    <valueCanonical value="http://snomed.info/sct|http://snomed.info/sct/900000000000207008/version/20250701"/>
+  </parameter>
+  <parameter>
+    <name value="system-version"/>
+    <valueCanonical value="http://terminology.hl7.org/CodeSystem/artifact-version-policy-codes|3.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-shareableimplementationguide|2.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-publishableimplementationguide|2.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-implementationguide|2.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/example-patient|2027.0.0-draft.1"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-shareablestructuredefinition|2.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/uv/crmi/StructureDefinition/crmi-publishablestructuredefinition|2.0.0"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/StructureDefinition/Patient|4.0.1"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/StructureDefinition/DomainResource|4.0.1"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/StructureDefinition/Element|4.0.1"/>
+  </parameter>
+  <parameter>
+    <name value="default-valueset-version"/>
+    <valueCanonical value="http://hl7.org/fhir/ValueSet/all-languages|4.0.1"/>
+  </parameter>
+  <parameter>
+    <name value="default-canonical-version"/>
+    <valueCanonical value="http://hl7.org/fhir/StructureDefinition/Extension|4.0.1"/>
+  </parameter>
+</Parameters>
