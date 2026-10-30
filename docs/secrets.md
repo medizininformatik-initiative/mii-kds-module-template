@@ -132,7 +132,8 @@ certificate fails the handshake, so rotate before `notAfter`.
 
 ## Simplifier login (the .NET validation job)
 
-`validation.yml` calls the MII reusable `ci_dotnet_validation.yml` with
+`validation.yml` calls the MII reusable `ci_dotnet_validation.yml` (hosted in
+this repository's `.github/workflows/` since kerndatensatz-meta#251) with
 `secrets: inherit`; its Simplifier Quality-Control step signs in to
 [Simplifier](https://simplifier.net) with two repository secrets:
 
