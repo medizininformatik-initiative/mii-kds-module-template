@@ -66,7 +66,7 @@ Everything below **propagates** to a module (the bootstrap keeps it). This is ho
 
 | Workflow | Trigger | What it does | Output | Toggle (default) | Human-gated? |
 | --- | --- | --- | --- | --- | --- |
-| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication. **On this template repo only**, every preview deploy also regenerates the `gh-pages` root index (`scripts/gen-pages-index.mjs`) | `gh-pages/branches/<branch>/` + PR comment | `ENABLE_PREVIEW` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
+| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication. **On this template repo only**, every preview deploy also regenerates the `gh-pages` root index (`scripts/gen-pages-index.mjs`) | `gh-pages/branches/<branch>/` + PR comment + `qa.xml` job summary | `ENABLE_PREVIEW` (ON) · `ENABLE_QA_SUMMARY` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
 | `cleanup-gh-pages.yml` | schedule (Sun 00:00 UTC); `workflow_dispatch` (input `dry_run`: list stale previews without deleting) | Prunes previews of deleted branches; keeps root + version paths | pruned `gh-pages` | `ENABLE_PREVIEW` (ON) | no |
 | `validation.yml` | push to `dev`/`main`; any pull request; `workflow_dispatch` | Runs the **MII reusable validation** workflows | validation report | `ENABLE_VALIDATION` (ON) | no (skips on the template repo itself) |
 | `convention-check.yml` | push/PR to `dev`/`main`/`release/**`; `workflow_dispatch` (input `strict`: force release mode) | The **single** convention checker: metadata-contract patterns (hard on release branches) + the optional-page decision gate (M9, `docs/optional-pages.md`) + the language-model guard (`scripts/language-model-check.sh`) + the offline test suites (`scripts/*.test.mjs`, and on the template repo `scripts/*.template-test.mjs`); the advisory repo ↔ MII-wiki drift review is a manual review, not part of this workflow | check result | `ENABLE_CONVENTION_CHECK` (ON) | no |
@@ -110,6 +110,7 @@ covers the *secrets* that enable the gated features.
 | Pipeline | Variable | Default |
 | --- | --- | --- |
 | IG build + preview | `ENABLE_PREVIEW` | ON |
+| IG Publisher QA summary (`output/qa.xml` → job summary) | `ENABLE_QA_SUMMARY` | ON |
 | Preview deploy path | `PAGES_ACTIONS_ENABLED` | unset (gh-pages push mode) |
 | Reusable validation | `ENABLE_VALIDATION` | ON |
 | Convention check | `ENABLE_CONVENTION_CHECK` | ON |
@@ -134,6 +135,10 @@ alone.
 variables, not toggles — the last two override the versions `validation.yml`
 passes to the MII reusable workflows, and unset means the pinned defaults there
 (see [maintenance.md](maintenance.md#where-each-pin-lives-single-source-of-truth)).
+`QA_SUMMARY_INCLUDE` (`errors` | `warnings` | `all`; default `errors`) and
+`QA_SUMMARY_FILTERS` (line-separated `filename|messageId|detailsWildcard|location`
+rules for known issues) are plain variables too; they tune the `qa.xml` summary
+in `ig-publisher.yml`.
 
 ---
 
