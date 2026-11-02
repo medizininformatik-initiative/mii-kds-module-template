@@ -32,9 +32,12 @@
 #              Gefyra/fhir-pkg-tool before validating. Differential-only
 #              packages (ISiK) otherwise fail validation with snapshot errors.
 #              Set it to false once those packages ship full snapshots.
-#            - Dependencies are read from package.json when the repo has one,
-#              otherwise from sushi-config.yaml (modules created from this
-#              template have no package.json).
+#            - Dependencies are read from sushi-config.yaml, the file SUSHI and
+#              the IG Publisher build from; package.json is only a fallback for
+#              repos without one. Many modules still carry a Simplifier-era
+#              package.json that is no longer kept in step with
+#              sushi-config.yaml, and modules created from this template have
+#              none at all.
 #            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
 #              call the Firely CLI, which this job does not install.
 #
@@ -222,18 +225,19 @@ jobs:
       # fhir-pkg-tool writes into the default FHIR package cache, where the
       # validator's -ig name#version arguments below find the snapshotted
       # packages. One of the two steps runs, matching the dependency source
-      # the validation step reads.
-      - name: Install dependencies and generate snapshots (package.json)
-        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/package.json', inputs.working-directory)) != '' }}
-        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
-        with:
-          package-json-file: ${{ inputs.working-directory }}/package.json
-
+      # the validation step reads: sushi-config.yaml first, package.json only
+      # when there is no sushi-config.yaml.
       - name: Install dependencies and generate snapshots (sushi-config.yaml)
-        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/package.json', inputs.working-directory)) == '' }}
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) != '' }}
         uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
         with:
           sushi-deps-file: ${{ inputs.working-directory }}/sushi-config.yaml
+
+      - name: Install dependencies and generate snapshots (package.json fallback)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) == '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          package-json-file: ${{ inputs.working-directory }}/package.json
       
       - name: Check if Java is installed
         run: |
@@ -292,12 +296,13 @@ jobs:
                 
           if $INPUT_JAVA_VALIDATION_ENABLED; then
             echo "Starting validation using Java validator ..." 
-            if [ -f package.json ]; then
-              IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
-            else
-              # No package.json (IG Publisher repos): read sushi-config.yaml,
-              # whose dependencies are `name: version` or a map with `version`.
+            if [ -f sushi-config.yaml ]; then
+              # The source of truth; dependencies are `name: version` or a map
+              # with `version`.
               IG_DEPENDENCIES=$(yq -r '.dependencies // {} | to_entries | .[] | "-ig " + .key + "#" + ((.value | select(kind == "map") | .version) // .value)' sushi-config.yaml | tr '\n' ' ')
+            else
+              # Fallback for repos without sushi-config.yaml.
+              IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
             fi
             echo "IG_DEPENDENCIES: $IG_DEPENDENCIES" 
             
