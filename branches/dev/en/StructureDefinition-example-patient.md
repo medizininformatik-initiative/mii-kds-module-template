@@ -182,7 +182,7 @@ Other representations of profile: [CSV](../StructureDefinition-example-patient.c
   },
   "status" : "active",
   "experimental" : false,
-  "date" : "2026-11-02T09:04:09+00:00",
+  "date" : "2026-11-02T11:25:57+00:00",
   "publisher" : "NUM-DIZ",
   "_publisher" : {
     "extension" : [{
