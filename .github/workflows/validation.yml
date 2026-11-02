@@ -104,7 +104,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
-      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.20.1' }}
+      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.0' }}
     secrets: inherit
 
   # The upstream Java-validation workflow has NO terminology fallback: it
@@ -145,7 +145,7 @@ jobs:
       JAVA_VALIDATION_ENABLED: true
       # Compile FSH in the job: modules do not commit fsh-generated/. Same
       # pinned SUSHI as the .NET job above; overridable via the repo variable.
-      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.20.1' }}
+      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.0' }}
       # Pinned Java validator (fixed versions); mirrors the reusable workflow's
       # own default at the pinned SHA. Overridable via the repo variable.
       JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '6.10.4' }}
