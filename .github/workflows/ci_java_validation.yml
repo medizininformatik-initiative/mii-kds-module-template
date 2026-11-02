@@ -38,6 +38,12 @@
 #              package.json that is no longer kept in step with
 #              sushi-config.yaml, and modules created from this template have
 #              none at all.
+#            - The validator's output is always printed and written to
+#              validation.json / validation.html / txlog.html (unless the caller
+#              passes its own -output). It used to be lost whenever the
+#              validator found errors: the step aborted on its exit status
+#              before printing anything, and without -output there was no
+#              report to render. The step still fails on errors.
 #            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
 #              call the Firely CLI, which this job does not install.
 #
@@ -305,6 +311,14 @@ jobs:
               IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
             fi
             echo "IG_DEPENDENCIES: $IG_DEPENDENCIES" 
+
+            # Report files for the upload and render steps below, unless the
+            # caller's options already choose an output file.
+            REPORT_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -output "* ]]; then
+              REPORT_OPTIONS="-output validation.json -html-output validation.html -txLog txlog.html"
+            fi
+            VALIDATION_STATUS=0
             
             for p in $INPUT_PATH_TO_CONFORMANCE_RESOURCES; # Get combined path to conformance resources, we want to provide all other directories as context for the current validation
             do  
@@ -321,7 +335,14 @@ jobs:
 
               UNESCPAED_IG_DEPENDENCIES=$(echo $IG_DEPENDENCIES | tr -d '"')
               
-              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir)
+              # The validator exits non-zero when it finds errors. The step
+              # shell runs with -e, so capture the status: otherwise the step
+              # aborts here and the output below is never printed.
+              validatorStatus=0
+              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $REPORT_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir 2>&1) || validatorStatus=$?
+              if [ "$validatorStatus" -ne 0 ]; then
+                VALIDATION_STATUS=$validatorStatus
+              fi
   
               javaValidatorOutput=$(echo "$javaValidatorOutput" | sed -E "
                 s/(:[[:space:]]*)Error([[:space:]]+-)/\1${ERROR}Error${NC}\2/g;
@@ -346,6 +367,10 @@ jobs:
             done
           fi
           echo "Finished validation using Java validator ..." 
+          if [ "${VALIDATION_STATUS:-0}" -ne 0 ]; then
+            echo "::error::The Java validator exited with status $VALIDATION_STATUS (errors found, or the validator failed). See the output above and the validation-output artifact."
+            exit "$VALIDATION_STATUS"
+          fi
         shell: bash
         env:
           FHIR_VERSION: "4.0"
@@ -402,7 +427,7 @@ jobs:
           printf '### Validation output\n\n[Download the validation-output artifact](%s)\n' "$artifact_url" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Convert Validation Report
-        if: always()
+        if: ${{ always() && hashFiles(format('{0}/validation.json', inputs.working-directory)) != '' }}
         uses: patrick-werner/validation-outcome-markdown-renderer@09f430c50c24c4d8666158efa4922dd300de6b1b # v1.5.0
         with:
           bundle-file: ${{ inputs.working-directory }}/validation.json
