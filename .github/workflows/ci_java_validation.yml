@@ -44,6 +44,10 @@
 #              validator found errors: the step aborted on its exit status
 #              before printing anything, and without -output there was no
 #              report to render. The step still fails on errors.
+#            - The validator gets a -fhir-settings file that allows the
+#              http://127.0.0.1:8090 proxy (unless the caller passes its own).
+#              Without it, recent validators (6.10.4 and 7.0.3 tested) refuse the non-https URL
+#              and abort before validating anything.
 #            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
 #              call the Firely CLI, which this job does not install.
 #
@@ -176,6 +180,26 @@ jobs:
               }
           }
           NGINX
+
+          # FHIR settings that allow the validator to use the plain-HTTP proxy
+          # above: recent validator releases refuse non-https and private-
+          # network URLs unless a server entry allows them ("Refusing to fetch
+          # from non-https URL"). Same entry as the template's
+          # .github/fhir-settings.json, inlined for the same reason as the
+          # nginx config.
+          cat > "${RUNNER_TEMP}/fhir-settings.json" <<'SETTINGS'
+          {
+            "servers": [
+              {
+                "url": "http://127.0.0.1:8090/fhir",
+                "type": "fhir",
+                "authenticationType": "none",
+                "allowHttp": true,
+                "allowPrivateNetwork": true
+              }
+            ]
+          }
+          SETTINGS
 
           # Decode and save the client certificate and key
           echo "$CDS_DEV_CLIENT_CERT" | base64 -d > nginx/certs/client-cert.pem
@@ -318,6 +342,12 @@ jobs:
             if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -output "* ]]; then
               REPORT_OPTIONS="-output validation.json -html-output validation.html -txLog txlog.html"
             fi
+            # Allow the local terminology proxy, unless the caller brings its
+            # own settings file.
+            SETTINGS_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -fhir-settings "* ]]; then
+              SETTINGS_OPTIONS="-fhir-settings ${RUNNER_TEMP}/fhir-settings.json"
+            fi
             VALIDATION_STATUS=0
             
             for p in $INPUT_PATH_TO_CONFORMANCE_RESOURCES; # Get combined path to conformance resources, we want to provide all other directories as context for the current validation
@@ -339,7 +369,7 @@ jobs:
               # shell runs with -e, so capture the status: otherwise the step
               # aborts here and the output below is never printed.
               validatorStatus=0
-              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $REPORT_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir 2>&1) || validatorStatus=$?
+              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $REPORT_OPTIONS $SETTINGS_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir 2>&1) || validatorStatus=$?
               if [ "$validatorStatus" -ne 0 ]; then
                 VALIDATION_STATUS=$validatorStatus
               fi
