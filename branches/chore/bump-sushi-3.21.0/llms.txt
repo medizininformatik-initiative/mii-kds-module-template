@@ -1,0 +1,44 @@
+# de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1: MII Implementation Guide Module Template(en)
+
+## Pages
+
+* [Home](en/index.md)
+* [Downloads](en/downloads.md)
+* [Capability Statements](en/capability-statements.md)
+* [Metadata Overview](en/metadata.md)
+* [Security and Privacy](en/security-and-privacy.md)
+* [Changelog](en/changes.md)
+* [Logical Models](en/logical-models.md)
+* [Guidance for Implementers](en/implementer-guidance.md)
+* [Guidance](en/guidance.md)
+* [Rendering Artifacts (demo)](en/rendering-artifacts.md)
+* [Artifacts Summary](en/artifacts.md)
+* [UML Diagrams](en/uml-diagrams.md)
+* [Versioning](en/version-history.md)
+* [Profiles](en/profiles.md)
+* [Translation Information](en/translationinfo.md)
+* [Guidance for Researchers](en/researcher-guidance.md)
+* [Extensions](en/extensions.md)
+* [Search Parameters](en/search-parameters.md)
+* [Examples](en/examples.md)
+* [Operations](en/operations.md)
+* [Value Sets](en/value-sets.md)
+* [Code Systems](en/code-systems.md)
+
+## Resources
+
+### Resource Profiles
+
+* [Example Patient — template starter](en/StructureDefinition-example-patient.md)
+
+### ImplementationGuides
+
+* [MII Implementation Guide Module Template](en/ImplementationGuide-mii-ig-template.md)
+
+### Parameters
+
+* [mii-param-template-manifest](en/Parameters-mii-param-template-manifest.md)
+
+### Examples
+
+* [ExamplePatientInstance (Patient)](en/Patient-ExamplePatientInstance.md)
