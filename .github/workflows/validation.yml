@@ -2,7 +2,9 @@
 #
 # Purpose:   Validate the module's FHIR conformance resources and examples by
 #            CALLING the Medical Informatics Initiative's shared reusable
-#            workflows rather than reimplementing validation:
+#            workflows rather than reimplementing validation. Since
+#            kerndatensatz-meta#251 they live in mii-kds-module-template's
+#            .github/workflows/ (before: kerndatensatz-meta@master):
 #              - ci_dotnet_validation.yml — SUSHI compile + Simplifier Quality
 #                Control (MII naming conventions), whose rule set this repo
 #                ships at the fixed path qc/custom.rules.yaml. NOTE (per the
@@ -34,7 +36,9 @@
 #            bootstrap keeps it).
 #
 # Fixed versions: the reusable workflows are pinned to a FIXED commit SHA
-#            of kerndatensatz-meta (not the moving @master the wiki shows).
+#            of mii-kds-module-template (never a branch). This file calls them
+#            by full repository path, not ./.github/workflows/: a created
+#            module does not keep its own copy (first-run-bootstrap removes it).
 #            SUSHI + Java-validator versions are pinned with a repo-var override.
 #
 # Secrets (human prerequisites — CI cannot obtain them by itself):
@@ -96,7 +100,7 @@ jobs:
     # ON by default, and only on created modules — the placeholder
     # template repo cannot produce clean SUSHI output for validation.
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.dotnet-validation-guard.outputs.has_creds == 'true' }}
-    uses: medizininformatik-initiative/kerndatensatz-meta/.github/workflows/ci_dotnet_validation.yml@1db2e534704d92e5ee0cde663ce3e7ccd8825fa7 # kerndatensatz-meta master @ 2026-07-15
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@f8f7a53228956981b5e9a926e7f5af4ec45b07c9 # mii-kds-module-template dev @ 2026-11-02 (#44)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
@@ -133,7 +137,7 @@ jobs:
     name: HL7 Java validator (SU-TermServ)
     needs: java-validation-guard
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.java-validation-guard.outputs.has_cert == 'true' }}
-    uses: medizininformatik-initiative/kerndatensatz-meta/.github/workflows/ci_java_validation.yml@1db2e534704d92e5ee0cde663ce3e7ccd8825fa7 # kerndatensatz-meta master @ 2026-07-15
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@f8f7a53228956981b5e9a926e7f5af4ec45b07c9 # mii-kds-module-template dev @ 2026-11-02 (#44)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources
@@ -141,7 +145,7 @@ jobs:
       JAVA_VALIDATION_ENABLED: true
       # Pinned Java validator (fixed versions); mirrors the reusable workflow's
       # own default at the pinned SHA. Overridable via the repo variable.
-      JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '6.5.7' }}
+      JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '6.10.4' }}
       # Wire the repo's advisor file into the validator CLI. The reusable
       # workflow passes JAVA_VALIDATION_OPTIONS verbatim to validator_cli.jar
       # (verified at the pinned SHA); without this the advisor.json shipped at
