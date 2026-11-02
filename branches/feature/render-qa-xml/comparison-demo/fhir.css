@@ -1154,8 +1154,7 @@ ol.fmmlist li::before {
 
 .removedStyleAccessible {
    font-style: italic;
-   text-decoration:line-through;
-   color: #fbffeb
+   text-decoration:line-through
 }
 
 .targetLink {
