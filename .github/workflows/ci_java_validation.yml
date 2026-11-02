@@ -1,0 +1,469 @@
+# Modified from: https://github.com/FirelyTeam/firely-terminal-pipeline
+# Copyright (c) 2021 Firely
+# Licensed under the MIT License. See the LICENSE file in the project for more information: https://github.com/FirelyTeam/firely-terminal-pipeline/blob/main/LICENSE
+
+#
+# Reusable workflow: HL7 Java validator against SU-TermServ.
+#
+# Purpose:   Validate a module's FHIR conformance resources and examples with
+#            the HL7 Java validator, using the MII terminology server
+#            (ontoserver.mii-termserv.de) through a local nginx proxy that
+#            presents the client certificate.
+#
+# Callers:   the validation workflows of KDS modules, as
+#              uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@<commit-SHA> # vX.Y.Z
+#            Pin a commit SHA of a tagged release of this repository, never a
+#            branch. Earlier pins to kerndatensatz-meta@master keep resolving
+#            (those commits stay reachable); new pins point here.
+#
+# Origin:    moved from kerndatensatz-meta@master (last change 2fc01235, see
+#            kerndatensatz-meta#251). The inputs and secrets contract is
+#            unchanged, so a caller only swaps the `uses:` path. Changes in the
+#            move: third-party actions pinned to commit SHAs, and the nginx proxy
+#            config inlined (it was fetched from kerndatensatz-meta's moving
+#            `master` at run time).
+#
+# Additions: optional inputs, so existing callers behave as before unless noted.
+#            - SUSHI_VERSION: when set, compile FSH with that SUSHI release
+#              first — for IG Publisher repos that no longer commit
+#              fsh-generated/.
+#            - SNAPSHOT_DEPENDENCIES (default true): install the dependency
+#              packages and generate their StructureDefinition snapshots with
+#              Gefyra/fhir-pkg-tool before validating. Differential-only
+#              packages (ISiK) otherwise fail validation with snapshot errors.
+#              Set it to false once those packages ship full snapshots.
+#            - Dependencies are read from sushi-config.yaml, the file SUSHI and
+#              the IG Publisher build from; package.json is only a fallback for
+#              repos without one. Many modules still carry a Simplifier-era
+#              package.json that is no longer kept in step with
+#              sushi-config.yaml, and modules created from this template have
+#              none at all.
+#            - The validator's output is always printed and written to
+#              validation.json / validation.html / txlog.html (unless the caller
+#              passes its own -output). It used to be lost whenever the
+#              validator found errors: the step aborted on its exit status
+#              before printing anything, and without -output there was no
+#              report to render. The step still fails on errors.
+#            - The validator gets a -fhir-settings file that allows the
+#              http://127.0.0.1:8090 proxy (unless the caller passes its own).
+#              Without it, recent validators (6.10.4 and 7.0.3 tested) refuse the non-https URL
+#              and abort before validating anything.
+#            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
+#              call the Firely CLI, which this job does not install.
+#            - JAVA_VALIDATOR_VERSION and JAVA_VALIDATION_ENABLED are optional.
+#              They were marked required, so GitHub never applied their
+#              defaults; a caller can now omit them and get the validator
+#              version this workflow ships at the caller's pin.
+#
+# Bootstrap: a module created from this template does NOT keep this file
+#            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
+#
+# Secrets:   CDS_DEV_CLIENT_CERT / CDS_DEV_CLIENT_KEY / CDS_DEV_CLIENT_CERT_PASSWORD
+#            (the SU-TermServ client certificate, base64; see docs/secrets.md).
+
+name: CI Java FHIR Validator
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      PATH_TO_CONFORMANCE_RESOURCES:
+        description: 'Relative paths of the folder(s) containing FHIR Conformance resources (StructureDefinition, ValueSet, CodeSystem)'
+        required: true
+        type: string
+      PATH_TO_EXAMPLES:
+        description: 'Relative paths of the folder(s) containing examples for the FHIR Conformance resources defined by the project'
+        required: false
+        type: string
+      JAVA_VALIDATION_ENABLED:
+        description: 'Boolean flag to run the offical HL7 Java validator to validate conformance resources and examples'
+        required: false
+        default: true
+        type: boolean
+      JAVA_VALIDATION_OPTIONS:
+        description: 'Custom options passed to the Java validator. See https://confluence.hl7.org/display/FHIR/Using+the+FHIR+Validator'
+        default: '-output-style compact'
+        required: false
+        type: string
+      JAVA_VALIDATOR_VERSION:
+        description: 'Version of org.hl7.fhir.core library used for Java-based validation'
+        default: '6.10.4'
+        required: false
+        type: string
+      JAVA_VALIDATOR_DOWNLOAD_LOCATION:
+        description: 'URL from which to download the Java validator JAR'
+        default: 'https://github.com/hapifhir/org.hl7.fhir.core/releases/download/$JAVA_VALIDATOR_VERSION/validator_cli.jar'
+        type: string
+      JAVA_SNAPSHOT_ENABLED:
+        description: 'Enables creating snapshots for the package dependencies using the Java validator.'
+        default: false
+        required: false
+        type: boolean
+      SNAPSHOT_DEPENDENCIES:
+        description: 'Install the dependency packages and generate their snapshots with Gefyra/fhir-pkg-tool before validating (fixes snapshot errors from differential-only packages such as ISiK).'
+        default: true
+        required: false
+        type: boolean
+      SUSHI_VERSION:
+        description: 'When set, compile FSH with this SUSHI release before validating (for repos that do not commit fsh-generated/). Empty skips SUSHI.'
+        default: ''
+        required: false
+        type: string
+      working-directory:
+        description: 'Optional working directory for validation steps'
+        required: false
+        default: '.'
+        type: string
+      VALIDATION_REPORT_INCLUDE:
+        description: 'Validation report severity level to include (errors, warnings, information)'
+        required: false
+        default: 'errors'
+        type: string
+      VALIDATION_REPORT_FILTERS:
+        description: 'Custom filters for validation report (fileName|messageId|detailsWildcard|location)'
+        required: false
+        default: ''
+        type: string
+
+    secrets:
+      CDS_DEV_CLIENT_CERT:
+        required: true
+      CDS_DEV_CLIENT_KEY:
+        required: true
+      CDS_DEV_CLIENT_CERT_PASSWORD:
+        required: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Create NGINX config and certificates
+        shell: bash
+        env:
+          CDS_DEV_CLIENT_CERT: ${{ secrets.CDS_DEV_CLIENT_CERT }}
+          CDS_DEV_CLIENT_KEY: ${{ secrets.CDS_DEV_CLIENT_KEY }}
+          CDS_DEV_CLIENT_CERT_PASSWORD: ${{ secrets.CDS_DEV_CLIENT_CERT_PASSWORD }}
+        run: |
+
+          mkdir -p nginx/certs  
+
+          # NGINX config, inlined: a reusable workflow cannot read files from
+          # its own repository at its own ref, and fetching it from a branch
+          # would make every pinned run depend on a moving target.
+          cat > nginx/nginx.conf <<'NGINX'
+          events {
+              worker_connections 1024;
+          }
+
+          http {
+              access_log /dev/stdout;
+
+              server {
+                  listen 80;
+
+                  # Your client will connect to this location
+                  location / {
+                      client_max_body_size 5m;
+                      # Forward to your target service
+                      proxy_pass https://ontoserver.mii-termserv.de;
+                      proxy_ssl_server_name on;
+
+                      # TLS client certificate settings
+                      proxy_ssl_certificate /etc/nginx/certs/client-cert.pem;
+                      proxy_ssl_certificate_key /etc/nginx/certs/client-key.key;
+                  }
+              }
+          }
+          NGINX
+
+          # FHIR settings that allow the validator to use the plain-HTTP proxy
+          # above: recent validator releases refuse non-https and private-
+          # network URLs unless a server entry allows them ("Refusing to fetch
+          # from non-https URL"). Same entry as the template's
+          # .github/fhir-settings.json, inlined for the same reason as the
+          # nginx config.
+          cat > "${RUNNER_TEMP}/fhir-settings.json" <<'SETTINGS'
+          {
+            "servers": [
+              {
+                "url": "http://127.0.0.1:8090/fhir",
+                "type": "fhir",
+                "authenticationType": "none",
+                "allowHttp": true,
+                "allowPrivateNetwork": true
+              }
+            ]
+          }
+          SETTINGS
+
+          # Decode and save the client certificate and key
+          echo "$CDS_DEV_CLIENT_CERT" | base64 -d > nginx/certs/client-cert.pem
+          echo "$CDS_DEV_CLIENT_KEY" | base64 -d > nginx/certs/client-key-encrypted.key
+
+          # Decrypt the private key using OpenSSL
+          openssl rsa -in nginx/certs/client-key-encrypted.key -out nginx/certs/client-key.key -passin env:CDS_DEV_CLIENT_CERT_PASSWORD
+  
+      - name: Start NGINX Proxy
+        run: |
+          docker run -d --name nginx-proxy \
+            -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+            -v $PWD/nginx/certs:/etc/nginx/certs:ro \
+            -p 8090:80 nginx:alpine
+  
+            sleep 5  # Give NGINX some time to start
+
+            for i in {1..5}; do
+            if curl --silent --fail http://localhost:8090/fhir/metadata; then
+              echo "NGINX is responding."
+              break
+            else
+              echo "NGINX not responding. Attempt $i"
+              sleep 2
+              if [ $i -eq 5 ]; then
+              echo "NGINX is still not responding after $i attempts."
+              exit 1
+              fi
+            fi
+            done
+    
+      - name: Remove package cache to enable the Java  validator to create snapshots
+        run: |
+          if $INPUT_JAVA_SNAPSHOT_ENABLED; then
+            # The default FHIR package cache; the Firely CLI that used to report
+            # it is not installed in this job.
+            rm -rf "${HOME}/.fhir/packages"
+          fi
+        shell: bash
+        env:
+          INPUT_JAVA_SNAPSHOT_ENABLED: ${{ inputs.JAVA_SNAPSHOT_ENABLED }}
+
+      - name: Compile FSH with SUSHI
+        if: ${{ inputs.SUSHI_VERSION != '' }}
+        shell: bash
+        env:
+          SUSHI_VERSION: ${{ inputs.SUSHI_VERSION }}
+        run: |
+          set -euo pipefail
+          npm install --global "fsh-sushi@${SUSHI_VERSION}"
+          sushi build .
+
+      # fhir-pkg-tool writes into the default FHIR package cache, where the
+      # validator's -ig name#version arguments below find the snapshotted
+      # packages. One of the two steps runs, matching the dependency source
+      # the validation step reads: sushi-config.yaml first, package.json only
+      # when there is no sushi-config.yaml.
+      - name: Install dependencies and generate snapshots (sushi-config.yaml)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) != '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          sushi-deps-file: ${{ inputs.working-directory }}/sushi-config.yaml
+
+      - name: Install dependencies and generate snapshots (package.json fallback)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) == '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          package-json-file: ${{ inputs.working-directory }}/package.json
+      
+      - name: Check if Java is installed
+        run: |
+          if $INPUT_JAVA_VALIDATION_ENABLED; then
+            if ! command -v java &> /dev/null
+            then
+                echo "java could not be found. Please see actions/setup-java to set it up before running this action."
+                exit 1
+            fi
+          fi
+        shell: bash
+        env:
+          INPUT_JAVA_VALIDATION_ENABLED: ${{ inputs.JAVA_VALIDATION_ENABLED }}
+      
+      - name: Download Java Validator
+        run: |
+          if $INPUT_JAVA_VALIDATION_ENABLED; then
+            CHECK_JAVA_VERSION=$(java -version 2>&1 | head -1 | cut -d'"' -f2)
+            echo "JAVA_VERSION: $CHECK_JAVA_VERSION"
+            echo "JAVA_VALIDATOR_VERSION: $JAVA_VALIDATOR_VERSION"
+            JAVA_VALIDATOR_DOWNLOAD_LOCATION=$(eval echo "$JAVA_VALIDATOR_DOWNLOAD_LOCATION")
+            echo "JAVA_VALIDATOR_DOWNLOAD_LOCATION: $JAVA_VALIDATOR_DOWNLOAD_LOCATION"
+            
+            wget -q $JAVA_VALIDATOR_DOWNLOAD_LOCATION -O validator_cli.jar
+          fi
+        shell: bash
+        env:
+         JAVA_VALIDATOR_VERSION: ${{ inputs.JAVA_VALIDATOR_VERSION }}
+         JAVA_VALIDATOR_DOWNLOAD_LOCATION: ${{ inputs.JAVA_VALIDATOR_DOWNLOAD_LOCATION }}
+         INPUT_JAVA_VALIDATION_ENABLED: ${{ inputs.JAVA_VALIDATION_ENABLED }}
+        
+      - name: Install jq
+        run: |
+          if $INPUT_JAVA_VALIDATION_ENABLED; then 
+            sudo apt-get update > /dev/null
+            sudo apt-get install --no-install-recommends -y jq findutils curl ca-certificates > /dev/null
+          fi
+        shell: bash
+        env:
+         INPUT_JAVA_VALIDATION_ENABLED: ${{ inputs.JAVA_VALIDATION_ENABLED }}
+
+      # - name: Install html2text
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y html2text
+            
+      - name: Validate all resources in scope of the repository
+        run: |
+
+          # Define color codes
+          ERROR=$'\033[0;31m'
+          WARN=$'\033[0;33m'
+          INFO=$'\033[0;34m'
+          OK=$'\033[0;32m'
+          NC=$'\033[0m'
+                
+          if $INPUT_JAVA_VALIDATION_ENABLED; then
+            echo "Starting validation using Java validator ..." 
+            if [ -f sushi-config.yaml ]; then
+              # The source of truth; dependencies are `name: version` or a map
+              # with `version`.
+              IG_DEPENDENCIES=$(yq -r '.dependencies // {} | to_entries | .[] | "-ig " + .key + "#" + ((.value | select(kind == "map") | .version) // .value)' sushi-config.yaml | tr '\n' ' ')
+            else
+              # Fallback for repos without sushi-config.yaml.
+              IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
+            fi
+            echo "IG_DEPENDENCIES: $IG_DEPENDENCIES" 
+
+            # Report files for the upload and render steps below, unless the
+            # caller's options already choose an output file.
+            REPORT_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -output "* ]]; then
+              REPORT_OPTIONS="-output validation.json -html-output validation.html -txLog txlog.html"
+            fi
+            # Allow the local terminology proxy, unless the caller brings its
+            # own settings file.
+            SETTINGS_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -fhir-settings "* ]]; then
+              SETTINGS_OPTIONS="-fhir-settings ${RUNNER_TEMP}/fhir-settings.json"
+            fi
+            VALIDATION_STATUS=0
+            
+            for p in $INPUT_PATH_TO_CONFORMANCE_RESOURCES; # Get combined path to conformance resources, we want to provide all other directories as context for the current validation
+            do  
+              LOCAL_IG_PARAMETERS+="-ig $GITHUB_WORKSPACE/$p "
+            done
+            
+            for p in $INPUT_PATH_TO_CONFORMANCE_RESOURCES; 
+            do
+            
+              # Ensure directory ends with "/"
+              if [[ ! "$p" =~ .*/$ ]]; then
+                p="$p/"
+              fi
+
+              UNESCPAED_IG_DEPENDENCIES=$(echo $IG_DEPENDENCIES | tr -d '"')
+              
+              # The validator exits non-zero when it finds errors. The step
+              # shell runs with -e, so capture the status: otherwise the step
+              # aborts here and the output below is never printed.
+              validatorStatus=0
+              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $REPORT_OPTIONS $SETTINGS_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir 2>&1) || validatorStatus=$?
+              if [ "$validatorStatus" -ne 0 ]; then
+                VALIDATION_STATUS=$validatorStatus
+              fi
+  
+              javaValidatorOutput=$(echo "$javaValidatorOutput" | sed -E "
+                s/(:[[:space:]]*)Error([[:space:]]+-)/\1${ERROR}Error${NC}\2/g;
+                s/(:[[:space:]]*)Warning([[:space:]]+-)/\1${WARN}Warning${NC}\2/g;
+                s/(:[[:space:]]*)Information([[:space:]]+-)/\1${INFO}Information${NC}\2/g;
+                s/(-[[:space:]]+)All OK/\1${OK}All OK${NC}/g
+              ")
+
+              # if [ -f txlog.html ]; then
+              #   echo "------ Terminology queries log (txlog.html, rendered) ------"
+              #   html2text txlog.html | sed 's/^[ \t]*//'
+              #   echo "-----------------------------------------------------------"
+              # fi
+  
+              echo -e "$javaValidatorOutput"
+
+              # if echo "$javaValidatorOutput" | grep -F "*FAILURE*" > /dev/null; then
+              #   echo "Validation failed with errors. Check the logs for more details."
+              #   exit 1
+              # fi
+              
+            done
+          fi
+          echo "Finished validation using Java validator ..." 
+          if [ "${VALIDATION_STATUS:-0}" -ne 0 ]; then
+            echo "::error::The Java validator exited with status $VALIDATION_STATUS (errors found, or the validator failed). See the output above and the validation-output artifact."
+            exit "$VALIDATION_STATUS"
+          fi
+        shell: bash
+        env:
+          FHIR_VERSION: "4.0"
+          INPUT_PATH_TO_CONFORMANCE_RESOURCES: ${{ inputs.PATH_TO_CONFORMANCE_RESOURCES }}
+          INPUT_JAVA_VALIDATION_ENABLED: ${{ inputs.JAVA_VALIDATION_ENABLED }}
+          INPUT_JAVA_VALIDATION_OPTIONS: ${{ inputs.JAVA_VALIDATION_OPTIONS }}
+
+      - name: Upload txlog and validation output
+        id: upload_validation_output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: validation-output
+          path: |
+            ${{ inputs.working-directory }}/txlog.html
+            ${{ inputs.working-directory }}/validation.html
+            ${{ inputs.working-directory }}/validation.json
+          retention-days: 7
+
+      # upload-artifact prints its URL to the log, where GitHub may replace a
+      # repository-name substring that matches a secret with "***". Encode the
+      # repository path so the job summary contains a working link instead.
+      - name: Add validation artifact link to job summary
+        if: always() && steps.upload_validation_output.outputs.artifact-id != ''
+        shell: bash
+        env:
+          ARTIFACT_ID: ${{ steps.upload_validation_output.outputs.artifact-id }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          percent_encode() {
+            local input="$1"
+            local encoded=""
+            local character
+            local hex
+            local i
+
+            for ((i = 0; i < ${#input}; i++)); do
+              character="${input:i:1}"
+              printf -v hex '%%%02X' "'$character"
+              encoded+="$hex"
+            done
+
+            printf '%s' "$encoded"
+          }
+
+          repository_owner="${REPOSITORY%%/*}"
+          repository_name="${REPOSITORY#*/}"
+          encoded_owner="$(percent_encode "$repository_owner")"
+          encoded_repository="$(percent_encode "$repository_name")"
+          artifact_url="${SERVER_URL}/${encoded_owner}/${encoded_repository}/actions/runs/${RUN_ID}/artifacts/${ARTIFACT_ID}"
+
+          printf '### Validation output\n\n[Download the validation-output artifact](%s)\n' "$artifact_url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Convert Validation Report
+        if: ${{ always() && hashFiles(format('{0}/validation.json', inputs.working-directory)) != '' }}
+        uses: patrick-werner/validation-outcome-markdown-renderer@09f430c50c24c4d8666158efa4922dd300de6b1b # v1.5.0
+        with:
+          bundle-file: ${{ inputs.working-directory }}/validation.json
+          include: ${{ inputs.VALIDATION_REPORT_INCLUDE }}
+          filters: ${{ inputs.VALIDATION_REPORT_FILTERS }}
