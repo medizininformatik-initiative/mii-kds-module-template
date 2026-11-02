@@ -100,7 +100,7 @@ jobs:
     # ON by default, and only on created modules — the placeholder
     # template repo cannot produce clean SUSHI output for validation.
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.dotnet-validation-guard.outputs.has_creds == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@f8f7a53228956981b5e9a926e7f5af4ec45b07c9 # mii-kds-module-template dev @ 2026-11-02 (#44)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@53291347918f61a809f0fa06c59f54a514f9f10b # mii-kds-module-template dev @ 2026-11-02 (#46)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
@@ -137,12 +137,15 @@ jobs:
     name: HL7 Java validator (SU-TermServ)
     needs: java-validation-guard
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.java-validation-guard.outputs.has_cert == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@f8f7a53228956981b5e9a926e7f5af4ec45b07c9 # mii-kds-module-template dev @ 2026-11-02 (#44)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@53291347918f61a809f0fa06c59f54a514f9f10b # mii-kds-module-template dev @ 2026-11-02 (#46)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources
       PATH_TO_EXAMPLES: fsh-generated/resources
       JAVA_VALIDATION_ENABLED: true
+      # Compile FSH in the job: modules do not commit fsh-generated/. Same
+      # pinned SUSHI as the .NET job above; overridable via the repo variable.
+      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.20.1' }}
       # Pinned Java validator (fixed versions); mirrors the reusable workflow's
       # own default at the pinned SHA. Overridable via the repo variable.
       JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '6.10.4' }}
