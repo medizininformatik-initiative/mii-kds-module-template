@@ -98,6 +98,11 @@ Read the output. It prints, in order:
   - `.github/workflows/release-demo.yml` — renders the *template's* Pages demo
     from a SemVer tag. Your module has no such demo: its Pages surface is the
     gated formal-publication output.
+  - `.github/workflows/ci_dotnet_validation.yml`,
+    `.github/workflows/ci_java_validation.yml` — the MII reusable validation
+    workflows this template hosts for every module. Your module's
+    validation workflow calls them here by SHA pin, so a local copy would only go
+    stale.
   - `CHANGELOG.md` — only if present (the template's SemVer changelog).
 - **Post-bootstrap checklist** — the manual steps below.
 
@@ -219,8 +224,9 @@ npx skills add forschungsgruppe-digital-health/agent-skills/tree/<release> --ski
 - `main` and `dev` both exist and are protected (Settings → Branches shows the
   rules).
 - The Release Please files (`release-please.yml`, `release-please-config.json`,
-  `.release-please-manifest.json`), `notify-zulip.yml`, `release-demo.yml` and
-  the template `CHANGELOG.md` are gone; this recipe, `scripts/first-run-bootstrap.sh` and
+  `.release-please-manifest.json`), `notify-zulip.yml`, `release-demo.yml`, the
+  hosted reusable workflows `ci_dotnet_validation.yml` and `ci_java_validation.yml`
+  and the template `CHANGELOG.md` are gone; this recipe, `scripts/first-run-bootstrap.sh` and
   the preview, validation, monitoring, convention-check and module-release
   workflows are still there.
 - `node scripts/convention-check.mjs` runs green (placeholders count as

@@ -1,0 +1,75 @@
+# Reusable workflow: SUSHI compile + Simplifier Quality Control (.NET).
+#
+# Purpose:   Compile the module's FSH with SUSHI and run Firely Terminal's .NET
+#            validator plus the Simplifier Quality Control rules in qc/custom
+#            (MII naming conventions). The .NET validation is configured as an
+#            EXPECTED fail, so this job always passes: read its log for the
+#            findings. On pull requests it commits fsh-generated/resources back
+#            to the PR branch.
+#
+# Callers:   the validation workflows of KDS modules, as
+#              uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@<commit-SHA> # vX.Y.Z
+#            Pin a commit SHA of a tagged release of this repository, never a
+#            branch. Earlier pins to kerndatensatz-meta@master keep resolving
+#            (those commits stay reachable); new pins point here.
+#
+# Origin:    moved from kerndatensatz-meta@master (last change 54fd89c4, see
+#            kerndatensatz-meta#251). The inputs and secrets contract is
+#            unchanged, so a caller only swaps the `uses:` path. Changes in the
+#            move: third-party actions pinned to commit SHAs.
+#
+# Bootstrap: a module created from this template does NOT keep this file
+#            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
+#
+# Secrets:   SIMPLIFIER_USERNAME / SIMPLIFIER_PASSWORD (Simplifier login for QC).
+name: CI DOTNET FHIR Validation
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      SUSHI_VERSION:
+        required: true
+        type: string
+    secrets:
+      SIMPLIFIER_USERNAME:
+        required: true
+      SIMPLIFIER_PASSWORD:
+        required: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Firely.Terminal (GitHub Actions)
+        id: firely-terminal
+        uses: FirelyTeam/firely-terminal-pipeline@c9989e48fd369fe07e328f65d706cbc73acbb39d # v0.8.25
+        with:
+          PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources
+          PATH_TO_EXAMPLES: fsh-generated/resources
+          PATH_TO_QUALITY_CONTROL_RULES: qc/custom
+          DOTNET_VALIDATION_ENABLED: true
+          JAVA_VALIDATION_ENABLED: false
+          #JAVA_VALIDATION_OPTIONS: -advisor-file advisor.json -resolution-context file:fsh-generated/resources/ -show-message-ids
+          SIMPLIFIER_USERNAME: ${{ secrets.SIMPLIFIER_USERNAME }}
+          SIMPLIFIER_PASSWORD: ${{ secrets.SIMPLIFIER_PASSWORD }}
+          SUSHI_ENABLED: true 
+          SUSHI_VERSION: ${{ inputs.SUSHI_VERSION }}
+          #JAVA_VALIDATOR_VERSION: 6.10.4
+          EXPECTED_FAILS: VALIDATION_CONFORMANCE_DOTNET #VALIDATION_CONFORMANCE_JAVA VALIDATION_EXAMPLES_JAVA
+          #JAVA_SNAPSHOT_ENABLED: true
+
+      - name: Add & Commit
+        if: github.event_name == 'pull_request'
+        uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9.1.4
+        with:
+          committer_name: GitHub Actions Bot
+          committer_email: ActionBot@github.com
+          add: 'fsh-generated/resources/'
+          message: auto-generated FHIR files by GitHub Actions (CI FSH to FHIR)
