@@ -23,6 +23,34 @@
 #            config inlined (it was fetched from kerndatensatz-meta's moving
 #            `master` at run time).
 #
+# Additions: optional inputs, so existing callers behave as before unless noted.
+#            - SUSHI_VERSION: when set, compile FSH with that SUSHI release
+#              first — for IG Publisher repos that no longer commit
+#              fsh-generated/.
+#            - SNAPSHOT_DEPENDENCIES (default true): install the dependency
+#              packages and generate their StructureDefinition snapshots with
+#              Gefyra/fhir-pkg-tool before validating. Differential-only
+#              packages (ISiK) otherwise fail validation with snapshot errors.
+#              Set it to false once those packages ship full snapshots.
+#            - Dependencies are read from sushi-config.yaml, the file SUSHI and
+#              the IG Publisher build from; package.json is only a fallback for
+#              repos without one. Many modules still carry a Simplifier-era
+#              package.json that is no longer kept in step with
+#              sushi-config.yaml, and modules created from this template have
+#              none at all.
+#            - The validator's output is always printed and written to
+#              validation.json / validation.html / txlog.html (unless the caller
+#              passes its own -output). It used to be lost whenever the
+#              validator found errors: the step aborted on its exit status
+#              before printing anything, and without -output there was no
+#              report to render. The step still fails on errors.
+#            - The validator gets a -fhir-settings file that allows the
+#              http://127.0.0.1:8090 proxy (unless the caller passes its own).
+#              Without it, recent validators (6.10.4 and 7.0.3 tested) refuse the non-https URL
+#              and abort before validating anything.
+#            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
+#              call the Firely CLI, which this job does not install.
+#
 # Bootstrap: a module created from this template does NOT keep this file
 #            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
 #
@@ -68,6 +96,16 @@ on:
         default: false
         required: false
         type: boolean
+      SNAPSHOT_DEPENDENCIES:
+        description: 'Install the dependency packages and generate their snapshots with Gefyra/fhir-pkg-tool before validating (fixes snapshot errors from differential-only packages such as ISiK).'
+        default: true
+        required: false
+        type: boolean
+      SUSHI_VERSION:
+        description: 'When set, compile FSH with this SUSHI release before validating (for repos that do not commit fsh-generated/). Empty skips SUSHI.'
+        default: ''
+        required: false
+        type: string
       working-directory:
         description: 'Optional working directory for validation steps'
         required: false
@@ -143,6 +181,26 @@ jobs:
           }
           NGINX
 
+          # FHIR settings that allow the validator to use the plain-HTTP proxy
+          # above: recent validator releases refuse non-https and private-
+          # network URLs unless a server entry allows them ("Refusing to fetch
+          # from non-https URL"). Same entry as the template's
+          # .github/fhir-settings.json, inlined for the same reason as the
+          # nginx config.
+          cat > "${RUNNER_TEMP}/fhir-settings.json" <<'SETTINGS'
+          {
+            "servers": [
+              {
+                "url": "http://127.0.0.1:8090/fhir",
+                "type": "fhir",
+                "authenticationType": "none",
+                "allowHttp": true,
+                "allowPrivateNetwork": true
+              }
+            ]
+          }
+          SETTINGS
+
           # Decode and save the client certificate and key
           echo "$CDS_DEV_CLIENT_CERT" | base64 -d > nginx/certs/client-cert.pem
           echo "$CDS_DEV_CLIENT_KEY" | base64 -d > nginx/certs/client-key-encrypted.key
@@ -176,12 +234,40 @@ jobs:
       - name: Remove package cache to enable the Java  validator to create snapshots
         run: |
           if $INPUT_JAVA_SNAPSHOT_ENABLED; then
-            fhirCacheLocation=$(fhir cache location --path)
-            rm -rf $fhirCacheLocation
+            # The default FHIR package cache; the Firely CLI that used to report
+            # it is not installed in this job.
+            rm -rf "${HOME}/.fhir/packages"
           fi
         shell: bash
         env:
           INPUT_JAVA_SNAPSHOT_ENABLED: ${{ inputs.JAVA_SNAPSHOT_ENABLED }}
+
+      - name: Compile FSH with SUSHI
+        if: ${{ inputs.SUSHI_VERSION != '' }}
+        shell: bash
+        env:
+          SUSHI_VERSION: ${{ inputs.SUSHI_VERSION }}
+        run: |
+          set -euo pipefail
+          npm install --global "fsh-sushi@${SUSHI_VERSION}"
+          sushi build .
+
+      # fhir-pkg-tool writes into the default FHIR package cache, where the
+      # validator's -ig name#version arguments below find the snapshotted
+      # packages. One of the two steps runs, matching the dependency source
+      # the validation step reads: sushi-config.yaml first, package.json only
+      # when there is no sushi-config.yaml.
+      - name: Install dependencies and generate snapshots (sushi-config.yaml)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) != '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          sushi-deps-file: ${{ inputs.working-directory }}/sushi-config.yaml
+
+      - name: Install dependencies and generate snapshots (package.json fallback)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles(format('{0}/sushi-config.yaml', inputs.working-directory)) == '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          package-json-file: ${{ inputs.working-directory }}/package.json
       
       - name: Check if Java is installed
         run: |
@@ -240,8 +326,29 @@ jobs:
                 
           if $INPUT_JAVA_VALIDATION_ENABLED; then
             echo "Starting validation using Java validator ..." 
-            IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
+            if [ -f sushi-config.yaml ]; then
+              # The source of truth; dependencies are `name: version` or a map
+              # with `version`.
+              IG_DEPENDENCIES=$(yq -r '.dependencies // {} | to_entries | .[] | "-ig " + .key + "#" + ((.value | select(kind == "map") | .version) // .value)' sushi-config.yaml | tr '\n' ' ')
+            else
+              # Fallback for repos without sushi-config.yaml.
+              IG_DEPENDENCIES=$(jq -r '(.dependencies) | to_entries | map("-ig " + .key + "#" + .value) | join(" ")' package.json)
+            fi
             echo "IG_DEPENDENCIES: $IG_DEPENDENCIES" 
+
+            # Report files for the upload and render steps below, unless the
+            # caller's options already choose an output file.
+            REPORT_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -output "* ]]; then
+              REPORT_OPTIONS="-output validation.json -html-output validation.html -txLog txlog.html"
+            fi
+            # Allow the local terminology proxy, unless the caller brings its
+            # own settings file.
+            SETTINGS_OPTIONS=""
+            if [[ " $INPUT_JAVA_VALIDATION_OPTIONS " != *" -fhir-settings "* ]]; then
+              SETTINGS_OPTIONS="-fhir-settings ${RUNNER_TEMP}/fhir-settings.json"
+            fi
+            VALIDATION_STATUS=0
             
             for p in $INPUT_PATH_TO_CONFORMANCE_RESOURCES; # Get combined path to conformance resources, we want to provide all other directories as context for the current validation
             do  
@@ -258,7 +365,14 @@ jobs:
 
               UNESCPAED_IG_DEPENDENCIES=$(echo $IG_DEPENDENCIES | tr -d '"')
               
-              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir)
+              # The validator exits non-zero when it finds errors. The step
+              # shell runs with -e, so capture the status: otherwise the step
+              # aborts here and the output below is never printed.
+              validatorStatus=0
+              javaValidatorOutput=$(java -jar validator_cli.jar $GITHUB_WORKSPACE/$p*.xml $GITHUB_WORKSPACE/$p*.json -version $FHIR_VERSION $INPUT_JAVA_VALIDATION_OPTIONS $REPORT_OPTIONS $SETTINGS_OPTIONS $UNESCPAED_IG_DEPENDENCIES $LOCAL_IG_PARAMETERS -tx http://127.0.0.1:8090/fhir 2>&1) || validatorStatus=$?
+              if [ "$validatorStatus" -ne 0 ]; then
+                VALIDATION_STATUS=$validatorStatus
+              fi
   
               javaValidatorOutput=$(echo "$javaValidatorOutput" | sed -E "
                 s/(:[[:space:]]*)Error([[:space:]]+-)/\1${ERROR}Error${NC}\2/g;
@@ -283,6 +397,10 @@ jobs:
             done
           fi
           echo "Finished validation using Java validator ..." 
+          if [ "${VALIDATION_STATUS:-0}" -ne 0 ]; then
+            echo "::error::The Java validator exited with status $VALIDATION_STATUS (errors found, or the validator failed). See the output above and the validation-output artifact."
+            exit "$VALIDATION_STATUS"
+          fi
         shell: bash
         env:
           FHIR_VERSION: "4.0"
@@ -339,7 +457,7 @@ jobs:
           printf '### Validation output\n\n[Download the validation-output artifact](%s)\n' "$artifact_url" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Convert Validation Report
-        if: always()
+        if: ${{ always() && hashFiles(format('{0}/validation.json', inputs.working-directory)) != '' }}
         uses: patrick-werner/validation-outcome-markdown-renderer@09f430c50c24c4d8666158efa4922dd300de6b1b # v1.5.0
         with:
           bundle-file: ${{ inputs.working-directory }}/validation.json
