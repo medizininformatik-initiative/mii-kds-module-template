@@ -1,11 +1,11 @@
 {
   "resourceType" : "StructureDefinition",
-  "id" : "daae231e-1cff-4a7f-97b7-852e5d80e771-3",
-  "url" : "http://hl7.org/fhir/comparison/StructureDefinition/daae231e-1cff-4a7f-97b7-852e5d80e771-3",
+  "id" : "1c75775a-49d6-44ac-8926-799a80644fe9-3",
+  "url" : "http://hl7.org/fhir/comparison/StructureDefinition/1c75775a-49d6-44ac-8926-799a80644fe9-3",
   "name" : "IntersectionExamplePatientAndExamplePatient",
   "title" : "Intersection of Example Patient — template starter And Example Patient — template starter",
   "status" : "active",
-  "date" : "2026-11-02T09:59:14+00:00",
+  "date" : "2026-11-02T10:06:06+00:00",
   "jurisdiction" : [{
     "coding" : [{
       "system" : "urn:iso:std:iso:3166",
