@@ -50,6 +50,10 @@
 #              and abort before validating anything.
 #            - JAVA_SNAPSHOT_ENABLED clears ~/.fhir/packages directly; it used to
 #              call the Firely CLI, which this job does not install.
+#            - JAVA_VALIDATOR_VERSION and JAVA_VALIDATION_ENABLED are optional.
+#              They were marked required, so GitHub never applied their
+#              defaults; a caller can now omit them and get the validator
+#              version this workflow ships at the caller's pin.
 #
 # Bootstrap: a module created from this template does NOT keep this file
 #            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
@@ -74,7 +78,7 @@ on:
         type: string
       JAVA_VALIDATION_ENABLED:
         description: 'Boolean flag to run the offical HL7 Java validator to validate conformance resources and examples'
-        required: true
+        required: false
         default: true
         type: boolean
       JAVA_VALIDATION_OPTIONS:
@@ -85,7 +89,7 @@ on:
       JAVA_VALIDATOR_VERSION:
         description: 'Version of org.hl7.fhir.core library used for Java-based validation'
         default: '6.10.4'
-        required: true
+        required: false
         type: string
       JAVA_VALIDATOR_DOWNLOAD_LOCATION:
         description: 'URL from which to download the Java validator JAR'
