@@ -33,6 +33,11 @@ on:
       SUSHI_VERSION:
         required: true
         type: string
+      SNAPSHOT_DEPENDENCIES:
+        description: 'Install the dependency packages and generate their snapshots with Gefyra/fhir-pkg-tool before SUSHI runs (fixes "... is missing a snapshot" from differential-only packages such as ISiK).'
+        default: true
+        required: false
+        type: boolean
     secrets:
       SIMPLIFIER_USERNAME:
         required: true
@@ -47,6 +52,23 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ inputs.ref }}
+      # SUSHI (run inside the Firely action below) reads dependencies from the
+      # default FHIR package cache. Differential-only packages such as ISiK
+      # make it fail with "... is missing a snapshot", so fhir-pkg-tool
+      # installs the dependencies with snapshots into that cache first. Same
+      # steps and pin as ci_java_validation.yml.
+      - name: Install dependencies and generate snapshots (sushi-config.yaml)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles('sushi-config.yaml') != '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          sushi-deps-file: sushi-config.yaml
+
+      - name: Install dependencies and generate snapshots (package.json fallback)
+        if: ${{ inputs.SNAPSHOT_DEPENDENCIES && hashFiles('sushi-config.yaml') == '' && hashFiles('package.json') != '' }}
+        uses: Gefyra/fhir-pkg-tool@7673ac0d19369660af993cd324d840b312708ffc # v0.5.0
+        with:
+          package-json-file: package.json
+
       - name: Firely.Terminal (GitHub Actions)
         id: firely-terminal
         uses: FirelyTeam/firely-terminal-pipeline@c9989e48fd369fe07e328f65d706cbc73acbb39d # v0.8.25
