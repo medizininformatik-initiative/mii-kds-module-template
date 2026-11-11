@@ -231,7 +231,7 @@ gated **`go-publish.yml`** in step 8.
 
 1. Open the **draft** release the automation created.
 2. Edit the notes; remove the `<!-- DELETE START/END -->` blocks.
-3. Attach the module's `package.tgz` (from the `module-release-build` artifact
+3. The module's package is attached automatically as `<package-id>-<version>.tgz` (from the `module-release-build` artifact
    the `build` job uploaded).
 4. Change the release from **draft** to **published**.
 

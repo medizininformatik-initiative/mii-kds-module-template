@@ -341,20 +341,39 @@ jobs:
           version="${GITHUB_REF#refs/tags/}"
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
-      - name: Download the build (package.tgz for the release assets)
+      - name: Download the build (the package for the release assets)
         # Attaching the package to every release is what makes the version
         # comparison of FUTURE releases work: seed-comparison-cache.sh fetches
-        # the previous version's package.tgz from exactly this asset.
+        # the previous version's package from exactly this asset (by its
+        # <package-id>-<version>.tgz name, with package.tgz as the legacy fallback).
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: module-release-build
           path: release-assets
 
+      - name: Name the package asset <package-id>-<version>.tgz
+        # The IG Publisher always writes output/package.tgz; as a release asset
+        # that generic name hides which package and version it is (every module
+        # ships a package.tgz). Take both from the manifest INSIDE the tarball —
+        # the single source of truth that Simplifier and the registry read too —
+        # so the asset name cannot drift from the package.
+        id: asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          manifest="$(tar -xzOf release-assets/package.tgz package/package.json)"
+          name="$(jq -er '.name' <<< "${manifest}")"
+          version="$(jq -er '.version' <<< "${manifest}")"
+          asset="${name}-${version}.tgz"
+          mv release-assets/package.tgz "release-assets/${asset}"
+          echo "asset=${asset}" >> "${GITHUB_OUTPUT}"
+          echo "Release asset: ${asset}"
+
       - name: Create the draft GitHub Release
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           name: "${{ steps.prep.outputs.version }}"
-          files: release-assets/package.tgz
+          files: release-assets/${{ steps.asset.outputs.asset }}
           draft: true
           prerelease: ${{ contains(steps.prep.outputs.version, '-') }}
           generate_release_notes: true
@@ -363,7 +382,7 @@ jobs:
 
             <!-- DELETE START -->
             This is a **draft** created automatically from the CalVer tag. The
-            module's FHIR package (`package.tgz`) is already attached — future
+            module's FHIR package (`${{ steps.asset.outputs.asset }}`) is already attached — future
             releases' version comparison fetches the previous package from this
             asset, so leave it in place. Before publishing (wiki step 7): edit
             these notes and remove the DELETE blocks.
