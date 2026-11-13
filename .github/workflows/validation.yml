@@ -41,6 +41,11 @@
 #            module does not keep its own copy (first-run-bootstrap removes it).
 #            SUSHI + Java-validator versions are pinned with a repo-var override.
 #
+# ZTS packages: both jobs pass vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#            vars.ZTS_PACKAGES to the reusable workflows, which install FHIR
+#            packages that exist only on the BfArM ZTS (#55). Unset = no-op;
+#            see docs/workflows.md "FHIR packages from the BfArM ZTS".
+#
 # Secrets (human prerequisites — CI cannot obtain them by itself):
 #            passed via `secrets: inherit` (the wiki's canonical pattern). A
 #            module maintainer must set, as repo secrets:
@@ -100,11 +105,14 @@ jobs:
     # ON by default, and only on created modules — the placeholder
     # template repo cannot produce clean SUSHI output for validation.
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.dotnet-validation-guard.outputs.has_creds == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@53291347918f61a809f0fa06c59f54a514f9f10b # mii-kds-module-template dev @ 2026-11-02 (#46)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@2700849d47c0d1a991b8780ff4b631fed8ec9eef # mii-kds-module-template dev @ 2026-11-13 (#57)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
       SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.0' }}
+      # FHIR packages that exist only on the BfArM ZTS (#55); empty = no-op.
+      ZTS_ACCEPTED_DOWNLOAD_CONDITIONS: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+      ZTS_PACKAGES: ${{ vars.ZTS_PACKAGES }}
     secrets: inherit
 
   # The upstream Java-validation workflow has NO terminology fallback: it
@@ -137,7 +145,7 @@ jobs:
     name: HL7 Java validator (SU-TermServ)
     needs: java-validation-guard
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.java-validation-guard.outputs.has_cert == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@53291347918f61a809f0fa06c59f54a514f9f10b # mii-kds-module-template dev @ 2026-11-02 (#46)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@2700849d47c0d1a991b8780ff4b631fed8ec9eef # mii-kds-module-template dev @ 2026-11-13 (#57)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources
@@ -155,6 +163,9 @@ jobs:
       # the repo root would be read by NOTHING and the "suppressed via
       # advisor.json" contract in this file's header would be false.
       JAVA_VALIDATION_OPTIONS: "-advisor-file advisor.json"
+      # FHIR packages that exist only on the BfArM ZTS (#55); empty = no-op.
+      ZTS_ACCEPTED_DOWNLOAD_CONDITIONS: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+      ZTS_PACKAGES: ${{ vars.ZTS_PACKAGES }}
       VALIDATION_REPORT_FILTERS: |
         filename | messageId | detailsWildcard | location
     # Secret-name reconciliation: the MII reusable workflow declares
