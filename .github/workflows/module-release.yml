@@ -59,6 +59,13 @@
 #   ::notice — the same selection idiom as the preview / go-publish workflows.
 #   The build must not hard-fail without the certificate.
 #
+# ZTS packages: FHIR packages that exist only on the BfArM ZTS (e.g.
+#            kbv.all.terminology.allergyintolerance) are installed into the
+#            package cache by .github/actions/zts-packages before SUSHI runs,
+#            controlled by vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#            vars.ZTS_PACKAGES. A no-op without ZTS-only dependencies. See
+#            docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+#
 # Fixed versions: every action is pinned to a commit SHA; the IG
 #   Publisher jar, SUSHI, Jekyll, the nginx image, and the kerndatensatz-meta
 #   ref are pinned by exact version + SHA-256/commit — identical to
@@ -197,6 +204,17 @@ jobs:
             printf -- '- FHIR IG Publisher: `%s` (SHA-256 `%s`)\n' "${PUBLISHER_VERSION}" "${PUBLISHER_SHA256}"
             printf -- '- SUSHI: `%s`\n' "$(sushi --version)"
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before SUSHI and the IG Publisher need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ vars.ZTS_PACKAGES }}
 
       - name: Select terminology server (SU-TermServ if cert present, else HL7)
         id: terminology

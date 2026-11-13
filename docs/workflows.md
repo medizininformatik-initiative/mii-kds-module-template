@@ -149,8 +149,12 @@ Terminologieserver (ZTS, <https://terminologien.bfarm.de>), not on
 packages.fhir.org, for example `kbv.all.terminology.allergyintolerance`.
 SUSHI, the IG Publisher and the validator cannot download those from the
 registry. The action `.github/actions/zts-packages` installs them into the FHIR
-package cache first. It is not yet called by the workflows; wiring it in
-follows (#55).
+package cache first. `ig-publisher.yml`, `module-release.yml`,
+`go-publish.yml` and `release-demo.yml` call it before SUSHI with the two
+variables below. The reusable `ci_java_validation.yml` and
+`ci_dotnet_validation.yml` take them as the inputs
+`ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` and `ZTS_PACKAGES`, which the caller fills
+from the same variables.
 
 The action reads the direct dependencies in `sushi-config.yaml` and installs a
 package only when it is on the ZTS catalog **and** not on packages.fhir.org.

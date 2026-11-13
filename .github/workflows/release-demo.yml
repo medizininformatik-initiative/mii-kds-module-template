@@ -72,6 +72,13 @@
 #            which this workflow deliberately never writes (a guard fails the
 #            job if one appears).
 #
+# ZTS packages: FHIR packages that exist only on the BfArM ZTS (e.g.
+#            kbv.all.terminology.allergyintolerance) are installed into the
+#            package cache by .github/actions/zts-packages before SUSHI runs,
+#            controlled by vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#            vars.ZTS_PACKAGES. A no-op without ZTS-only dependencies. See
+#            docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+#
 # Fixed versions: the IG Publisher jar (+ SHA-256), SUSHI and Jekyll are pinned
 #            in the env: block below under the SAME names ig-publisher.yml,
 #            go-publish.yml and module-release.yml use;
@@ -313,6 +320,19 @@ jobs:
             echo "mode=public HL7 fallback (https://tx.fhir.org)" >> "${GITHUB_OUTPUT}"
             echo "::notice::No SU-TermServ client certificate configured — falling back to the public HL7 terminology server https://tx.fhir.org. Some MII-specific value sets may not fully expand (a QA note, not a failure)."
           fi
+
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before SUSHI and the IG Publisher need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        if: ${{ steps.tag.outputs.skip != 'true' }}
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ vars.ZTS_PACKAGES }}
+          sushi-config: release-src/sushi-config.yaml
 
       - name: Build the released demo IG (SUSHI + the pinned IG Publisher)
         if: ${{ steps.tag.outputs.skip != 'true' }}

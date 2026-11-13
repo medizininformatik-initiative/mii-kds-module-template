@@ -54,6 +54,11 @@
 #              They were marked required, so GitHub never applied their
 #              defaults; a caller can now omit them and get the validator
 #              version this workflow ships at the caller's pin.
+#            - ZTS_ACCEPTED_DOWNLOAD_CONDITIONS / ZTS_PACKAGES: packages that
+#              exist only on the BfArM ZTS are installed into the package cache
+#              by .github/actions/zts-packages before fhir-pkg-tool, SUSHI and
+#              the validator run. Callers pass vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS
+#              and vars.ZTS_PACKAGES; empty inputs are a no-op (#55).
 #
 # Bootstrap: a module created from this template does NOT keep this file
 #            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
@@ -107,6 +112,16 @@ on:
         type: boolean
       SUSHI_VERSION:
         description: 'When set, compile FSH with this SUSHI release before validating (for repos that do not commit fsh-generated/). Empty skips SUSHI.'
+        default: ''
+        required: false
+        type: string
+      ZTS_ACCEPTED_DOWNLOAD_CONDITIONS:
+        description: 'Package names whose BfArM ZTS download conditions are accepted (pass vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS). Needed only for dependencies that exist solely on the ZTS.'
+        default: ''
+        required: false
+        type: string
+      ZTS_PACKAGES:
+        description: 'Additional ZTS-only packages as name#version, comma-separated, for transitive needs (pass vars.ZTS_PACKAGES).'
         default: ''
         required: false
         type: string
@@ -245,6 +260,18 @@ jobs:
         shell: bash
         env:
           INPUT_JAVA_SNAPSHOT_ENABLED: ${{ inputs.JAVA_SNAPSHOT_ENABLED }}
+
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before fhir-pkg-tool, SUSHI and the validator need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ inputs.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ inputs.ZTS_PACKAGES }}
+          sushi-config: ${{ inputs.working-directory }}/sushi-config.yaml
 
       # fhir-pkg-tool writes into the default FHIR package cache, where the
       # validator's -ig name#version arguments below find the snapshotted
