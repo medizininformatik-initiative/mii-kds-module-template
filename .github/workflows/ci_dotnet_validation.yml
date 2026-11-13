@@ -18,6 +18,17 @@
 #            unchanged, so a caller only swaps the `uses:` path. Changes in the
 #            move: third-party actions pinned to commit SHAs.
 #
+# Additions: optional inputs, so existing callers behave as before.
+#            - SNAPSHOT_DEPENDENCIES (default true): install the dependency
+#              packages and generate their snapshots with Gefyra/fhir-pkg-tool
+#              before SUSHI runs (#52). Differential-only packages (ISiK)
+#              otherwise make SUSHI fail with "... is missing a snapshot".
+#            - ZTS_ACCEPTED_DOWNLOAD_CONDITIONS / ZTS_PACKAGES: packages that
+#              exist only on the BfArM ZTS are installed into the package cache
+#              by .github/actions/zts-packages before fhir-pkg-tool and SUSHI.
+#              Callers pass vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#              vars.ZTS_PACKAGES; empty inputs are a no-op (#55).
+#
 # Bootstrap: a module created from this template does NOT keep this file
 #            (first-run-bootstrap.sh REMOVE=); modules call the copy here.
 #
@@ -38,6 +49,16 @@ on:
         default: true
         required: false
         type: boolean
+      ZTS_ACCEPTED_DOWNLOAD_CONDITIONS:
+        description: 'Package names whose BfArM ZTS download conditions are accepted (pass vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS). Needed only for dependencies that exist solely on the ZTS.'
+        default: ''
+        required: false
+        type: string
+      ZTS_PACKAGES:
+        description: 'Additional ZTS-only packages as name#version, comma-separated, for transitive needs (pass vars.ZTS_PACKAGES).'
+        default: ''
+        required: false
+        type: string
     secrets:
       SIMPLIFIER_USERNAME:
         required: true
@@ -52,6 +73,18 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ inputs.ref }}
+
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before fhir-pkg-tool and SUSHI (inside the Firely action) need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ inputs.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ inputs.ZTS_PACKAGES }}
+
       # SUSHI (run inside the Firely action below) reads dependencies from the
       # default FHIR package cache. Differential-only packages such as ISiK
       # make it fail with "... is missing a snapshot", so fhir-pkg-tool
