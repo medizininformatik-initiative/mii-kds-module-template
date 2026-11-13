@@ -1,0 +1,147 @@
+# Composite action: SU-TermServ client-certificate proxy.
+#
+# Purpose:   The single copy of the local nginx proxy that gives the IG
+#            Publisher and the HL7 Java validator access to the MII terminology
+#            server (ontoserver.mii-termserv.de), which requires a TLS client
+#            certificate. The proxy listens on http://127.0.0.1:8090 and adds
+#            the certificate upstream. See issue #50 for why it replaces the
+#            per-workflow copies.
+#
+# Callers:   every workflow that needs SU-TermServ, by full path pinned to a
+#            commit SHA — also this repository's own workflows, so that a
+#            created module carries no copy of its own:
+#              uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/su-termserv-proxy@<commit-SHA>
+#
+# Files:     nginx.conf and fhir-settings.json sit next to this file and are
+#            read through github.action_path. fhir-settings.json allows the
+#            plain-HTTP, private-network proxy URL; validators from 6.10.4 on
+#            and the IG Publisher refuse it otherwise. Pass the
+#            `fhir-settings` output as -fhir-settings.
+#
+# Without a certificate: `fallback: 'true'` (default) returns
+#            https://tx.fhir.org and starts nothing; `fallback: 'false'` fails
+#            the step (for jobs that only make sense against SU-TermServ).
+#
+# Bootstrap: a created module does NOT keep this directory
+#            (first-run-bootstrap.sh REMOVE=); modules use the copy here.
+#
+# Fixed versions: the nginx image is pinned by digest.
+name: SU-TermServ proxy
+description: Start a local nginx proxy that presents the SU-TermServ client certificate, or fall back to tx.fhir.org.
+
+inputs:
+  client-cert:
+    description: Base64-encoded PEM client certificate (secret). Empty means no certificate.
+    required: false
+    default: ''
+  client-key:
+    description: Base64-encoded, password-protected PEM private key (secret).
+    required: false
+    default: ''
+  client-password:
+    description: Password of the private key (secret).
+    required: false
+    default: ''
+  fallback:
+    description: "'true' falls back to https://tx.fhir.org when no certificate is configured; 'false' fails instead."
+    required: false
+    default: 'true'
+  container-name:
+    description: Name of the nginx container, for `docker logs` / `docker rm` in later steps.
+    required: false
+    default: su-termserv-proxy
+
+outputs:
+  tx:
+    description: Terminology server URL to pass as -tx (the proxy, or https://tx.fhir.org).
+    value: ${{ steps.proxy.outputs.tx }}
+  mode:
+    description: "'su-termserv' when the proxy runs, 'fallback' otherwise."
+    value: ${{ steps.proxy.outputs.mode }}
+  fhir-settings:
+    description: Absolute path of the fhir-settings.json that allows the proxy URL.
+    value: ${{ steps.proxy.outputs.fhir-settings }}
+  container-name:
+    description: Name of the nginx container (empty in fallback mode).
+    value: ${{ steps.proxy.outputs.container-name }}
+
+runs:
+  using: composite
+  steps:
+    - name: Start the SU-TermServ proxy or select the fallback
+      id: proxy
+      shell: bash
+      env:
+        CLIENT_CERT: ${{ inputs.client-cert }}
+        CLIENT_KEY: ${{ inputs.client-key }}
+        CLIENT_PASSWORD: ${{ inputs.client-password }}
+        FALLBACK: ${{ inputs.fallback }}
+        CONTAINER: ${{ inputs.container-name }}
+        ACTION_DIR: ${{ github.action_path }}
+        NGINX_IMAGE: nginx:1.30.4-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
+      run: |
+        set -euo pipefail
+        proxy_url="http://127.0.0.1:8090/fhir"
+
+        # Copy the settings out of the action directory so the path stays
+        # valid for the rest of the job, whichever ref the action came from.
+        settings="${RUNNER_TEMP}/su-termserv-fhir-settings.json"
+        cp "${ACTION_DIR}/fhir-settings.json" "${settings}"
+        echo "fhir-settings=${settings}" >> "${GITHUB_OUTPUT}"
+
+        if [[ -z "${CLIENT_CERT}" || -z "${CLIENT_KEY}" || -z "${CLIENT_PASSWORD}" ]]; then
+          if [[ "${FALLBACK}" != "true" ]]; then
+            echo "::error::SU-TermServ client certificate not configured (certificate, key and password are all required) and fallback is off."
+            exit 1
+          fi
+          echo "::notice::SU-TermServ client certificate not configured; falling back to the public HL7 terminology server https://tx.fhir.org. Some MII-specific value sets may not fully expand (a QA note, not a failure)."
+          {
+            echo "tx=https://tx.fhir.org"
+            echo "mode=fallback"
+            echo "container-name="
+          } >> "${GITHUB_OUTPUT}"
+          echo "Terminology: public HL7 fallback (https://tx.fhir.org)" >> "${GITHUB_STEP_SUMMARY}"
+          exit 0
+        fi
+
+        nginx_dir="${RUNNER_TEMP}/su-termserv-proxy"
+        mkdir -p "${nginx_dir}/certs"
+        cp "${ACTION_DIR}/nginx.conf" "${nginx_dir}/nginx.conf"
+        printf '%s' "${CLIENT_CERT}" | base64 --decode > "${nginx_dir}/certs/client-cert.pem"
+        printf '%s' "${CLIENT_KEY}" | base64 --decode > "${nginx_dir}/certs/client-key-encrypted.key"
+        openssl rsa \
+          -in "${nginx_dir}/certs/client-key-encrypted.key" \
+          -out "${nginx_dir}/certs/client-key.key" \
+          -passin env:CLIENT_PASSWORD
+        rm -f "${nginx_dir}/certs/client-key-encrypted.key"
+        chmod 600 "${nginx_dir}/certs/"*
+
+        docker run --detach --name "${CONTAINER}" \
+          --volume "${nginx_dir}/nginx.conf:/etc/nginx/nginx.conf:ro" \
+          --volume "${nginx_dir}/certs:/etc/nginx/certs:ro" \
+          --publish 8090:80 \
+          "${NGINX_IMAGE}" >/dev/null
+
+        # Ready means nginx answers AND the upstream accepts the certificate:
+        # /fhir/metadata goes through to SU-TermServ, so a wrong certificate
+        # fails here instead of as terminology errors later in the build.
+        ready=false
+        for _ in {1..15}; do
+          if curl --silent --fail --max-time 10 --output /dev/null "${proxy_url}/metadata"; then
+            ready=true
+            break
+          fi
+          sleep 2
+        done
+        if [[ "${ready}" != "true" ]]; then
+          echo "::error::The SU-TermServ proxy did not answer ${proxy_url}/metadata after 15 attempts (wrong certificate or SU-TermServ unreachable). nginx log follows."
+          docker logs "${CONTAINER}" || true
+          exit 1
+        fi
+
+        {
+          echo "tx=${proxy_url}"
+          echo "mode=su-termserv"
+          echo "container-name=${CONTAINER}"
+        } >> "${GITHUB_OUTPUT}"
+        echo "Terminology: SU-TermServ via client-certificate proxy" >> "${GITHUB_STEP_SUMMARY}"

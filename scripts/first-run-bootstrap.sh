@@ -54,6 +54,8 @@ why() {
       echo "renders the TEMPLATE repo's Pages demo from a SemVer tag; a module has no demo — its Pages surface is the gated formal-publication output";;
     .github/workflows/ci_dotnet_validation.yml|.github/workflows/ci_java_validation.yml)
       echo "MII reusable validation workflow hosted by the TEMPLATE repo for every module; the module's validation.yml calls it there by SHA pin, so a local copy would only go stale";;
+    .github/actions/su-termserv-proxy)
+      echo "SU-TermServ proxy action hosted by the TEMPLATE repo for every module; the module's workflows use it there by SHA pin, so a local copy would only go stale";;
     CHANGELOG.md)
       echo "the template's Release-Please-generated SemVer changelog; a module keeps its own release notes";;
     *) echo "conflicts with a module's own release process";;
@@ -176,7 +178,9 @@ main() {
   # ci_dotnet_validation.yml / ci_java_validation.yml are the MII reusable
   # validation workflows this repository hosts for every module. A module
   # calls them here by SHA pin; a copy inside the module would only go stale.
-  local REMOVE=".github/workflows/release-please.yml .github/workflows/notify-zulip.yml .github/workflows/release-demo.yml .github/workflows/ci_dotnet_validation.yml .github/workflows/ci_java_validation.yml release-please-config.json .release-please-manifest.json CHANGELOG.md"
+  # .github/actions/su-termserv-proxy is the SU-TermServ proxy action (#50);
+  # the module's workflows use it here by SHA pin, for the same reason.
+  local REMOVE=".github/workflows/release-please.yml .github/workflows/notify-zulip.yml .github/workflows/release-demo.yml .github/workflows/ci_dotnet_validation.yml .github/workflows/ci_java_validation.yml .github/actions/su-termserv-proxy release-please-config.json .release-please-manifest.json CHANGELOG.md"
   # NEVER: module content, build input, and PROPAGATED tooling that a
   # module keeps. A removal target colliding here is a bug → hard abort.
   local NEVER="input sushi-config.yaml ig.ini publication-request.json advisor.json qc scripts skills .claude .agents AGENTS.md LICENSE README.md CONTRIBUTING.md docs/recipes/first-run-setup.md .devcontainer .editorconfig .gitignore .github/dependabot.yml .github/CODEOWNERS .github/ISSUE_TEMPLATE .github/workflows/go-publish.yml .github/workflows/convention-check.yml .github/workflows/security-scan.yml .github/workflows/dependency-check.yml scripts/convention-check.mjs scripts/convention-check.test.mjs scripts/language-model-check.sh"
