@@ -103,6 +103,9 @@ Read the output. It prints, in order:
     workflows this template hosts for every module. Your module's
     validation workflow calls them here by SHA pin, so a local copy would only go
     stale.
+  - `.github/actions/zts-packages` — the action this template hosts for FHIR
+    packages that exist only on the BfArM ZTS. Your module's workflows use it
+    here by SHA pin, for the same reason.
   - `CHANGELOG.md` — only if present (the template's SemVer changelog).
 - **Post-bootstrap checklist** — the manual steps below.
 
@@ -225,7 +228,8 @@ npx skills add forschungsgruppe-digital-health/agent-skills/tree/<release> --ski
   rules).
 - The Release Please files (`release-please.yml`, `release-please-config.json`,
   `.release-please-manifest.json`), `notify-zulip.yml`, `release-demo.yml`, the
-  hosted reusable workflows `ci_dotnet_validation.yml` and `ci_java_validation.yml`
+  hosted reusable workflows `ci_dotnet_validation.yml` and `ci_java_validation.yml`,
+  the hosted action `.github/actions/zts-packages`
   and the template `CHANGELOG.md` are gone; this recipe, `scripts/first-run-bootstrap.sh` and
   the preview, validation, monitoring, convention-check and module-release
   workflows are still there.

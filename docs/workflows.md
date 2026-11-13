@@ -40,6 +40,7 @@ Please, previews its own demo build, and monitors its own dependencies.
 | `release-please.yml` | push to `main` | Opens the SemVer release PR (tag + changelog) | `ENABLE_RELEASE_PLEASE` (ON) | **REMOVED by bootstrap** |
 | `notify-zulip.yml` | `release: published` | Announces the template release to the MII Zulip (topic *Template Releases*) | `ENABLE_ZULIP_ANNOUNCE` (ON) · `ANNOUNCE_PUBLIC_ZULIP` (OFF) | **REMOVED by bootstrap** |
 | `ci_dotnet_validation.yml`, `ci_java_validation.yml` | `workflow_call` only (reusable) | The MII reusable validation workflows (SUSHI + Simplifier QC; HL7 Java validator against SU-TermServ), hosted here for every KDS module since kerndatensatz-meta#251. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_*.yml@<commit-SHA> # vX.Y.Z` | — (the caller's `ENABLE_VALIDATION`) | **REMOVED by bootstrap** |
+| `.github/actions/zts-packages/` | composite action (`uses:`) | Installs FHIR packages that exist only on the BfArM ZTS into the package cache, before SUSHI, the IG Publisher or the validator need them. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@<commit-SHA>`. See [§ FHIR packages from the BfArM ZTS](#fhir-packages-from-the-bfarm-zts) | — | **REMOVED by bootstrap** |
 | `release-demo.yml` | `release: published`; `workflow_dispatch` (inputs `tag`, `update_landing_page`) | Rebuilds the Pages **demo from the released tag** with the same pinned toolchain, verifies the render carries that version, publishes it to `gh-pages/demo/<tag>/` and regenerates the root index (`scripts/gen-pages-index.mjs`). See [§ The published demo](#the-published-demo) | `ENABLE_RELEASE_DEMO` (ON) · `ENABLE_VERSION_COMPARISON` (ON) · `PAGES_ACTIONS_ENABLED` | **REMOVED by bootstrap** |
 
 > **How it is triggered.** Not by a `release` event: release-please publishes the
@@ -140,6 +141,33 @@ passes to the MII reusable workflows, and unset means the pinned defaults there
 `QA_SUMMARY_FILTERS` (line-separated `filename|messageId|detailsWildcard|location`
 rules for known issues) are plain variables too; they tune the `qa.xml` summary
 in `ig-publisher.yml`.
+
+### FHIR packages from the BfArM ZTS
+
+Some FHIR packages are published only on the BfArM Zentraler
+Terminologieserver (ZTS, <https://terminologien.bfarm.de>), not on
+packages.fhir.org, for example `kbv.all.terminology.allergyintolerance`.
+SUSHI, the IG Publisher and the validator cannot download those from the
+registry. The action `.github/actions/zts-packages` installs them into the FHIR
+package cache first. It is not yet called by the workflows; wiring it in
+follows (#55).
+
+The action reads the direct dependencies in `sushi-config.yaml` and installs a
+package only when it is on the ZTS catalog **and** not on packages.fhir.org.
+Packages that are on both, such as `dvmd.kdl.r4`, keep loading from the
+registry. A module without ZTS-only dependencies is unaffected, with or without
+the variables below.
+
+Two plain variables (organisation or repository level) control it:
+
+| Variable | Meaning |
+| --- | --- |
+| `ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` | Package names whose BfArM download conditions are accepted, comma-separated, e.g. `kbv.all.terminology.allergyintolerance`. **Setting it accepts those conditions on behalf of the organisation**, so whoever may accept them for the MII has to decide that first. A ZTS-only dependency that is not listed fails the build with an error naming the package. |
+| `ZTS_PACKAGES` | Additional packages as `name#version`, comma-separated, for packages a module needs only **transitively**, for example a module that depends on kerndatensatz-basis sets `kbv.all.terminology.allergyintolerance#1.0.0`. The IG Publisher and the validator load dependencies of dependencies, but the action only sees the module's own `sushi-config.yaml`. |
+
+No secret is involved, so this also works for pull requests from forks. The
+BfArM download conditions do not allow redistributing the package contents:
+**never upload or cache `~/.fhir/packages`** as a workflow artifact.
 
 ---
 
