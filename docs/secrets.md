@@ -39,7 +39,11 @@ IG Publisher: it allowlists the proxy's plain-HTTP private-network address
 would otherwise refuse. The file has no effect on the `tx.fhir.org` fallback.
 It also lists the MII IG template under `trustedTemplates`: IG Publisher 3.0.5
 and later stop on a template that runs scripts unless it is trusted there (see
-`ig.ini` and `scripts/template-trust.test.mjs`).
+`ig.ini` and `scripts/template-trust.test.mjs`). The MII IG template always
+counts as running scripts, because it ships JavaScript assets. Listing it is a
+decision to run the template's content in CI. The list names the MII template
+and never `all`: `all` would also run any other template, including one that a
+pull request puts into `ig.ini`.
 
 SU-TermServ authenticates clients with **mutual TLS**. Verified against the live
 server (`openssl s_client` to `ontoserver.mii-termserv.de:443`):
