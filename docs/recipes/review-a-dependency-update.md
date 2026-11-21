@@ -52,6 +52,14 @@ The two that catch reviewers out (excerpt — the full list is in
 (all four on the template repo; or `validation.yml`'s SUSHI fallback) stop
 agreeing, so a half-applied bump does not reach `dev`.
 
+**IG Publisher 3.0.5 and later** run a template with scripts, such as the MII
+IG template, only when it is listed under `trustedTemplates` in the FHIR
+settings file. The build workflows pass `.github/fhir-settings.json`, which
+already lists it, and `scripts/template-trust.test.mjs` keeps that list
+matching `ig.ini`. A module whose own workflows or settings file predate this
+needs the same entry before the bump
+(`kerndatensatz-basis@bad77b36` is the example).
+
 ### 4. IG Publisher only: recompute the jar SHA-256
 
 The version pin and the checksum move **together** — never bump one without

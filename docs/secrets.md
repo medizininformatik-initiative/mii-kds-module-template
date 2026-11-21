@@ -37,6 +37,9 @@ The build workflows pass `-fhir-settings .github/fhir-settings.json` to the
 IG Publisher: it allowlists the proxy's plain-HTTP private-network address
 (`http://127.0.0.1:8090/fhir`), which the publisher's SSRF hardening (2.3.1+)
 would otherwise refuse. The file has no effect on the `tx.fhir.org` fallback.
+It also lists the MII IG template under `trustedTemplates`: IG Publisher 3.0.5
+and later stop on a template that runs scripts unless it is trusted there (see
+`ig.ini` and `scripts/template-trust.test.mjs`).
 
 SU-TermServ authenticates clients with **mutual TLS**. Verified against the live
 server (`openssl s_client` to `ontoserver.mii-termserv.de:443`):
