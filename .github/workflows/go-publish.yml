@@ -594,7 +594,8 @@ jobs:
             sushi .
             # -fhir-settings: see .github/fhir-settings.json — allowlists the
             # local SU-TermServ proxy against publisher 2.3.1+ SSRF hardening
-            # (basis idiom). Path is workspace-absolute because this build runs
+            # (basis idiom). It also trusts the MII IG template, which
+            # publisher 3.0.5+ requires (trustedTemplates). Path is workspace-absolute because this build runs
             # inside the source/ checkout.
             java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" \
               -ig ig.ini \
@@ -710,7 +711,12 @@ jobs:
           TX_URL: ${{ steps.terminology.outputs.tx_url }}
         run: |
           set -euo pipefail
+          # -fhir-settings: the build -go-publish runs internally
+          # (PublicationProcess.runBuild -> Publisher.main) keeps the settings
+          # path the outer call sets. It needs the trust entry for the MII IG
+          # template (publisher 3.0.5+) and the proxy allowlist for -tx (#62).
           java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" -go-publish \
+            -fhir-settings "${GITHUB_WORKSPACE}/source/.github/fhir-settings.json" \
             -source "${GITHUB_WORKSPACE}/source" \
             -web "${GITHUB_WORKSPACE}/site" \
             -history "${GITHUB_WORKSPACE}/publication/history" \
