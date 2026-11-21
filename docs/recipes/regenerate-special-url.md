@@ -70,7 +70,7 @@ outside the IG's canonical base, because that usually indicates a typo.
 4. Rebuild with the IG Publisher and confirm the QA report:
 
    ```bash
-   java -Xmx6g -jar publisher.jar -ig ig.ini
+   java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 
 5. Repeat step 2 after content changes (new profiles, renamed URLs) and on

@@ -123,8 +123,8 @@
    ```sh
    sushi .
    curl -L -o publisher.jar \
-     https://github.com/HL7/fhir-ig-publisher/releases/download/2.3.2/publisher.jar
-   java -Xmx6g -jar publisher.jar -ig ig.ini
+     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.5/publisher.jar
+   java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 
    then read `output/qa.html`. The dev container brings SUSHI, Java and Jekyll —

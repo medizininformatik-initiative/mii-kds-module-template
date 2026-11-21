@@ -98,8 +98,8 @@ env:
   # Pinned toolchain — identical to go-publish.yml and ig-publisher.yml; a
   # workflow cannot read another workflow's env:, so these are copies and
   # scripts/toolchain-pins.test.mjs fails the build if they drift apart.
-  PUBLISHER_VERSION: "2.3.2"
-  PUBLISHER_SHA256: "07c576024df917cc1f879b6b5a64147cd0222d5b4129688e8f0ad9ccce58b1d5"
+  PUBLISHER_VERSION: "3.0.5"
+  PUBLISHER_SHA256: "1353ae81848d621350fa2b12ea7c17249ca43f66d7b26d29013e5154cd6c64ec"
   SUSHI_VERSION: "3.21.0"
   JEKYLL_VERSION: "4.4.1"
 
