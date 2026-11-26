@@ -80,17 +80,19 @@ for v in ${versions}; do
     echo "seed-comparison-cache: ${pkg_id}#${v} already cached."
     continue
   fi
-  echo "seed-comparison-cache: fetching package.tgz of release v${v} from ${repo} ..."
+  echo "seed-comparison-cache: fetching the package asset of release v${v} from ${repo} ..."
   release_json="$(curl -fsSL ${auth[@]+"${auth[@]}"} \
       "https://api.github.com/repos/${repo}/releases/tags/v${v}" 2>/dev/null || true)"
   asset_url=""
   if [ -n "${release_json}" ]; then
+    # Asset name: <package-id>-<version>.tgz (module-release.yml names it after the
+    # manifest); releases before that convention carry a plain package.tgz.
     asset_url="$(printf '%s' "${release_json}" \
-      | python3 -c "import json,sys; d=json.load(sys.stdin); print(next((a['url'] for a in d.get('assets',[]) if a['name']=='package.tgz'), ''))" \
+      | python3 -c "import json,sys; d=json.load(sys.stdin); a=d.get('assets',[]); want=['${pkg_id}-${v}.tgz','package.tgz']; print(next((x['url'] for n in want for x in a if x['name']==n), ''))" \
       2>/dev/null || true)"
   fi
   if [ -z "${asset_url}" ]; then
-    echo "::warning::seed-comparison-cache: release v${v} has no package.tgz asset — the comparison page will report the version as unavailable. Attach package.tgz to the release (module-release.yml does this automatically for new releases)."
+    echo "::warning::seed-comparison-cache: release v${v} has no package asset (${pkg_id}-${v}.tgz or package.tgz) — the comparison page will report the version as unavailable. Attach the package (<package-id>-<version>.tgz) to that release."
     continue
   fi
   tmp="$(mktemp -d)"
