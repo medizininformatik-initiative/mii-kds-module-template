@@ -54,6 +54,9 @@ Dieser Implementierungsleitfaden richtet sich an:
   die modul-spezifischen Aspekte zu
   [Sicherheit und Datenschutz](security-and-privacy.html) sind Teil dieses
   Leitfadens.
+- **[Instanz validieren](validate.html)** — eine eigene FHIR-Instanz gegen die
+  Profile dieses Moduls prüfen (online, Kommandozeile, API oder ein selbst
+  betriebener Validator; gegen den öffentlichen Dienst nur synthetische Daten).
 - **[Profile](profiles.html)** und die weiteren
   **[Artefakt-Seiten](artifacts.html)** — die technischen Artefakte.
 - **[Beispiele](examples.html)** — Beispielinstanzen.

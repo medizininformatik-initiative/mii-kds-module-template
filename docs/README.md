@@ -21,6 +21,7 @@ map of everything else.
 | Know what is unfinished, and why | the [issue tracker](../../../issues); decided limits: [maintenance.md](maintenance.md) |
 | Understand the completed move to the target organisation | [org-move.md](org-move.md) |
 | Translate the pages, menu and page titles | [recipes/add-translation.md](recipes/add-translation.md) |
+| Validate an instance against my module, or point the *Validate an instance* page at a self-hosted validator | [recipes/validate-instances.md](recipes/validate-instances.md) |
 | Read the specifications this is built on | [further-reading.md](further-reading.md) |
 
 ## Reading order for a newcomer

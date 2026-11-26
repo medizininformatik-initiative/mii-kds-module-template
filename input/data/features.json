@@ -1,0 +1,6 @@
+{
+  "validator": {
+    "url": "https://validator.fhir.org",
+    "tx": "https://tx.fhir.org"
+  }
+}

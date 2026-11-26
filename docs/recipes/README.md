@@ -36,6 +36,7 @@ single job from start to a checkable result.
 | [regenerate the `special-url` list](regenerate-special-url.md) | The build warns about canonicals outside your module |
 | [switch to the published template](switch-template-to-published.md) | The MII IG template has a release you can pin |
 | [cut a release (CalVer)](cut-a-release.md) | Your module is ready to publish |
+| [let implementers validate their own instances](validate-instances.md) | You want to check an instance against your module, or point the *Validate an instance* page at a self-hosted validator |
 | [review a dependency update](review-a-dependency-update.md) | A bump was proposed and someone has to decide |
 | [triage a vulnerability alert](triage-a-vulnerability-alert.md) | A security finding needs a decision |
 

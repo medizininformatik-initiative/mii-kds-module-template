@@ -55,6 +55,15 @@
       <li><a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Conformance#must-support-ms">Must Support</a></li>
       <li><a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Conformance#fehlende-daten">Handling Missing Data</a></li>
       <li><a href="security-and-privacy.html">Security and Privacy</a></li>
+      <!-- link-only entry: the page is CONTRIBUTED BY THE IG TEMPLATE
+           (content/validate.html — the Simplifier-substitute for validating
+           an implementer's own instance against this module; NUM-DIZ request
+           2026-08-31). The publisher renders it into every language folder,
+           so the folder-relative href works like the page links above. It
+           has NO `pages:` entry in sushi-config.yaml and NO .po msgid; the
+           optional validator settings live in input/data/features.json —
+           see docs/page-structure.md and docs/recipes/validate-instances.md. -->
+      <li><a href="validate.html">Validate an instance</a></li>
     </ul>
   </li>
   <li class="dropdown">
