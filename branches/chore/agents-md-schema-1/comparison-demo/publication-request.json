@@ -1,0 +1,17 @@
+{
+   "package-id" : "de.medizininformatikinitiative.kerndatensatz.{{MODULE_SLUG}}",
+   "version" : "{{CALVER_VERSION}}",
+   "path" : "https://{{GITHUB_ORG}}.github.io/{{REPO_NAME}}/{{CALVER_VERSION}}",
+   "mode" : "milestone",
+   "status" : "release",
+   "sequence" : "{{CALVER_YEAR}}",
+   "desc" : "{{RELEASE_DESCRIPTION}}",
+   "first" : true,
+   "title" : "MII Implementation Guide {{MODULE_TITLE}}",
+   "ci-build" : "https://{{GITHUB_ORG}}.github.io/{{REPO_NAME}}/branches/dev/",
+   "category" : "Research",
+   "introduction" : "{{MODULE_DESCRIPTION}}",
+   "registry-description" : "{{REGISTRY_DESCRIPTION}}",
+   "registry-country" : "de",
+   "registry-authority" : "Medical Informatics Initiative (MII)"
+}
