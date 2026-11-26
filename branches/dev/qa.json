@@ -7,14 +7,14 @@
   "status" : "active",
   "package-id" : "de.medizininformatikinitiative.kerndatensatz.template",
   "ig-ver" : "2027.0.0-draft.1",
-  "date" : "Sat, 21 Nov, 2026 12:08:55 +0000",
-  "dateISO8601" : "2026-11-21T12:08:55+00:00",
-  "errs" : 0,
-  "warnings" : 15,
-  "hints" : 124,
-  "suppressed-hints" : 0,
+  "date" : "Thu, 26 Nov, 2026 10:45:21 +0000",
+  "dateISO8601" : "2026-11-26T10:45:21+00:00",
+  "errs" : 56,
+  "warnings" : 18,
+  "hints" : 120,
+  "suppressed-hints" : 56,
   "suppressed-warnings" : 0,
   "version" : "4.0.1",
   "tool" : "5.0.0 (3)",
-  "maxMemory" : 2732239384
+  "maxMemory" : 1885350400
 }
