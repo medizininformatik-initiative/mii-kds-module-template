@@ -1,184 +1,98 @@
+<!-- agents-md: schema 1 | updated 2026-11-16 | long form lives in CONTRIBUTING.md, skills/README.md and docs/ -->
 # AGENTS.md — mii-kds-module-template
 
-Vendor-neutral instructions for any coding agent working in this repository.
-These instructions describe *what to do*, independent of which agent, runtime,
-or model executes them.
+Vendor-neutral instructions for any coding agent working in this repository: *what to do*,
+independent of which agent, runtime or model executes them.
 
-## What this repository is
+This is the **GitHub template repository** for a new **MII KDS module Implementation Guide**.
+A module starts with "Use this template"; its `sushi-config.yaml`, `ig.ini` and workflows carry
+`{{PLACEHOLDER}}` values the module fills in. `ig.ini` references the MII IG template
+`ig-template-mii-kds` by repository URL until that package has a registry release
+(recipe: `docs/recipes/switch-template-to-published.md`); the vendored `ig-template/` folder is the
+offline fallback. Full picture: `README.md`.
 
-A **GitHub template repository** — the scaffold for a new **MII KDS module
-Implementation Guide (IG)**. A user clicks "Use this template" to start a
-module; the scaffold's `sushi-config.yaml`, `ig.ini`, and workflows carry
-`{{PLACEHOLDER}}` values the new module fills in. The scaffold **references**
-the MII IG template package
-[`ig-template-mii-kds`](https://github.com/medizininformatik-initiative/ig-template-mii-kds)
-(`de.medizininformatikinitiative.template`) in `ig.ini` — **today by repository
-URL** (`template = https://github.com/medizininformatik-initiative/ig-template-mii-kds`;
-the IG Publisher fetches the released `main` at build time), because that
-package has no registry release yet. The vendored local folder
-`template = #ig-template` remains the offline/reproducibility fallback, and the
-endgame is `template = de.medizininformatikinitiative.template#<version>` once
-the package is published (see
-[`docs/recipes/switch-template-to-published.md`](docs/recipes/switch-template-to-published.md)
-and issues [#1](../../issues/1)/[#2](../../issues/2)). See
-[`README.md`](README.md) for the full picture.
+**Two layers, never mixed:** this template releases with **SemVer** (Release Please on `main`) and
+is tooling. A module created from it releases with **CalVer `YYYY.n.n`** through the MII Module
+Release Workflow; `scripts/first-run-bootstrap.sh` strips the Release Please files from a new module.
 
-**Two layers — do not confuse them:**
+## Build, test, validate
 
-- **This template repository itself** releases with **SemVer** (Release Please
-  on `main`) — it is tooling.
-- **A module created from it** releases with **CalVer `YYYY.n.n`** via the MII
-  Module Release Workflow. The first-run bootstrap
-  ([`scripts/first-run-bootstrap.sh`](scripts/first-run-bootstrap.sh)) removes this
-  repo's Release Please files from a new module so the two never mix.
+```bash
+sushi .                                        # compile FSH; then run the IG Publisher and read output/qa.html
+node --test scripts/*.test.mjs                 # unit tests of the maintenance scripts
+node --test scripts/convention-check.test.mjs  # one test file
+node scripts/convention-check.mjs              # the single convention checker (placeholder-aware)
+bash scripts/language-model-check.sh           # prose must say: English default, German translation
+bash scripts/sync-ig-template.sh --check       # fails on drift of the vendored ig-template/ mirror
+```
 
-## Branching and pull-request rules
+Pushing a branch builds a preview and comments its URL on the PR, once first-run setup has enabled
+GitHub Pages (`docs/recipes/first-run-setup.md`).
 
-Full walkthrough in [`CONTRIBUTING.md`](CONTRIBUTING.md). The short form the
-agent must follow:
+## Branching and pull requests
 
-- **Never commit to `main` or `dev` directly.** All work happens on a
-  short-lived branch (`feature/*`, `change/*`, `fix/*`) **off `dev`**.
-- Every change arrives as a **pull request targeting `dev`** — one focused
-  change per PR. PRs into `dev` are squash-merged after green CI and human
-  review; the working branch is then deleted.
-- `dev` → `main` is the **release gate**: a human decision, merged as a merge
-  commit (not a squash). Never open or merge it unprompted.
-- **Back-merge rule.** `main` and `dev` have diverged (see
-  [`docs/org-move.md`](docs/org-move.md)). If anything lands on
-  `main` without going through `dev`, `main` must be merged back into `dev`
-  before the next `dev → main` merge. Check `git log origin/dev..origin/main`
-  before branching.
+Full walkthrough in `CONTRIBUTING.md`. The short form the agent must follow:
+
+- **Never commit to `main` or `dev` directly.** Work on a short-lived `feature/*`, `change/*` or
+  `fix/*` branch **off `dev`**; one focused change per PR, **targeting `dev`**; squash-merged after
+  green CI and human review, branch deleted afterwards.
+- **`dev → main` is the release gate**: a human decision, merged as a merge commit (not a squash).
+  Never open or merge it unprompted.
+- **Back-merge rule.** If anything lands on `main` without passing `dev`, merge `main` into `dev`
+  before the next release. Check `git log origin/dev..origin/main` before branching (`docs/org-move.md`).
 - **Conventional Commits** for every commit message and PR title
   (`feat`, `fix`, `docs`, `chore`, `ci`, `refactor`, `test`).
 
-## Attribution rule
+## Attribution
 
-Commits, PR titles/bodies, file headers, and docs carry **no AI attribution**:
-no AI co-author trailers, no tool or model names, no "generated by" notes.
-Author identity is the configured human committer.
+Commits, PR titles and bodies, file headers and docs carry **no AI attribution**: no co-author
+trailers, no tool or model names, no "generated by" notes. The author is the configured human committer.
 
 ## Guardrails
 
-- **Never mix release systems.** This template repo = SemVer/Release Please; a
-  module = CalVer/MII Module Release Workflow. Do not wire Release Please into a
-  module, and do not let a module inherit this repo's Release Please files.
-- **Fixed versions only.** Never use `current`/`latest`/`dev`/`cibuild` as a
-  version label in anything built (dependencies, the IG template pin, tool
-  versions). The convention check (M7) and the publication gate in
-  `go-publish.yml` both reject that set; the dependency check proposes bumps.
-  The interim template URL in `ig.ini` is the one sanctioned exception — it
-  follows the template's released `main` by design (see `ig.ini`'s header);
-  the published package pin restores strict pinning.
-- **`ig-template/` is a machine-synced mirror**, maintained by
-  `scripts/sync-ig-template.sh` (`--check` fails on drift; `sync-ig-template.yml`
-  runs it). It is the offline/reproducibility fallback (`template = #ig-template`)
-  behind the default URL form in `ig.ini`. Never hand-edit it, and never rewrite
-  the `template =` line into a package pin — `scripts/first-run-bootstrap.sh`
-  tells module owners to leave that line alone until the package is published.
-  Fix the source in `ig-template-mii-kds` and re-sync.
-- **The single convention checker** is `wiki-consistency-check` +
-  `scripts/convention-check.mjs` (placeholder-aware). Do not add a second
-  metadata linter. `convention-check.yml` also runs `scripts/language-model-check.sh`
-  — a separate concern (see below), not a second metadata linter.
-- **English is the IG's default language, German the translation**
-  (`i18n-default-lang: en`, sources under `input/translations/de/`) — the same
-  model as `kerndatensatz-basis`, so "deviates from basis" is never true. Prose
-  asserting the reverse fails `scripts/language-model-check.sh` in CI — fix the
-  prose, never the guard.
+- **Never mix the release systems.** No Release Please in a module; no module inherits this repo's
+  Release Please files.
+- **Fixed versions only.** `current`, `latest`, `dev` and `cibuild` are rejected by the convention
+  check (M7) and by the publication gate in `.github/workflows/go-publish.yml`. The interim template
+  URL in `ig.ini` is the one sanctioned exception.
+- **`ig-template/` is a machine-synced mirror** (`scripts/sync-ig-template.sh`). Never hand-edit it,
+  and never rewrite the `template =` line into a package pin before the package is published. Fix
+  the source in `ig-template-mii-kds` and re-sync.
+- **One convention checker**: `wiki-consistency-check` plus `scripts/convention-check.mjs`. Do not
+  add a second metadata linter. `scripts/language-model-check.sh` is a separate concern, not a linter.
+- **English is the IG's default language** (`i18n-default-lang: en`); **the translation is
+  German**, sources under `input/translations/de/`, the same model as `kerndatensatz-basis`. Fix
+  prose that claims otherwise, never the guard.
 - Do not change canonical URLs of published artifacts.
-- Checker/analysis skills are report-only: they propose, humans decide; no
-  auto-merge; any change is a PR targeting `dev`.
-- Never trigger a publication or announcement; those are human-gated.
+- Checker and analysis skills are **report-only**: they propose, humans decide, no auto-merge;
+  every change is a PR targeting `dev`.
+- Never trigger a publication or announcement; both are human-gated.
+- **Skills never install other skills.** A skill states a missing dependency as a precondition and
+  prints the install command for the user to run (rationale in `skills/README.md`).
 
 ## Skills
 
-Every skill an agent can invoke here lives in [`skills/`](skills/) — one folder
-per skill, with the instructions in `SKILL.md` (agent-skills format). Consult
-them before doing the corresponding task by hand. This repository is the source
-of truth for every skill in the directory ([`skills/README.md`](skills/README.md)
-is the index); skills from the org catalog are installed on demand, not kept as
-copies (see below).
+Every skill lives in `skills/` (one folder per skill, instructions in its SKILL.md); `.claude/skills`
+and `.agents/skills` are relative symlinks to it (on Windows enable symlink support or read `skills/`
+directly; never copy). Consult the matching skill before doing its task by hand.
 
-Written here:
+- `skills/wiki-consistency-check/`: repo ↔ MII meta wiki drift and the module-metadata contract.
+- `skills/docs-steward/`: verifies links, paths and factual claims of this repository's docs.
+- Measuring (`fhir-ig-analysis`), translating (`fhir-ig-translation`) and migrating
+  (`mii-ig-migration`) an IG come from the org catalog https://github.com/forschungsgruppe-digital-health/agent-skills.
+  Install at a pinned release with the `/tree/<ref>` form and keep no copies; index, install
+  command and history in `skills/README.md` and `skills/RETIRED.md`.
 
-- [`skills/wiki-consistency-check/`](skills/wiki-consistency-check/SKILL.md)
-  — **the single convention checker**: repo ↔ MII meta wiki drift plus the hard
-  module-metadata contract; placeholder-aware; report-only, PRs target `dev`.
-  Mechanized by [`scripts/convention-check.mjs`](scripts/convention-check.mjs).
-- [`skills/docs-steward/`](skills/docs-steward/SKILL.md) — checks and repairs
-  this repository's documentation: verifies every link, path and factual claim
-  against the repo itself, keeps the docs to what create/modify/maintain
-  actually needs, and walks the documented path as a first-time and an
-  experienced reader. Findings are reported for a human to decide on; any
-  resulting change is a pull request targeting `dev`.
+## Issue tracking
 
-### Skills from the org catalog (installed, not copied)
+Issue tracking: GitHub issues of this repository. There is no `.beads/` directory here; do not
+initialise any other tracker unprompted.
 
-Measuring an IG and translating one are **not written here**. They belong to the organization's
-skill catalog,
-[`forschungsgruppe-digital-health/agent-skills`](https://github.com/forschungsgruppe-digital-health/agent-skills),
-which is their single source of truth and where they have been developed further. This repository
-keeps **no copies** (pinned vendored copies existed until 2026-08-28 — see
-[`skills/RETIRED.md`](skills/RETIRED.md); same doctrine as the retired vendored `ig-template`: no
-stale copies). Install what you need from the catalog at a pinned release.
+## Where to look
 
-| Task | Catalog skill | Was |
-| --- | --- | --- |
-| Measure / compare Implementation Guides (read-only statistics, hygiene, maturity) | `fhir-ig-analysis` | `skills/ig-analyze` + `scripts/ig-stats.py` |
-| Produce a guide's translation supplements (translate or harvest) | `fhir-ig-translation` | `skills/ig-translate` + `scripts/ig-translate.sh` |
-| Migrate a Simplifier/Forge-published KDS module onto this scaffold | `mii-ig-migration` | never local |
-
-```bash
-npx skills add forschungsgruppe-digital-health/agent-skills/tree/<release> --skill fhir-ig-analysis fhir-ig-translation --copy
-```
-
-Pin with the `/tree/<ref>` form — `owner/repo@v0.15.1` does *not* pin: in that CLI `@` introduces a
-skill *name*, and the install silently comes from the default branch. `.claude/skills` and
-`.agents/skills` are symlinks to `skills/`, so an install inside this checkout lands in `skills/` —
-installed catalog skills are working copies, not tracked content. The full record of what moved
-when is in [`skills/RETIRED.md`](skills/RETIRED.md); the catalog's own
-[`docs/consuming-skills.md`](https://github.com/forschungsgruppe-digital-health/agent-skills/blob/main/docs/consuming-skills.md)
-documents all consumption paths.
-
-### Skills never install other skills
-
-A skill that needs another one states it as a **precondition** and prints the exact install command
-for the user to run. It does not install anything itself, and `allowed-tools` is not a dependency
-declaration — it grants permissions, it says nothing about what must already be present.
-Auto-installing would write into the user's project as a side effect of an unrelated invocation,
-make the run non-hermetic (its behaviour would depend on a network fetch nobody asked for), and cut
-against the catalog's static-by-design stance.
-
-### Discovery paths (symlinks, not copies)
-
-Some agent runtimes look for skills in a runtime-specific directory. Those
-directories are committed as **relative symlinks** to the single source:
-
-```
-.claude/skills  -> ../skills
-.agents/skills  -> ../skills
-```
-
-> **Why symlinks over copies:** copies drift; a symlink guarantees every
-> runtime reads the identical, single-sourced skill content.
-
-**Windows caveat:** on Windows, git checks out symlinks as plain text files
-containing the link target unless symlink support is enabled (Developer Mode or
-admin rights, plus `git config core.symlinks true` before checkout). If a
-runtime on such a checkout cannot follow the links, read the canonical
-`skills/` directory directly — or generate a mirror from `skills/` in CI. Never
-hand-copy the content into the runtime directories.
-
-## Creating a module from this template
-
-A new module needs the one-time first-run bootstrap
-([`docs/recipes/first-run-setup.md`](docs/recipes/first-run-setup.md)): it
-creates `dev` from `main`, applies branch protection, and removes the
-files that would conflict with a module (Release Please + the template's SemVer
-announcement + the template `CHANGELOG`). The preview, validation, monitoring,
-convention-check, and module-release workflows, the skills, and the bootstrap
-with its recipe **stay** — a module wants them. The authoritative removal list
-is the `REMOVE=` line in
-[`scripts/first-run-bootstrap.sh`](scripts/first-run-bootstrap.sh); the dry run
-prints it.
+- `README.md` quickstart, `docs/recipes/create-a-new-module.md` full walkthrough, `docs/glossary.md`.
+- `docs/recipes/first-run-setup.md` and `scripts/first-run-bootstrap.sh`; its `REMOVE=` line is the
+  authoritative list of what a new module drops.
+- `docs/release.md` and `docs/recipes/cut-a-release.md`: release paths for template and module.
+- `docs/workflows.md`: what each workflow under `.github/workflows/` does.
+- `docs/org-move.md`: branch history and the back-merge rule.
