@@ -1017,6 +1017,17 @@ nicht stabil — öffnen Sie `package.db` aus Ihrem eigenen Build mit einem
 beliebigen SQLite-Werkzeug und sehen Sie nach, bevor Sie sich auf eine Spalte
 verlassen.
 
+Eine Eigenheit dieser einfachen Form: Jede Spalte wird als `auto` gerendert,
+und das verwandelt eine Zelle, die ein bekanntes Artefakt benennt, in einen
+Link. Bei **logischen Modellen** fehlt diesem Link in Publisher 2.3.2 das
+`.html` — die Seite rendert, der QA-Bericht zählt aber einen defekten Link.
+Geben Sie einer solchen Spalte in der JSON-Form unten `"type" : "text"`. Die
+Spalte `Json` enthält die vollständige Ressource jedes Artefakts, und das
+SQLite des Publishers versteht `json_extract` / `json_each`; so erhält ein
+logisches Modell eine kompakte Datenelement-Tabelle statt des
+`-dict`-Fragments — siehe das Rezept
+[render existing artifacts](https://github.com/medizininformatik-initiative/mii-kds-module-template/blob/main/docs/recipes/render-existing-artifacts.md#logical-models-a-compact-data-element-table).
+
 Eine JSON-Form derselben Direktive steuert Spaltentitel, CSS-Klasse und die
 Darstellung je Spalte — `link`, `markdown`, `canonical`, `resource` und weitere:
 
