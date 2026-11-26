@@ -183,7 +183,7 @@ main() {
   local REMOVE=".github/workflows/release-please.yml .github/workflows/notify-zulip.yml .github/workflows/release-demo.yml .github/workflows/ci_dotnet_validation.yml .github/workflows/ci_java_validation.yml .github/actions/zts-packages release-please-config.json .release-please-manifest.json CHANGELOG.md"
   # NEVER: module content, build input, and PROPAGATED tooling that a
   # module keeps. A removal target colliding here is a bug → hard abort.
-  local NEVER="input sushi-config.yaml ig.ini publication-request.json advisor.json qc scripts skills .claude .agents AGENTS.md LICENSE README.md CONTRIBUTING.md docs/recipes/first-run-setup.md .devcontainer .editorconfig .gitignore .github/dependabot.yml .github/CODEOWNERS .github/ISSUE_TEMPLATE .github/workflows/go-publish.yml .github/workflows/convention-check.yml .github/workflows/security-scan.yml .github/workflows/dependency-check.yml scripts/convention-check.mjs scripts/convention-check.test.mjs scripts/language-model-check.sh"
+  local NEVER="input sushi-config.yaml ig.ini publication-request.json advisor.json qc scripts skills .claude .agents AGENTS.md LICENSE README.md CONTRIBUTING.md docs/recipes/first-run-setup.md .devcontainer .editorconfig .gitignore .github/dependabot.yml .github/CODEOWNERS .github/ISSUE_TEMPLATE .github/workflows/go-publish.yml .github/workflows/convention-check.yml .github/workflows/security-scan.yml .github/workflows/dependency-check.yml .github/workflows/sync-scripts.yml scripts/sync-scripts.sh scripts/convention-check.mjs scripts/convention-check.test.mjs scripts/language-model-check.sh"
 
   git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "ERROR: not inside a git repository." >&2; return 1; }
 

@@ -77,6 +77,7 @@ Everything below **propagates** to a module (the bootstrap keeps it). This is ho
 | `dependency-check.yml` | schedule (Mon 06:00 UTC); `workflow_dispatch` | Version drift (IG Publisher, SUSHI, Jekyll, both templates, FHIR deps) → one tracking issue | `dependencies` issue | `ENABLE_DEPENDENCY_CHECK` (ON) | proposals only |
 | `security-scan.yml` | schedule (Mon 07:00 UTC); PR to `dev`; `workflow_dispatch` | OSV + Trivy (fs + dev-container image) | SARIF in Security tab | `ENABLE_SECURITY_SCAN` (ON) | no |
 | `sync-ig-template.yml` | schedule (Mon 05:00 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps the vendored `ig-template/` (the offline/reproducibility fallback behind the URL default in `ig.ini`) in step with `ig-template-mii-kds@dev`; opens a PR on drift, fails a PR whose mirror is stale | sync PR | `ENABLE_TEMPLATE_SYNC` (ON) | never auto-merges |
+| `sync-scripts.yml` | schedule (Mon 05:30 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps a module's `scripts/` (checker, bootstrap, publication helpers) in step with `mii-kds-module-template@main`; opens a PR on drift, fails a PR whose copy is stale; skipped in the template repository itself | sync PR | `ENABLE_SCRIPT_SYNC` (ON) | never auto-merges |
 
 Notes:
 - **The reusable validation needs two files in the repo root**, at fixed paths the
