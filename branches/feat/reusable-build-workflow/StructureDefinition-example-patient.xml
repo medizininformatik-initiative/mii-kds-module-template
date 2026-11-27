@@ -138,7 +138,7 @@
   </title>
   <status value="active"/>
   <experimental value="false"/>
-  <date value="2026-11-27T09:09:08+00:00"/>
+  <date value="2026-11-27T09:13:33+00:00"/>
   <publisher value="NUM-DIZ">
     <extension url="http://hl7.org/fhir/StructureDefinition/translation">
       <extension url="lang">
