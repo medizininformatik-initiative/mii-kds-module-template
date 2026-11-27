@@ -1,0 +1,35 @@
+{
+  "source": "qa-tx.html",
+  "calls": 15,
+  "byOperation": {
+    "GET metadata": 2,
+    "$validate-code": 11,
+    "GET ValueSet": 2
+  },
+  "byStatus": {
+    "200": 15
+  },
+  "failed": 11,
+  "failedBySystem": {
+    "urn:iso:std:iso:3166": 7,
+    "urn:uuid:9cd3a74e-36bd-3f17-90c9-df7c9eeb62cf|1": 2,
+    "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl": 1,
+    "http://hl7.org/fhir/ValueSet/languages|4.0.1": 1
+  },
+  "entries": [
+{"n":1,"op":"GET metadata","status":200,"out":{"resourceType":"CapabilityStatement"}},
+{"n":2,"op":"GET metadata","status":200,"query":"mode=terminology","out":{"resourceType":"TerminologyCapabilities"}},
+{"n":3,"op":"$validate-code","status":200,"in":{"system":"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl","code":"C15607","displayLanguage":"en"},"out":{"result":false,"message":"A definition for CodeSystem 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl' could not be found, so the code cannot be validated"}]}},
+{"n":4,"op":"$validate-code","status":200,"in":{"code":"de-DE","displayLanguage":"en","valueSet":"urn:uuid:9cd3a74e-36bd-3f17-90c9-df7c9eeb62cf|1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated"}]}},
+{"n":5,"op":"$validate-code","status":200,"in":{"code":"de","displayLanguage":"en","valueSet":"urn:uuid:9cd3a74e-36bd-3f17-90c9-df7c9eeb62cf|1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated"}]}},
+{"n":6,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":7,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":8,"op":"$validate-code","status":200,"in":{"code":"en","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/languages|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:ietf:bcp:47' could not be found, so the code cannot be validated"}]}},
+{"n":9,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":10,"op":"GET ValueSet","status":200,"query":"_format=json&url=http://fhir.org/packages/de.basisprofil.r4/ImplementationGuide/de.basisprofil.r4","out":{"entries":0}},
+{"n":11,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":12,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":13,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}},
+{"n":14,"op":"GET ValueSet","status":200,"query":"_format=json&url=http://snomed.info/sct&version=http://snomed.info/sct/900000000000207008/version/20250701","out":{"entries":0}},
+{"n":15,"op":"$validate-code","status":200,"in":{"system":"urn:iso:std:iso:3166","code":"DE","display":"Germany","displayLanguage":"en-US","valueSet":"http://hl7.org/fhir/ValueSet/jurisdiction|4.0.1"},"out":{"result":false,"message":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated","issues":[{"severity":"error","code":"not-found","type":"not-found","text":"A definition for CodeSystem 'urn:iso:std:iso:3166' could not be found, so the code cannot be validated"}]}}
+]}
