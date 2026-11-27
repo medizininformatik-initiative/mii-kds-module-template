@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.14.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.2...v0.14.0) (2026-11-27)
+
+
+### Features
+
+* **ci:** add a composite action that installs ZTS-only FHIR packages ([#56](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/56)) ([93f9907](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/93f99070b4c5bd4fcb438a368038b0e6eb94049c)), closes [#55](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/55)
+* **ci:** fhir-pkg-tool snapshots and SUSHI for IG Publisher repos ([5329134](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/53291347918f61a809f0fa06c59f54a514f9f10b))
+* **ci:** fhir-pkg-tool snapshots and SUSHI for IG Publisher repos ([8a8ea1b](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/8a8ea1bed3504b1b7401dff04e1737608ed50394))
+* **ci:** host the MII reusable validation workflows ([f8f7a53](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/f8f7a53228956981b5e9a926e7f5af4ec45b07c9))
+* **ci:** host the MII reusable validation workflows ([1eb4e68](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/1eb4e685a4d44ee46f5ebbb69fa992a012a6d2bc))
+* **ci:** install ZTS-only packages in every build and validation workflow ([#57](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/57)) ([2700849](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/2700849d47c0d1a991b8780ff4b631fed8ec9eef)), closes [#55](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/55)
+* **ci:** render the IG Publisher qa.xml as a job summary ([18b94b1](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/18b94b187ae1191797036548c7f53931a9f638ed))
+* **ci:** render the IG Publisher qa.xml as a job summary ([2d36eba](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/2d36eba963517303e5a62cb2b6b218948c397c84))
+* **scripts:** sync a module's scripts/ with the template (sync-scripts.sh + workflow) ([#67](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/67)) ([fda65a1](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/fda65a1e4f4ef499ad748ddc04c83fe850dc98e4))
+* Simplifier registry publication workflow (publish-simplifier.yml) ([#75](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/75)) ([039cc88](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/039cc882b8efbbf88c5165a3ce9530e9d86706eb))
+
+
+### Bug Fixes
+
+* **ci:** allow the Java validator to use the local terminology proxy ([0d0cc83](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/0d0cc83d69e800939581f849f8eb38701a857e66))
+* **ci:** announce Release Please releases on Zulip ([#69](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/69)) ([4de5a3b](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/4de5a3b4b3ab7963ab0f8afdbd0669aa23f8793c))
+* **ci:** generate dependency snapshots before SUSHI ([793a502](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/793a50274dfa00c24ac386a84a63f3fa527a4e2a))
+* **ci:** generate dependency snapshots before SUSHI ([a140438](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/a14043816157562a37d1a4f66f2e8fe2cc3d9789))
+* **ci:** keep the Java validator output when validation fails ([4afa9c6](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/4afa9c6e1f0a2c4b3b1ccc4f9ba13068856af275))
+* **ci:** make the Java validator version and toggle optional inputs ([9d464cd](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/9d464cddb17985b41df9ab6e0a5ff95870f902f2))
+* **ci:** make the Java validator version and toggle optional inputs ([34ac890](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/34ac89065f7772b9a95e582746de2bf52cbd1020))
+* **ci:** read validation dependencies from sushi-config.yaml first ([de3ff13](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/de3ff13ed4ae5f3451df4fd726e0492e8ee2371a))
+* **ci:** trust the MII IG template for IG Publisher 3.0.5+ ([#61](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/61)) ([22f10be](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/22f10bee5e09f1c8006b2d155747550af06a5409)), closes [#62](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/62)
+* **ci:** validation reads the org validator options; fsh-generated commit is switchable ([#72](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/72)) ([2829a31](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/2829a3127369f68eaa1e6863fa7a345454aec86f))
+* **rulesets:** CRMI artifact-metadata rule sets are inheritance-safe ([#73](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/73)) ([281e803](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/281e8035e870b85bd6c4c75e22b22e24fec127b8))
+* unblock a module's first formal publication ([#74](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/74)) ([993697a](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/993697aa45f7ad4a4653f8f2100580132f1ac842))
+
 ## [0.13.2](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.1...v0.13.2) (2026-08-30)
 
 
