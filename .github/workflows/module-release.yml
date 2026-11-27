@@ -59,6 +59,13 @@
 #   ::notice — the same selection idiom as the preview / go-publish workflows.
 #   The build must not hard-fail without the certificate.
 #
+# ZTS packages: FHIR packages that exist only on the BfArM ZTS (e.g.
+#            kbv.all.terminology.allergyintolerance) are installed into the
+#            package cache by .github/actions/zts-packages before SUSHI runs,
+#            controlled by vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#            vars.ZTS_PACKAGES. A no-op without ZTS-only dependencies. See
+#            docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+#
 # Fixed versions: every action is pinned to a commit SHA; the IG
 #   Publisher jar, SUSHI, Jekyll, the nginx image, and the kerndatensatz-meta
 #   ref are pinned by exact version + SHA-256/commit — identical to
@@ -93,7 +100,7 @@ env:
   # scripts/toolchain-pins.test.mjs fails the build if they drift apart.
   PUBLISHER_VERSION: "2.3.2"
   PUBLISHER_SHA256: "07c576024df917cc1f879b6b5a64147cd0222d5b4129688e8f0ad9ccce58b1d5"
-  SUSHI_VERSION: "3.20.1"
+  SUSHI_VERSION: "3.21.0"
   JEKYLL_VERSION: "4.4.1"
 
 jobs:
@@ -198,6 +205,17 @@ jobs:
             printf -- '- SUSHI: `%s`\n' "$(sushi --version)"
           } >> "${GITHUB_STEP_SUMMARY}"
 
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before SUSHI and the IG Publisher need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ vars.ZTS_PACKAGES }}
+
       - name: Select terminology server (SU-TermServ if cert present, else HL7)
         id: terminology
         shell: bash
@@ -278,7 +296,10 @@ jobs:
           # (http://127.0.0.1:8090) for the publisher's terminology access:
           # publisher 2.3.1+ SSRF hardening can refuse plain-HTTP/private-
           # network -tx targets without it (basis idiom, kerndatensatz-basis
-          # @190a3a18). Inert on the tx.fhir.org fallback path.
+          # @190a3a18). Inert on the tx.fhir.org fallback path. It also lists
+          # the MII IG template under trustedTemplates: publisher 3.0.5+ stops
+          # on a template with scripts that is not trusted (kerndatensatz-basis
+          # @bad77b36; scripts/template-trust.test.mjs keeps it matching ig.ini).
           java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" -ig ig.ini -tx "${TX_URL}" \
             -fhir-settings "${GITHUB_WORKSPACE}/.github/fhir-settings.json"
 

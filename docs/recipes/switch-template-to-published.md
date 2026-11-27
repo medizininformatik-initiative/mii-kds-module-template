@@ -100,6 +100,22 @@ in order of preference:
    Remove the now-stale bring-up comment block above the `template =` line while
    you are there.
 
+   In the same change, add the package id **without** the version to
+   `trustedTemplates` in `.github/fhir-settings.json`:
+
+   ```json
+   "trustedTemplates": [
+     "https://github.com/medizininformatik-initiative/ig-template-mii-kds",
+     "#ig-template",
+     "de.medizininformatikinitiative.template"
+   ]
+   ```
+
+   IG Publisher 3.0.5 and later trust a template by the name `ig.ini` gives
+   it, and stop on an untrusted template that runs scripts.
+   `scripts/template-trust.test.mjs` fails until the entry is there. Once
+   step 3 has removed `ig-template/`, drop the two interim entries.
+
    > **Why drop the `#`:** the leading `#` is what told the IG Publisher
    > "this is a local folder." Without it, the value is a package reference
    > (`id#version`) the Publisher resolves from the registry.
@@ -157,6 +173,7 @@ in order of preference:
 |---|---|---|
 | Publisher aborts: `Unable to resolve template de.medizininformatikinitiative.template#x.y.z` | The template is not yet published/registered, or the version does not exist | Confirm the registry URL returns that version (prerequisite); if it 404s, the template repo has not published it yet — revert to the vendored `#ig-template` and wait |
 | Build fails with `Unable to load template source from #ig-template` | You deleted `ig-template/` but `ig.ini` still says `template = #ig-template` (now a dangling local folder) | Make sure step 2 (edit) happened before/with step 3 (delete) — the Publisher fails loudly on a missing `#folder`, so this is caught at the next build |
+| Publisher stops: `The template 'de.medizininformatikinitiative.template#x.y.z' runs scripts, and it is not a trusted template` | `trustedTemplates` in `.github/fhir-settings.json` does not list the package id (IG Publisher 3.0.5+) | Add `de.medizininformatikinitiative.template` (no version) as in step 2 |
 | Convention check fails on the template line | You pinned `#current` / `#latest` / left a `TODO` | Pin an exact SemVer `x.y.z` from the template repo's release |
 | QA error count jumped after the switch | The published release differs from the vendored commit (a newer template version, or the vendored copy had local edits) | Expected if you jumped versions — read the template repo's CHANGELOG for the delta; if you had edited `ig-template/` locally (you should not have), reconcile those edits upstream first |
 | `git rm -r ig-template` says "did not match any files" | Already deleted, or you are not at the repo root | Run from the module root; confirm with `ls ig-template` |
