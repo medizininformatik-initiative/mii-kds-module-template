@@ -15,6 +15,7 @@ import { parseWorkflowEnvPin } from "./check-updates.mjs";
 const repository = fileURLToPath(new URL("../", import.meta.url));
 
 const WORKFLOWS = [
+  ".github/workflows/ci_build.yml",
   ".github/workflows/go-publish.yml",
   ".github/workflows/ig-publisher.yml",
   ".github/workflows/module-release.yml",
@@ -33,9 +34,16 @@ function readIfPresent(relativePath) {
   return existsSync(file) ? readFileSync(file, "utf8") : null;
 }
 
-/** The build workflows that exist here — a created module may drop one. */
+// A thin caller of the reusable build (ci_build.yml) carries no toolchain pins
+// of its own: the pins live in the reusable workflow at the caller's SHA.
+const CALLS_REUSABLE_BUILD = /uses:\s*\S*\/\.github\/workflows\/ci_build\.yml@/;
+
+/** The build workflows that exist here and pin the toolchain themselves —
+ * a created module may drop one, or call the reusable build instead. */
 function presentWorkflows() {
-  return WORKFLOWS.map((file) => ({ file, text: readIfPresent(file) })).filter((w) => w.text !== null);
+  return WORKFLOWS.map((file) => ({ file, text: readIfPresent(file) })).filter(
+    (w) => w.text !== null && !CALLS_REUSABLE_BUILD.test(w.text),
+  );
 }
 
 for (const key of KEYS) {

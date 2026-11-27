@@ -167,9 +167,18 @@ jobs:
           CDS_DEV_CLIENT_CERT: ${{ secrets.CDS_DEV_CLIENT_CERT }}
           CDS_DEV_CLIENT_KEY: ${{ secrets.CDS_DEV_CLIENT_KEY }}
           CDS_DEV_CLIENT_CERT_PASSWORD: ${{ secrets.CDS_DEV_CLIENT_CERT_PASSWORD }}
+          SU_TERMSERV_HOST: ${{ vars.SU_TERMSERV_HOST || 'ontoserver.mii-termserv.de' }}
         run: |
 
-          mkdir -p nginx/certs  
+          mkdir -p nginx/certs
+          # The upstream host comes from vars.SU_TERMSERV_HOST (default:
+          # the production SU-TermServ), so the org can switch every module's
+          # terminology, e.g. to ontoserver-staging.su-termserv.de, in one
+          # place. Only a plain host name is accepted.
+          if [[ ! "${SU_TERMSERV_HOST}" =~ ^[A-Za-z0-9.-]+$ ]]; then
+            echo "::error::SU_TERMSERV_HOST '${SU_TERMSERV_HOST}' is not a host name."; exit 1
+          fi
+
 
           # NGINX config, inlined: a reusable workflow cannot read files from
           # its own repository at its own ref, and fetching it from a branch
@@ -189,7 +198,7 @@ jobs:
                   location / {
                       client_max_body_size 5m;
                       # Forward to your target service
-                      proxy_pass https://ontoserver.mii-termserv.de;
+                      proxy_pass https://__SU_TERMSERV_HOST__;
                       proxy_ssl_server_name on;
 
                       # TLS client certificate settings
@@ -199,6 +208,7 @@ jobs:
               }
           }
           NGINX
+          sed -i "s/__SU_TERMSERV_HOST__/${SU_TERMSERV_HOST}/" nginx/nginx.conf
 
           # FHIR settings that allow the validator to use the plain-HTTP proxy
           # above: recent validator releases refuse non-https and private-
@@ -232,7 +242,7 @@ jobs:
           docker run -d --name nginx-proxy \
             -v $PWD/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
             -v $PWD/nginx/certs:/etc/nginx/certs:ro \
-            -p 8090:80 nginx:alpine
+            -p 8090:80 nginx:1.30.4-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
   
             sleep 5  # Give NGINX some time to start
 

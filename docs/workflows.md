@@ -39,6 +39,7 @@ Please, previews its own demo build, and monitors its own dependencies.
 | --- | --- | --- | --- | --- |
 | `release-please.yml` | push to `main` | Opens the SemVer release PR (tag + changelog) | `ENABLE_RELEASE_PLEASE` (ON) | **REMOVED by bootstrap** |
 | `notify-zulip.yml` | called by `release-please.yml` when it cuts a release; `release: published` for a hand-made release | Announces the template release to the MII Zulip (topic *Template Releases*) | `ENABLE_ZULIP_ANNOUNCE` (ON) · `ANNOUNCE_PUBLIC_ZULIP` (OFF) | **REMOVED by bootstrap** |
+| `pr-title.yml` | pull request | Checks the PR title for Conventional Commits (it becomes the squash commit Release Please reads) | — | **REMOVED by bootstrap** |
 | `ci_dotnet_validation.yml`, `ci_java_validation.yml` | `workflow_call` only (reusable) | The MII reusable validation workflows (SUSHI + Simplifier QC; HL7 Java validator against SU-TermServ), hosted here for every KDS module since kerndatensatz-meta#251. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_*.yml@<commit-SHA> # vX.Y.Z` | — (the caller's `ENABLE_VALIDATION`) | **REMOVED by bootstrap** |
 | `.github/actions/zts-packages/` | composite action (`uses:`) | Installs FHIR packages that exist only on the BfArM ZTS into the package cache, before SUSHI, the IG Publisher or the validator need them. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@<commit-SHA>`. See [§ FHIR packages from the BfArM ZTS](#fhir-packages-from-the-bfarm-zts) | — | **REMOVED by bootstrap** |
 | `release-demo.yml` | `release: published`; `workflow_dispatch` (inputs `tag`, `update_landing_page`) | Rebuilds the Pages **demo from the released tag** with the same pinned toolchain, verifies the render carries that version, publishes it to `gh-pages/demo/<tag>/` and regenerates the root index (`scripts/gen-pages-index.mjs`). See [§ The published demo](#the-published-demo) | `ENABLE_RELEASE_DEMO` (ON) · `ENABLE_VERSION_COMPARISON` (ON) · `PAGES_ACTIONS_ENABLED` | **REMOVED by bootstrap** |
@@ -131,6 +132,17 @@ covers the *secrets* that enable the gated features.
 | Public FHIR Zulip announcement (template only) | `ANNOUNCE_PUBLIC_ZULIP` | OFF |
 | Public FHIR Zulip sender (template only) | `FHIR_ZULIP_BOT_EMAIL` | unset |
 | Production `-go-publish` | manual `workflow_dispatch` + `publish:false` | OFF (gated) |
+
+**Org-level overrides** (docs/adr/0007). Org variables override the template defaults and are not visible outside the organisation; each validation run lists the effective values in its job summary. Currently set at org level:
+
+| Variable | Value | Note |
+| --- | --- | --- |
+| `SUSHI_VERSION` | 3.21.0 → to be raised to 3.21.1 | overrides the template default |
+| `JAVA_VALIDATOR_VERSION` | 6.9.11 → to be set to 6.10.4 | stays on 6.x until the comparison run (January 2027) |
+| `JAVA_VALIDATION_OPTIONS` | MII-wide option set incl. `-forPublication` | read by `validation.yml` |
+| `ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` | `kbv.all.terminology.allergyintolerance` | each entry needs a TF KDS decision (docs/adr/0013, #83) |
+
+Update this table in the same step as an org variable.
 
 The rows marked **template only** have no effect in a module: the bootstrap
 deletes `release-please.yml`, `notify-zulip.yml` and `release-demo.yml`, so a
