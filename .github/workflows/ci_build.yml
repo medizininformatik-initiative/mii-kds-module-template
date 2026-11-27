@@ -194,31 +194,43 @@ jobs:
 
       - name: Pre-install FHIR packages the IG Publisher 3.x refuses as published
         # de.ihe-d.terminology#3.0.1 (a dependency of kerndatensatz medikation
-        # and dokument) ships package/other/HEAD and package/other/v3.0 twice.
-        # IG Publisher 3.0.x refuses such a tarball ("Refusing to load the
-        # package ... it has more than one file named package/other/HEAD"),
-        # which stops every module that depends on it, also transitively.
-        # Extracted into the package cache it loads like any other package:
-        # tar keeps the last of two identical entries. The list is the
-        # variable FHIR_PACKAGES_PREINSTALL (name#version, space-separated);
-        # drop an entry once a fixed version is published and used.
+        # and dokument) ships a packed .git directory, so package/other/HEAD and
+        # package/other/v3.0 appear more than once. IG Publisher 3.0.x refuses
+        # such a tarball ("Refusing to load the package ... it has more than one
+        # file named package/other/HEAD"), which stops every module that depends
+        # on it, also transitively. The cleaned copy in the MII fhir-package-store
+        # (cache-store branch) is placed into the package cache, where the
+        # publisher loads it without the tarball check. The list is the variable
+        # FHIR_PACKAGES_PREINSTALL (name#version, space-separated). Each entry and
+        # its exit condition are recorded in docs/adr/0010; drop an entry once
+        # its upstream fix is in use.
         shell: bash
         env:
           PACKAGES: ${{ vars.FHIR_PACKAGES_PREINSTALL || 'de.ihe-d.terminology#3.0.1' }}
+          STORE: https://github.com/medizininformatik-initiative/fhir-package-store.git
+          STORE_REF: cache-store
         run: |
           set -euo pipefail
+          store="${RUNNER_TEMP}/fhir-package-store"
+          missing=()
           for spec in ${PACKAGES}; do
-            name="${spec%%#*}"; version="${spec#*#}"
-            if [[ "${name}" == "${spec}" || ! "${spec}" =~ ^[A-Za-z0-9._-]+#[A-Za-z0-9._-]+$ ]]; then
+            if [[ ! "${spec}" =~ ^[A-Za-z0-9._-]+#[A-Za-z0-9._-]+$ ]]; then
               echo "::error::FHIR_PACKAGES_PREINSTALL entry '${spec}' is not name#version."; exit 1
             fi
-            dir="${HOME}/.fhir/packages/${name}#${version}"
-            if [[ -f "${dir}/package/package.json" ]]; then continue; fi
-            mkdir -p "${dir}"
-            curl --fail --location --silent --show-error --max-time 120 \
-              "https://packages.fhir.org/${name}/${version}" | tar -xz -C "${dir}"
-            test -f "${dir}/package/package.json"
-            echo "Pre-installed ${name}#${version} into the package cache."
+            [[ -f "${HOME}/.fhir/packages/${spec}/package/package.json" ]] || missing+=("${spec}")
+          done
+          if [[ ${#missing[@]} -eq 0 ]]; then exit 0; fi
+          patterns=()
+          for spec in "${missing[@]}"; do patterns+=("/packages/${spec}/"); done
+          git clone --quiet --depth 1 --filter=blob:none --sparse --branch "${STORE_REF}" "${STORE}" "${store}"
+          git -C "${store}" sparse-checkout set --no-cone "${patterns[@]}"
+          mkdir -p "${HOME}/.fhir/packages"
+          for spec in "${missing[@]}"; do
+            if [[ ! -f "${store}/packages/${spec}/package/package.json" ]]; then
+              echo "::error::${spec} is not in the fhir-package-store (${STORE_REF}); add it there or remove it from FHIR_PACKAGES_PREINSTALL."; exit 1
+            fi
+            cp -R "${store}/packages/${spec}" "${HOME}/.fhir/packages/${spec}"
+            echo "Pre-installed ${spec} from the fhir-package-store."
           done
 
       - name: Module hook before SUSHI
@@ -320,11 +332,11 @@ jobs:
               --publish 8090:80 \
               nginx:1.30.4-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
             ready=false
-            for _ in {1..15}; do
-              if curl --head --silent --fail http://127.0.0.1:8090 >/dev/null; then ready=true; break; fi
+            for _ in {1..10}; do
+              if curl --silent --fail --max-time 20 --output /dev/null http://127.0.0.1:8090/fhir/metadata; then ready=true; break; fi
               sleep 2
             done
-            if [[ "${ready}" != "true" ]]; then docker logs preview-nginx; exit 1; fi
+            if [[ "${ready}" != "true" ]]; then echo "::error::SU-TermServ is not reachable through the proxy (GET /fhir/metadata failed). Check the client certificate and the host, or switch the host with SU_TERMSERV_HOST (docs/adr/0009)."; docker logs preview-nginx; exit 1; fi
             echo "tx=http://127.0.0.1:8090/fhir" >> "${GITHUB_OUTPUT}"
             echo "Terminology: SU-TermServ (${SU_TERMSERV_HOST}) via client-certificate proxy" >> "${GITHUB_STEP_SUMMARY}"
           else
