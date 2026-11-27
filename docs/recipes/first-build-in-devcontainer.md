@@ -72,7 +72,7 @@ access (the first build downloads the base image and tools):
    ```sh
    java -version     # OpenJDK 17.x
    node --version    # v22.23.1
-   sushi --version   # SUSHI v3.20.1
+   sushi --version   # SUSHI v3.21.0
    ruby --version    # ruby 3.3.12
    jekyll --version  # jekyll 4.4.1
    dot -V            # graphviz version ...
@@ -148,6 +148,7 @@ access (the first build downloads the base image and tools):
 | Toast never appears; no "Reopen in Container" command | The Dev Containers extension is missing. | Install `ms-vscode-remote.remote-containers`, then reload VS Code. |
 | Container start fails with a bind-mount error mentioning `.fhir` | The container mounts `~/.fhir` (the FHIR package cache) from your host, and your Docker setup refuses to auto-create it. | Create it once on the **host**: `mkdir ~/.fhir` — then rebuild. |
 | First build seems stuck at the Ruby feature | Ruby is compiling from source; this is the slow step. | Wait — it can take several minutes. Do not cancel. |
+| Publisher (3.0.5 or later) stops with `The template '…ig-template-mii-kds' runs scripts, and it is not a trusted template` | The MII IG template ships scripts, and the publisher runs such a template only once it is trusted. CI passes `.github/fhir-settings.json`, which trusts it; a plain `-ig ig.ini` run reads your own `~/.fhir/fhir-settings.json` instead. | Add `-fhir-settings .github/fhir-settings.json` to the command, or run once with `-trust-template https://github.com/medizininformatik-initiative/ig-template-mii-kds`, which records the trust in your own settings file. |
 | Publisher dies with `java.lang.OutOfMemoryError: Java heap space` | The IG Publisher needs more heap than the JVM default; KDS builds with many dependencies are memory-hungry. | Run it with an explicit heap limit: `java -Xmx6g -jar publisher.jar -ig ig.ini` (raise to `-Xmx8g` if your machine has the RAM; also raise Docker Desktop's memory limit if the container itself is capped). |
 | Publisher hangs or fails while "Fetching" / "Loading" packages; or errors mention a corrupt package | The FHIR package cache (`~/.fhir/packages`) has a truncated download from an interrupted run. | Delete the offending package directory from `~/.fhir/packages` on the host (or the whole `packages` folder in the worst case) and rebuild — the cache repopulates. |
 | QA report notes that value sets could not be expanded; log shows a fallback notice about `tx.fhir.org` | No SU-TermServ client certificate configured, so the build used the public HL7 terminology server, which does not carry every MII-specific value set. | Expected fallback behavior, not a failure — see the terminology note in step 8. For full expansion a maintainer configures the SU-TermServ client-certificate secret (Germany-only access). |

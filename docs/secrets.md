@@ -37,6 +37,13 @@ The build workflows pass `-fhir-settings .github/fhir-settings.json` to the
 IG Publisher: it allowlists the proxy's plain-HTTP private-network address
 (`http://127.0.0.1:8090/fhir`), which the publisher's SSRF hardening (2.3.1+)
 would otherwise refuse. The file has no effect on the `tx.fhir.org` fallback.
+It also lists the MII IG template under `trustedTemplates`: IG Publisher 3.0.5
+and later stop on a template that runs scripts unless it is trusted there (see
+`ig.ini` and `scripts/template-trust.test.mjs`). The MII IG template always
+counts as running scripts, because it ships JavaScript assets. Listing it is a
+decision to run the template's content in CI. The list names the MII template
+and never `all`: `all` would also run any other template, including one that a
+pull request puts into `ig.ini`.
 
 SU-TermServ authenticates clients with **mutual TLS**. Verified against the live
 server (`openssl s_client` to `ontoserver.mii-termserv.de:443`):
@@ -132,7 +139,8 @@ certificate fails the handshake, so rotate before `notAfter`.
 
 ## Simplifier login (the .NET validation job)
 
-`validation.yml` calls the MII reusable `ci_dotnet_validation.yml` with
+`validation.yml` calls the MII reusable `ci_dotnet_validation.yml` (hosted in
+this repository's `.github/workflows/` since kerndatensatz-meta#251) with
 `secrets: inherit`; its Simplifier Quality-Control step signs in to
 [Simplifier](https://simplifier.net) with two repository secrets:
 
