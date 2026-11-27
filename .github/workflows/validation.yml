@@ -73,6 +73,38 @@ permissions:
   pull-requests: write
 
 jobs:
+  # Which toolchain this validation runs with, and where each value comes from.
+  # Org variables override the template defaults below, and they are not
+  # visible outside the organisation, so every run states the effective values
+  # in its job summary (docs/adr/0007).
+  toolchain:
+    if: ${{ vars.ENABLE_VALIDATION != 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report toolchain versions and their source
+        shell: bash
+        env:
+          SUSHI: ${{ vars.SUSHI_VERSION || '3.21.1' }}
+          SUSHI_SRC: ${{ vars.SUSHI_VERSION && 'variable SUSHI_VERSION' || 'template default' }}
+          VALIDATOR: ${{ vars.JAVA_VALIDATOR_VERSION || '7.0.8' }}
+          VALIDATOR_SRC: ${{ vars.JAVA_VALIDATOR_VERSION && 'variable JAVA_VALIDATOR_VERSION' || 'template default' }}
+          OPTIONS_SRC: ${{ vars.JAVA_VALIDATION_OPTIONS && 'variable JAVA_VALIDATION_OPTIONS' || 'template default (-advisor-file advisor.json)' }}
+          TX_HOST: ${{ vars.SU_TERMSERV_HOST || 'ontoserver.mii-termserv.de' }}
+          TX_SRC: ${{ vars.SU_TERMSERV_HOST && 'variable SU_TERMSERV_HOST' || 'template default' }}
+        run: |
+          {
+            echo "### Validation toolchain"
+            echo
+            echo "| Tool | Value | Source |"
+            echo "| --- | --- | --- |"
+            echo "| SUSHI | ${SUSHI} | ${SUSHI_SRC} |"
+            echo "| HL7 Java validator | ${VALIDATOR} | ${VALIDATOR_SRC} |"
+            echo "| Java validator options | — | ${OPTIONS_SRC} |"
+            echo "| SU-TermServ host | ${TX_HOST} | ${TX_SRC} |"
+            echo
+            echo "A variable can be set at organisation or repository level; the repository value wins."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
   # The upstream dotnet workflow declares SIMPLIFIER_USERNAME/SIMPLIFIER_PASSWORD
   # as REQUIRED secrets — calling it without them fails at workflow evaluation
   # with zero steps ("Secret SIMPLIFIER_USERNAME is required, but not
