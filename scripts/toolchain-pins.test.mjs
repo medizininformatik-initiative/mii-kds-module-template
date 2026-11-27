@@ -15,6 +15,7 @@ import { parseWorkflowEnvPin } from "./check-updates.mjs";
 const repository = fileURLToPath(new URL("../", import.meta.url));
 
 const WORKFLOWS = [
+  ".github/workflows/ci_build.yml",
   ".github/workflows/go-publish.yml",
   ".github/workflows/ig-publisher.yml",
   ".github/workflows/module-release.yml",
