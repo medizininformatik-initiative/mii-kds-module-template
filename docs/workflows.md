@@ -190,6 +190,24 @@ BfArM download conditions do not allow redistributing the package contents:
 
 ---
 
+### What a branch preview keeps
+
+GitHub rejects a push that contains a file over 100 MB, and large dependency
+sets push the IG Publisher output past that (molekulares-tumorboard's
+`full-ig.zip`: 118 MB; onkologie's `qa-tx.html`: 119 MB). Before the push to
+`gh-pages/branches/<branch>/`, `ig-publisher.yml` and `ci_build.yml` therefore
+
+- condense `qa-tx.html`, the raw log of every terminology-server call, into
+  **`qa-tx.json`**: one entry per call (operation, inputs, result, issues) plus
+  counts and failures per code system, without HTTP headers and expansion
+  contents, about 3 % of the size (`scripts/qa-tx-summary.mjs`, embedded in
+  both workflows; `scripts/qa-tx-summary.test.mjs` checks the copies);
+- drop the offline bundle `full-ig.zip`, the validator pack, the package
+  database, the expansion cache and any file over 50 MB, which includes a large
+  `qa-tx.html`. `qa.html`, `qa.xml`, `qa.txt` and `qa-txservers.html` stay.
+
+The formal publication (`go-publish.yml`) keeps every file.
+
 ## Release — the two schemes, never mixed
 
 - **This template repo:** **SemVer** via Release Please on `main` (Layer 1).
