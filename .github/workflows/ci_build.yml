@@ -601,6 +601,13 @@ jobs:
           rm -rf "${branch_dir}"
           mkdir -p "${branch_dir}"
           cp -R "output/." "${branch_dir}/"
+          # GitHub rejects files over 100 MB on push (GH001), and large
+          # dependency sets push full-ig.zip past that (molekulares-tumorboard:
+          # 118 MB). A branch preview is for review; the offline bundle, the
+          # validator pack, the package db and the expansion cache add nothing
+          # to review and are rebuilt by every run. The formal go-publish output
+          # is not affected.
+          find "${branch_dir}" -type f \( -size +50M -o -name 'full-ig.zip' -o -name 'validator.pack' -o -name 'validator-*.json' -o -name 'package.db' -o -name 'expansions.json' -o -name 'expansions.db' -o -name 'package.tgz.zip' \) -print -delete | sed 's/^/preview: dropped heavy file: /'
           # Marker consumed by cleanup-gh-pages.yml to detect deleted branches.
           echo "${BRANCH}" > "${branch_dir}/.branch-name"
           # TEMPLATE REPOSITORY ONLY: (re)generate the root index — a plain
