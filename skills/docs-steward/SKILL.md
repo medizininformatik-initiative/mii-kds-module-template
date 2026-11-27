@@ -174,8 +174,10 @@ working, not where a reader needs it. Remove:
 - **Progress and status residue** — "not yet available", "landing in a separate
   change", "(planned)", "TODO(agent)", "confirmed on `<date>`" banners. Check
   each against reality; most describe something that has since shipped.
-- **Attribution to an AI** — as author, co-author or reviewer, in files, commit
-  templates or contribution templates.
+- **AI attribution inside content** — an AI named as author, co-author or reviewer
+  in docs, file headers or specification pages. Disclosure of AI assistance belongs
+  in commit trailers and pull-request descriptions (`AGENTS.md`, "AI assistance is
+  disclosed"); never remove it there.
 - **Duplicated rationale** — the same "why" restated in every file that touches
   the topic.
 
