@@ -65,7 +65,8 @@ in order of preference:
   URL reference.
 - Your module already builds green today against the current template reference (so you
   have a clean baseline to compare against).
-- `sushi` (`3.20.0`), the IG Publisher jar (`2.3.0`), and `jq` are available —
+- `sushi`, the IG Publisher jar (at the versions CI pins; see
+  [`docs/maintenance.md`](../maintenance.md#where-each-pin-lives-single-source-of-truth)) and `jq` are available —
   the dev container has all three. Or push the branch and let the
   `IG build and preview` workflow build it for you.
 
@@ -76,7 +77,7 @@ in order of preference:
 
    ```bash
    sushi .
-   java -Xmx6g -jar publisher.jar -ig ig.ini
+   java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    cp output/qa.json /tmp/qa-before.json
    jq '{errs, warnings, hints}' output/qa.json   # note these counts
    ```
@@ -133,7 +134,7 @@ in order of preference:
 
    ```bash
    sushi .
-   java -Xmx6g -jar publisher.jar -ig ig.ini
+   java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 
    The Publisher now downloads `de.medizininformatikinitiative.template#0.1.0`

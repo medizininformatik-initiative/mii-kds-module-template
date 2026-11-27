@@ -93,7 +93,7 @@ on:
         type: string
       JAVA_VALIDATOR_VERSION:
         description: 'Version of org.hl7.fhir.core library used for Java-based validation'
-        default: '6.10.4'
+        default: '7.0.8'
         required: false
         type: string
       JAVA_VALIDATOR_DOWNLOAD_LOCATION:

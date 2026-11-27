@@ -109,7 +109,7 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
-      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.0' }}
+      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.1' }}
       # FHIR packages that exist only on the BfArM ZTS (#55); empty = no-op.
       ZTS_ACCEPTED_DOWNLOAD_CONDITIONS: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
       ZTS_PACKAGES: ${{ vars.ZTS_PACKAGES }}
@@ -153,10 +153,12 @@ jobs:
       JAVA_VALIDATION_ENABLED: true
       # Compile FSH in the job: modules do not commit fsh-generated/. Same
       # pinned SUSHI as the .NET job above; overridable via the repo variable.
-      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.0' }}
-      # Pinned Java validator (fixed versions); mirrors the reusable workflow's
-      # own default at the pinned SHA. Overridable via the repo variable.
-      JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '6.10.4' }}
+      SUSHI_VERSION: ${{ vars.SUSHI_VERSION || '3.21.1' }}
+      # Pinned Java validator (fixed versions), passed explicitly so the
+      # reusable workflow's own default at the pinned SHA does not apply.
+      # 7.0.x matches IG Publisher 3.0.x. Overridable via the repo or org
+      # variable JAVA_VALIDATOR_VERSION.
+      JAVA_VALIDATOR_VERSION: ${{ vars.JAVA_VALIDATOR_VERSION || '7.0.8' }}
       # Wire the repo's advisor file into the validator CLI. The reusable
       # workflow passes JAVA_VALIDATION_OPTIONS verbatim to validator_cli.jar
       # (verified at the pinned SHA); without this the advisor.json shipped at
