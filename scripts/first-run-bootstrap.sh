@@ -180,7 +180,7 @@ main() {
   # calls them here by SHA pin; a copy inside the module would only go stale.
   # .github/actions/zts-packages installs FHIR packages that exist only on the
   # BfArM ZTS (#55); modules use it here by SHA pin, for the same reason.
-  local REMOVE=".github/workflows/release-please.yml .github/workflows/notify-zulip.yml .github/workflows/release-demo.yml .github/workflows/ci_dotnet_validation.yml .github/workflows/ci_java_validation.yml .github/actions/zts-packages release-please-config.json .release-please-manifest.json CHANGELOG.md"
+  local REMOVE=".github/workflows/release-please.yml .github/workflows/notify-zulip.yml .github/workflows/release-demo.yml .github/workflows/ci_dotnet_validation.yml .github/workflows/ci_java_validation.yml .github/actions/zts-packages release-please-config.json .release-please-manifest.json CHANGELOG.md .github/workflows/pr-title.yml"
   # NEVER: module content, build input, and PROPAGATED tooling that a
   # module keeps. A removal target colliding here is a bug → hard abort.
   local NEVER="input sushi-config.yaml ig.ini publication-request.json advisor.json qc scripts skills .claude .agents AGENTS.md LICENSE README.md CONTRIBUTING.md docs/recipes/first-run-setup.md .devcontainer .editorconfig .gitignore .github/dependabot.yml .github/CODEOWNERS .github/ISSUE_TEMPLATE .github/workflows/go-publish.yml .github/workflows/convention-check.yml .github/workflows/security-scan.yml .github/workflows/dependency-check.yml .github/workflows/sync-scripts.yml scripts/sync-scripts.sh scripts/convention-check.mjs scripts/convention-check.test.mjs scripts/language-model-check.sh"

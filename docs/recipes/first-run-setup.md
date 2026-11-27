@@ -95,6 +95,8 @@ Read the output. It prints, in order:
     *template* repo.
   - `.github/workflows/notify-zulip.yml` — announces the *template's* SemVer
     releases (your module announces its own CalVer releases instead).
+  - `.github/workflows/pr-title.yml` — checks the *template's* PR titles for
+    Conventional Commits, which Release Please turns into release notes.
   - `.github/workflows/release-demo.yml` — renders the *template's* Pages demo
     from a SemVer tag. Your module has no such demo: its Pages surface is the
     gated formal-publication output.
@@ -227,7 +229,7 @@ npx skills add forschungsgruppe-digital-health/agent-skills/tree/<release> --ski
 - `main` and `dev` both exist and are protected (Settings → Branches shows the
   rules).
 - The Release Please files (`release-please.yml`, `release-please-config.json`,
-  `.release-please-manifest.json`), `notify-zulip.yml`, `release-demo.yml`, the
+  `.release-please-manifest.json`), `notify-zulip.yml`, `release-demo.yml`, `pr-title.yml`, the
   hosted reusable workflows `ci_dotnet_validation.yml` and `ci_java_validation.yml`,
   the hosted action `.github/actions/zts-packages`
   and the template `CHANGELOG.md` are gone; this recipe, `scripts/first-run-bootstrap.sh` and
