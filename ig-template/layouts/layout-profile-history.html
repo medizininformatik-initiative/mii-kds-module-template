@@ -1,0 +1,35 @@
+---
+---
+{% comment %}
+  Override of fhir2.base.template 0.1.0 layouts/layout-profile-history.html for
+  ONE defect: the base emits the page heading twice - line 14 repeats line 13
+  as a second <h2 id="root"> and never closes it. IG Publisher 3.0+ reports that
+  as an error on every *.profile.history.html (more than one top-level
+  heading) plus HTML_DUPLICATE_ID and HTML_NOT_WELL_FORMED (issue #33). This
+  copy is verbatim from 0.1.0 except that line 14 is removed.
+  Fixed upstream in HL7/ig-template-base2 5b8c9667 (2026-09-15), not yet
+  released (HL7/ig-template-base2#7).
+  REMOVAL: delete this file - and the layouts/ folder - the day the pinned base
+  is a release that contains 5b8c9667. A same-path override is invisible drift
+  on base updates (styleguide section 1).
+{% endcomment %}
+{% assign localPage = page.path | split: "/" | last %}
+{% include fragment-modelType.html type='{{[type]}}' id='{{[id]}}' lang="{{[lang]}}" %}
+{% include fragment-pagebegin.html lang="{{[lang]}}" %}
+<!-- layouts\layout-profile-history -->
+<div style="counter-reset: section 10" class="col-12">
+  <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
+  {% include fragment-profile-navtabs.html type='{{[type]}}' id='{{[id]}}' active='history' lang="{{[lang]}}" %}
+
+  <a name="root"> </a>
+{% assign respath = site.data.resources[resource_].path %}
+  <h2 id="root">{{modelType}}: {{site.data.pages[respath].titlelang['{{[lang]}}'] | escape_once}} - {{site.data.stringsBase['{{[lang]}}']['ChangeHistory']}}</h2>
+{% include fragment-simpletable.html lang="{{[lang]}}" %}
+{% assign modelLower = modelType | downcase %}
+  <p>{{site.data.stringsBase['{{[lang]}}']['ChangesIn'] | replace: "%ID%", "{{[id]}}" | replace: "%TYPE%", modelLower}}</p>
+
+  {% include {{[type]}}-{{[id]}}-history{{[langsuffix]}}.xhtml %}
+
+</div>
+{% assign includetabscripts = 'true' %}
+{% include fragment-pageend.html lang="{{[lang]}}" %}

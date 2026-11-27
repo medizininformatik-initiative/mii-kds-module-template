@@ -36,8 +36,10 @@ while [ $# -gt 0 ]; do
 done
 
 # The template package content the IG Publisher consumes. `translations/` carries
-# the vendored German UI-string catalogs, so it MUST be synced too.
-PARTS=(package includes content translations)
+# the vendored German UI-string catalogs, and `layouts/` the page-layout
+# overrides (since template 1.4.0), so both MUST be synced too. A part the
+# source does not have is skipped.
+PARTS=(package includes content translations layouts)
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 tmp="$(mktemp -d)"
