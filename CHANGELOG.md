@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.15.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.14.0...v0.15.0) (2026-11-27)
+
+
+### Features
+
+* **ci:** reusable IG build (ci_build.yml) and a switchable SU-TermServ host ([#80](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/80)) ([375909e](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/375909e84a39b5288baf471cbe99a5aa64c276e0))
+
+
+### Toolchain and maintenance
+
+* back-merge main into dev after release 0.14.0 ([f3d3153](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/f3d315319e4d58ccce14056582a2cf4f9b84ec74))
+* **dependabot:** own group for the template's workflow pins ([#87](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/87)) ([4840a41](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/4840a41c1c73945ca0a21e1c8b7aca7f6f58f2bb))
+* **release:** complete release notes and a PR-title check ([#86](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/86)) ([f8be11d](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/f8be11d91185747977bb2f6383bb2364907cd7b1))
+
+
+### CI
+
+* **validation:** report toolchain versions and their source in the job summary ([#88](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/88)) ([6e4ff47](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/6e4ff473d028ea5d9ab7dde24f909700561833bc))
+
+
+### Documentation
+
+* **adr:** record the architecture decisions of the template and the module pipeline ([#81](https://github.com/medizininformatik-initiative/mii-kds-module-template/issues/81)) ([f8e414f](https://github.com/medizininformatik-initiative/mii-kds-module-template/commit/f8e414f0eb9b0e80f10814437d4c670a1f0f354a))
+
 ## [0.14.0](https://github.com/medizininformatik-initiative/mii-kds-module-template/compare/v0.13.2...v0.14.0) (2026-11-27)
 
 
