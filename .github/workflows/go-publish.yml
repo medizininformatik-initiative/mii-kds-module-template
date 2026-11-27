@@ -517,6 +517,47 @@ jobs:
           packages: ${{ vars.ZTS_PACKAGES }}
           sushi-config: source/sushi-config.yaml
 
+      - name: Pre-install FHIR packages the IG Publisher 3.x refuses as published
+        # de.ihe-d.terminology#3.0.1 (a dependency of kerndatensatz medikation
+        # and dokument) ships a packed .git directory, so package/other/HEAD and
+        # package/other/v3.0 appear more than once. IG Publisher 3.0.x refuses
+        # such a tarball ("Refusing to load the package ... it has more than one
+        # file named package/other/HEAD"), which stops every module that depends
+        # on it, also transitively. The cleaned copy in the MII fhir-package-store
+        # (cache-store branch) is placed into the package cache, where the
+        # publisher loads it without the tarball check. The list is the variable
+        # FHIR_PACKAGES_PREINSTALL (name#version, space-separated). Each entry and
+        # its exit condition are recorded in docs/adr/0010; drop an entry once
+        # its upstream fix is in use.
+        shell: bash
+        env:
+          PACKAGES: ${{ vars.FHIR_PACKAGES_PREINSTALL || 'de.ihe-d.terminology#3.0.1' }}
+          STORE: https://github.com/medizininformatik-initiative/fhir-package-store.git
+          STORE_REF: cache-store
+        run: |
+          set -euo pipefail
+          store="${RUNNER_TEMP}/fhir-package-store"
+          missing=()
+          for spec in ${PACKAGES}; do
+            if [[ ! "${spec}" =~ ^[A-Za-z0-9._-]+#[A-Za-z0-9._-]+$ ]]; then
+              echo "::error::FHIR_PACKAGES_PREINSTALL entry '${spec}' is not name#version."; exit 1
+            fi
+            [[ -f "${HOME}/.fhir/packages/${spec}/package/package.json" ]] || missing+=("${spec}")
+          done
+          if [[ ${#missing[@]} -eq 0 ]]; then exit 0; fi
+          patterns=()
+          for spec in "${missing[@]}"; do patterns+=("/packages/${spec}/"); done
+          git clone --quiet --depth 1 --filter=blob:none --sparse --branch "${STORE_REF}" "${STORE}" "${store}"
+          git -C "${store}" sparse-checkout set --no-cone "${patterns[@]}"
+          mkdir -p "${HOME}/.fhir/packages"
+          for spec in "${missing[@]}"; do
+            if [[ ! -f "${store}/packages/${spec}/package/package.json" ]]; then
+              echo "::error::${spec} is not in the fhir-package-store (${STORE_REF}); add it there or remove it from FHIR_PACKAGES_PREINSTALL."; exit 1
+            fi
+            cp -R "${store}/packages/${spec}" "${HOME}/.fhir/packages/${spec}"
+            echo "Pre-installed ${spec} from the fhir-package-store."
+          done
+
       - name: Select terminology server
         id: terminology
         shell: bash
@@ -524,6 +565,7 @@ jobs:
           SU_TERMSERV_CLIENT_CERT: ${{ secrets.SU_TERMSERV_CLIENT_CERT }}
           SU_TERMSERV_CLIENT_KEY: ${{ secrets.SU_TERMSERV_CLIENT_KEY }}
           SU_TERMSERV_CLIENT_PASSWORD: ${{ secrets.SU_TERMSERV_CLIENT_PASSWORD }}
+          SU_TERMSERV_HOST: ${{ vars.SU_TERMSERV_HOST || 'ontoserver.mii-termserv.de' }}
         run: |
           set -euo pipefail
           # Prefer the MII terminology server (SU-TermServ) through the
@@ -542,6 +584,13 @@ jobs:
               -out "${nginx_dir}/certs/client-key.key" \
               -passin env:SU_TERMSERV_CLIENT_PASSWORD
             chmod 600 "${nginx_dir}/certs/"*
+            # Upstream host from vars.SU_TERMSERV_HOST (default production), so the org can
+            # switch every module, e.g. to ontoserver-staging.su-termserv.de (docs/adr/0009).
+            if [[ ! "${SU_TERMSERV_HOST}" =~ ^[A-Za-z0-9.-]+$ ]]; then
+              echo "::error::SU_TERMSERV_HOST '${SU_TERMSERV_HOST}' is not a host name."; exit 1
+            fi
+            sed -i "s#proxy_pass https://ontoserver.mii-termserv.de;#proxy_pass https://${SU_TERMSERV_HOST};#" "${nginx_dir}/nginx.conf"
+            grep -q "proxy_pass https://${SU_TERMSERV_HOST};" "${nginx_dir}/nginx.conf"
 
             docker run --detach --name publication-nginx \
               --volume "${nginx_dir}/nginx.conf:/etc/nginx/nginx.conf:ro" \
@@ -550,14 +599,15 @@ jobs:
               nginx:1.30.4-alpine@sha256:97d490c12ba55b4946b01546d1c3ed324e8d41ab1c9fcb2a616aa470620e5b46
 
             ready=false
-            for attempt in {1..15}; do
-              if curl --head --silent --fail http://127.0.0.1:8090 >/dev/null; then
+            for attempt in {1..10}; do
+              if curl --silent --fail --max-time 20 --output /dev/null http://127.0.0.1:8090/fhir/metadata; then
                 ready=true
                 break
               fi
               sleep 2
             done
             if [[ "${ready}" != "true" ]]; then
+              echo "::error::SU-TermServ is not reachable through the proxy (GET /fhir/metadata failed). Check the client certificate and the host, or switch the host with SU_TERMSERV_HOST (docs/adr/0009)."
               docker logs publication-nginx
               exit 1
             fi
