@@ -33,8 +33,12 @@ all four — you never store the certificate twice.
 
 ### What kind of certificate is required
 
-The build workflows pass `-fhir-settings .github/fhir-settings.json` to the
-IG Publisher: it allowlists the proxy's plain-HTTP private-network address
+The build workflows pass the settings to the IG Publisher with `-fhir-settings`.
+They do not pass `.github/fhir-settings.json` as it is: a step before the build
+("Effective FHIR settings") reads it, adds the two entries below when they are
+missing, keeps everything else, and hands the result from `$RUNNER_TEMP` to the
+publisher. A module whose copy of the file predates an entry still builds.
+The settings allowlist the proxy's plain-HTTP private-network address
 (`http://127.0.0.1:8090/fhir`), which the publisher's SSRF hardening (2.3.1+)
 would otherwise refuse. The file has no effect on the `tx.fhir.org` fallback.
 It also lists the MII IG template under `trustedTemplates`: IG Publisher 3.0.5

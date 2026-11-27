@@ -292,6 +292,36 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash scripts/seed-comparison-cache.sh
 
+      - name: Effective FHIR settings (module file + template trust and proxy)
+        # The module's .github/fhir-settings.json is a copy made when the module
+        # was created and is never updated. IG Publisher 3.0.5+ stops on the MII
+        # IG template unless it is listed under trustedTemplates, and 2.3.1+
+        # refuses the plain-HTTP local SU-TermServ proxy unless it is allowed.
+        # This step adds both when the module's file lacks them, keeps
+        # everything else the module set, never adds "all", and hands the
+        # result to the publisher. A module with an old settings file builds
+        # with any publisher from 2.3.1 on.
+        shell: bash
+        env:
+          MODULE_SETTINGS: ${{ github.workspace }}/.github/fhir-settings.json
+        run: |
+          set -euo pipefail
+          out="${RUNNER_TEMP}/fhir-settings.json"
+          base='{}'
+          if [ -s "${MODULE_SETTINGS}" ]; then base="$(cat "${MODULE_SETTINGS}")"; fi
+          jq -n --argjson base "${base}" '
+            $base
+            | .servers = ((.servers // []) as $s
+                | if any($s[]; .url == "http://127.0.0.1:8090/fhir") then $s
+                  else $s + [{"url": "http://127.0.0.1:8090/fhir", "type": "fhir",
+                              "authenticationType": "none", "allowHttp": true,
+                              "allowPrivateNetwork": true}] end)
+            | .trustedTemplates = ((.trustedTemplates // [])
+                + ["https://github.com/medizininformatik-initiative/ig-template-mii-kds", "#ig-template"]
+                | unique)
+          ' > "${out}"
+          echo "FHIR settings: $(jq -c '{servers: [.servers[].url], trustedTemplates}' "${out}")"
+
       - name: Build IG (SUSHI already ran) with the pinned IG Publisher
         if: ${{ steps.build.outputs.mode == 'full' }}
         shell: bash
@@ -312,7 +342,7 @@ jobs:
           # on a template with scripts that is not trusted (kerndatensatz-basis
           # @bad77b36; scripts/template-trust.test.mjs keeps it matching ig.ini).
           java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" -ig ig.ini -tx "${TX_URL}" \
-            -fhir-settings "${GITHUB_WORKSPACE}/.github/fhir-settings.json"
+            -fhir-settings "${RUNNER_TEMP}/fhir-settings.json"
           test -s output/index.html
           jq empty output/qa.json
 
