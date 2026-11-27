@@ -105,7 +105,7 @@ jobs:
     # ON by default, and only on created modules — the placeholder
     # template repo cannot produce clean SUSHI output for validation.
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.dotnet-validation-guard.outputs.has_creds == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@2700849d47c0d1a991b8780ff4b631fed8ec9eef # mii-kds-module-template dev @ 2026-11-13 (#57)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_dotnet_validation.yml@039cc882b8efbbf88c5165a3ce9530e9d86706eb # mii-kds-module-template dev @ 2026-11-27 (#70-#75)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       # Pinned SUSHI (fixed versions); overridable via the repo variable.
@@ -113,6 +113,10 @@ jobs:
       # FHIR packages that exist only on the BfArM ZTS (#55); empty = no-op.
       ZTS_ACCEPTED_DOWNLOAD_CONDITIONS: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
       ZTS_PACKAGES: ${{ vars.ZTS_PACKAGES }}
+      # Commit fsh-generated/resources back to the PR branch. Needed when
+      # Simplifier builds the package (Bake); set the repo variable
+      # COMMIT_FSH_GENERATED to 'false' when the IG Publisher builds it.
+      COMMIT_GENERATED: ${{ vars.COMMIT_FSH_GENERATED != 'false' }}
     secrets: inherit
 
   # The upstream Java-validation workflow has NO terminology fallback: it
@@ -145,7 +149,7 @@ jobs:
     name: HL7 Java validator (SU-TermServ)
     needs: java-validation-guard
     if: ${{ vars.ENABLE_VALIDATION != 'false' && !endsWith(github.repository, '/mii-kds-module-template') && needs.java-validation-guard.outputs.has_cert == 'true' }}
-    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@2700849d47c0d1a991b8780ff4b631fed8ec9eef # mii-kds-module-template dev @ 2026-11-13 (#57)
+    uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_java_validation.yml@039cc882b8efbbf88c5165a3ce9530e9d86706eb # mii-kds-module-template dev @ 2026-11-27 (#70-#75)
     with:
       ref: ${{ github.event.pull_request.head.ref || github.ref }}
       PATH_TO_CONFORMANCE_RESOURCES: fsh-generated/resources
