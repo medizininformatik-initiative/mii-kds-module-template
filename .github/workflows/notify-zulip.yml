@@ -37,11 +37,35 @@
 name: Announce release
 
 on:
+  # A release created by Release Please is published with the default
+  # GITHUB_TOKEN, and GitHub starts no workflow for events that token raises,
+  # so `release: published` never fires for it. release-please.yml therefore
+  # CALLS this workflow (workflow_call) in the run that created the release,
+  # the same way it calls release-demo.yml. The release trigger stays for a
+  # release a human publishes by hand; such a release is not also called, so
+  # nothing is announced twice.
   release:
     types: [published]
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag to announce, e.g. v1.4.0"
+        required: true
+        type: string
+      prerelease:
+        description: "Whether the release is a prerelease (gates the public job)"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
+
+env:
+  # One source for both triggers: the called run passes the tag, the release
+  # event carries it in its payload.
+  RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+  RELEASE_URL: ${{ github.event.release.html_url || format('{0}/{1}/releases/tag/{2}', github.server_url, github.repository, inputs.tag) }}
 
 jobs:
   mii:
@@ -64,15 +88,15 @@ jobs:
           # announcements stay separate from module CalVer announcements.
           topic: "Template Releases"
           content: |
-            **New template release:** `${{ github.repository }}` `${{ github.event.release.tag_name }}`
-            ${{ github.event.release.html_url }}
+            **New template release:** `${{ github.repository }}` `${{ env.RELEASE_TAG }}`
+            ${{ env.RELEASE_URL }}
       - name: Skip notice when ZULIP_API_KEY is absent
         if: ${{ env.ZULIP_API_KEY == '' }}
         run: echo "::notice::ZULIP_API_KEY not set — skipping MII announcement."
 
   public:
     # Public FHIR Zulip: OFF unless a human set the flag AND the key. Non-prerelease only.
-    if: ${{ vars.ANNOUNCE_PUBLIC_ZULIP == 'true' && github.event.release.prerelease == false }}
+    if: ${{ vars.ANNOUNCE_PUBLIC_ZULIP == 'true' && (inputs.prerelease || github.event.release.prerelease) != true }}
     runs-on: ubuntu-latest
     env:
       FHIR_ZULIP_API_KEY: ${{ secrets.FHIR_ZULIP_API_KEY }}
@@ -90,7 +114,7 @@ jobs:
           to: "german/mi-initiative"
           topic: "MII KDS template"
           content: |
-            New MII KDS template release: `${{ github.event.release.tag_name }}` — ${{ github.event.release.html_url }}
+            New MII KDS template release: `${{ env.RELEASE_TAG }}` — ${{ env.RELEASE_URL }}
       - name: Skip notice when the public-channel credentials are incomplete
         if: ${{ env.FHIR_ZULIP_API_KEY == '' || vars.FHIR_ZULIP_BOT_EMAIL == '' }}
         run: echo "::notice::Public announcement skipped — set BOTH the FHIR_ZULIP_API_KEY secret and the FHIR_ZULIP_BOT_EMAIL variable."

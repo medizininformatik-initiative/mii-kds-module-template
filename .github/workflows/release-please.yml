@@ -77,3 +77,17 @@ jobs:
       pages: write
       id-token: write
     secrets: inherit
+
+  # Announce the release this run just created on the MII Zulip (stream
+  # MII-Kerndatensatz, topic "Template Releases" — never the modules' topic
+  # "Releases"). Called for the same reason as release-demo above: the
+  # release event raised by the GITHUB_TOKEN starts no workflow.
+  notify-zulip:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/notify-zulip.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    permissions:
+      contents: read
+    secrets: inherit
