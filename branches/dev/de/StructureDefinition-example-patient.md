@@ -9,14 +9,14 @@
 | | |
 | :--- | :--- |
 | *Offizielle URL*:https://www.medizininformatik-initiative.de/fhir/modul-template/StructureDefinition/example-patient | *Version*:2027.0.0-draft.1 |
-| Active Stand: 2026-11-26 | *Maschinenlesbarer Name*:ExamplePatient |
+| Active Stand: 2026-11-27 | *Maschinenlesbarer Name*:ExamplePatient |
 
  
 Minimales Beispielprofil, das nur mit der Vorlage ausgeliefert wird, damit ein neu erstelltes Modul sofort eine gerenderte IG erzeugt. Kein MII-Artefakt — ersetzen Sie es durch die Profile Ihres Moduls. 
 
 **Usages:**
 
-* Examples for this Profile: [Patient/ExamplePatientInstance](Patient-ExamplePatientInstance.md)
+* Examples for this Profil: [Patient/ExamplePatientInstance](Patient-ExamplePatientInstance.md)
 
 You can also check for [usages in the FHIR IG Statistics](https://packages2.fhir.org/xig/resource/de.medizininformatikinitiative.kerndatensatz.template|current/StructureDefinition/StructureDefinition-example-patient.json)
 
@@ -42,11 +42,6 @@ Diese Struktur ist abgeleitet von [Patient](http://hl7.org/fhir/R4/patient.html)
 
 Diese Struktur ist abgeleitet von [Patient](http://hl7.org/fhir/R4/patient.html) 
 
-** Summary **
-
-Mandatory: 2 elements
- Must-Support: 4 elements
-
  **Schlüsselelemente-Ansicht** 
 
 #### Terminology Bindings
@@ -64,11 +59,6 @@ Diese Struktur ist abgeleitet von [Patient](http://hl7.org/fhir/R4/patient.html)
 #### Constraints
 
 Diese Struktur ist abgeleitet von [Patient](http://hl7.org/fhir/R4/patient.html) 
-
-** Summary **
-
-Mandatory: 2 elements
- Must-Support: 4 elements
 
  
 
@@ -228,7 +218,7 @@ Weitere Repräsentationen des Profils: [CSV](../StructureDefinition-example-pati
   },
   "status" : "active",
   "experimental" : false,
-  "date" : "2026-11-26T10:45:21+00:00",
+  "date" : "2026-11-27T13:42:25+00:00",
   "publisher" : "NUM-DIZ",
   "_publisher" : {
     "extension" : [{

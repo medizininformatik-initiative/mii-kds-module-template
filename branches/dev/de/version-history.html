@@ -1,4 +1,5 @@
 
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML>
 
@@ -244,6 +245,7 @@
 
 
 
+
 <div style="float: var(--ig-right);padding: 8px 0px;" id="language">
   <div id="select_flg" class="flaglist" style="background-image: url(assets/images/icon_arrow_down.png);background-position: 133px 3px;">
     <div><img class="flag" alt="flag en" src="assets/images/lang-de.png"/>Deutsch</div>
@@ -256,6 +258,7 @@
 
   </div>
 </div>
+
 
 
 
@@ -305,15 +308,23 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
 
 
     <p><!-- white space is critical inside of capture --></p>
-<div>
-<!-- do not remove - needed to prevent Jekyll from adding a p tag to any non block level element in the markdown.-->
+<div class="markdown-toc">
+<ul id="markdown-toc">
+  <li><a href="#versionsschema" id="markdown-toc-versionsschema">Versionsschema</a></li>
+  <li><a href="#versionen-vergleichen" id="markdown-toc-versionen-vergleichen">Versionen vergleichen</a></li>
+  <li><a href="#artefakt-versionen" id="markdown-toc-artefakt-versionen">Artefakt-Versionen</a></li>
+  <li><a href="#release-prozess" id="markdown-toc-release-prozess">Release-Prozess</a></li>
+  <li><a href="#versionshistorie-und-änderungen" id="markdown-toc-versionshistorie-und-änderungen">Versionshistorie und Änderungen</a></li>
+  <li><a href="#versionsvergleich" id="markdown-toc-versionsvergleich">Versionsvergleich</a></li>
+</ul>
+
 </div>
 
-<p style="border:var(--translation-box-border);background-color:var(--translation-background-color);padding: 5px 5px 5px 5px;">
+<div class="ig-highlight ig-highlight-grey">
 
-Diese Seite enthält Übersetzungen aus der Originalsprache, in der der Leitfaden verfasst wurde.  Informationen zu diesen Übersetzungen und Anweisungen zum Abgeben von Feedback zu den Übersetzungen finden Sie <a href="translationinfo.html">hier</a>.
+  <p>Diese Seite enthält Übersetzungen aus der Originalsprache, in der der Leitfaden verfasst wurde.  Informationen zu diesen Übersetzungen und Anweisungen zum Abgeben von Feedback zu den Übersetzungen finden Sie <a href="translationinfo.html">hier</a>.</p>
 
-</p>
+</div>
 
 <!-- markdownlint-disable MD041 -->
 <!-- Deutsche Übersetzung der Standardsprachseite
@@ -323,7 +334,7 @@ Diese Seite enthält Übersetzungen aus der Originalsprache, in der der Leitfade
      des MII-Meta-Wikis
      (https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Module-Release-Workflow). -->
 
-<h4 id="versionsschema">Versionsschema</h4>
+<h3 id="versionsschema">Versionsschema</h3>
 
 <p>Das Modul <strong>Module Template</strong> folgt dem KDS-Schema der Kalender-Versionierung
 (CalVer) in einer SemVer-kompatiblen numerischen Form:</p>
@@ -339,14 +350,14 @@ tritt an die Stelle der Major-Version;</li>
 <code class="language-plaintext highlighter-rouge">cibuild</code>.</li>
 </ul>
 
-<h4 id="versionen-vergleichen">Versionen vergleichen</h4>
+<h3 id="versionen-vergleichen">Versionen vergleichen</h3>
 
 <p>Stabile Releases lassen sich vergleichen, indem die numerischen Bestandteile als
 SemVer-artiges <code class="language-plaintext highlighter-rouge">&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;</code> gelesen werden, mit dem Kalenderjahr
 als Major-Komponente: <code class="language-plaintext highlighter-rouge">2026.1.0</code> ist neuer als <code class="language-plaintext highlighter-rouge">2026.0.3</code>. Labels kennzeichnen
 den Vorab- oder Build-Status; zwischen Labels wird keine Reihenfolge abgeleitet.</p>
 
-<h4 id="artefakt-versionen">Artefakt-Versionen</h4>
+<h3 id="artefakt-versionen">Artefakt-Versionen</h3>
 
 <p>Alle veröffentlichten FHIR-Artefakte im Paket tragen dieselbe Version wie der
 Leitfaden und sein Paket. Ein Artefakt kann daher beim Release eine neue Version
@@ -355,7 +366,7 @@ Metadaten, die Versionsalgorithmus, Versionierungs-Politik, Paketquelle und
 Manifest-Parameter deklarieren, beschreibt die Seite
 <a href="metadata.html">Metadaten-Übersicht</a>.</p>
 
-<h4 id="release-prozess">Release-Prozess</h4>
+<h3 id="release-prozess">Release-Prozess</h3>
 
 <p>Releases folgen dem
 <a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Module-Release-Workflow">Module Release Workflow</a>:
@@ -363,14 +374,14 @@ Die Version wird im Release-Branch angehoben, der Changelog-Eintrag geschrieben,
 die Validierungs-Workflows laufen auf dem Release-Pull-Request, und nach dem
 Merge wird das Release getaggt.</p>
 
-<h4 id="versionshistorie-und-änderungen">Versionshistorie und Änderungen</h4>
+<h3 id="versionshistorie-und-änderungen">Versionshistorie und Änderungen</h3>
 
 <ul>
   <li><strong><a href="changes.html">Änderungshistorie</a></strong> — die Änderungen jeder veröffentlichten
 Version.</li>
 </ul>
 
-<h4 id="versionsvergleich">Versionsvergleich</h4>
+<h3 id="versionsvergleich">Versionsvergleich</h3>
 
 <p>Ab der zweiten <strong>formalen Publikation</strong> veröffentlicht dieser Leitfaden
 zusätzlich einen <strong>maschinell erzeugten Versionsvergleich</strong>. Er ergänzt die
@@ -439,7 +450,7 @@ hier. Löschen Sie diesen Hinweis anschließend.]</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 basiert auf <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Erstellt <span title="Thu, Nov 26, 2026 10:45+0000">2026-11-26</span>
+          Erstellt <span title="Fri, Nov 27, 2026 13:42+0000">2026-11-27</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.
@@ -462,10 +473,23 @@ hier. Löschen Sie diesen Hinweis anschließend.]</p>
      Imprint: points at the NUM-DIZ website's legal pages since 2026-08-14
      (TF-KDS: NUM-DIZ takes over from MII in 2027, so legal-aspect links use
      the NUM-DIZ counterpart where one exists) - German /impressum and English
-     /en/legal-notice (both verified HTTP 200 on 2026-08-14). -->
+     /en/legal-notice (both verified HTTP 200 on 2026-08-14).
+     Instance validation (NUM-DIZ request, 2026-08-31): the utility link
+     "Validate an instance" / "Instanz validieren" points at the
+     template-contributed page content/validate.html (docs/concepts.md
+     section 7). Like the TOC link it is folder-relative (the assets
+     prefix): the publisher copies template content into every language
+     folder, so a reader lands on the copy in the language they are reading
+     (and on the root copy in a single-language build).
+     The QA link is root-relative and carries the rootpath prefix: '../'
+     from a language-folder page, '' on a root page such as the root copy of
+     validate.html - a '../' from the site root would escape the output
+     folder and the publisher's HTML check aborts the build. -->
+
 
           Links: <a style="color: var(--footer-hyperlink-text-color)" href="toc.html">Inhaltsverzeichnis</a> |
-                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA-Bericht</a>
+                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA-Bericht</a> |
+                 <a style="color: var(--footer-hyperlink-text-color)" href="validate.html">Instanz validieren</a>
                  
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.netzwerk-universitaetsmedizin.de/">netzwerk-universitaetsmedizin.de</a>
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.medizininformatik-initiative.de/">medizininformatik-initiative.de</a>

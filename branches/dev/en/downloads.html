@@ -1,4 +1,5 @@
 
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML>
 
@@ -272,6 +273,7 @@
 
 
 
+
 <div style="float: var(--ig-right);padding: 8px 0px;" id="language">
   <div id="select_flg" class="flaglist" style="background-image: url(assets/images/icon_arrow_down.png);background-position: 133px 3px;">
     <div><img class="flag" alt="flag en" src="assets/images/lang-en.png"/>English</div>
@@ -284,6 +286,7 @@
 
   </div>
 </div>
+
 
 
 
@@ -333,8 +336,17 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
 
 
     <p><!-- white space is critical inside of capture --></p>
-<div>
-<!-- do not remove - needed to prevent Jekyll from adding a p tag to any non block level element in the markdown.-->
+<div class="markdown-toc">
+<ul id="markdown-toc">
+  <li><a href="#package-file" id="markdown-toc-package-file">Package file</a></li>
+  <li><a href="#downloadable-copy-of-this-guide" id="markdown-toc-downloadable-copy-of-this-guide">Downloadable copy of this guide</a></li>
+  <li><a href="#examples" id="markdown-toc-examples">Examples</a></li>
+  <li><a href="#consolidated-csv-and-excel-representations-of-the-profiles" id="markdown-toc-consolidated-csv-and-excel-representations-of-the-profiles">Consolidated CSV and Excel representations of the profiles</a></li>
+  <li><a href="#schematrons" id="markdown-toc-schematrons">Schematrons</a></li>
+  <li><a href="#implementationguide-resource" id="markdown-toc-implementationguide-resource">ImplementationGuide resource</a></li>
+  <li><a href="#version-history" id="markdown-toc-version-history">Version history</a></li>
+</ul>
+
 </div>
 
 <!-- markdownlint-disable MD041 -->
@@ -352,7 +364,7 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
 
 <p>This page links the downloadable artifacts of the <strong>Module Template</strong> module.</p>
 
-<h4 id="package-file">Package file</h4>
+<h3 id="package-file">Package file</h3>
 
 <p>The package file is an NPM-format FHIR package used by most FHIR tooling. It
 contains all value sets, profiles, extensions and the list of pages and URLs of
@@ -367,7 +379,7 @@ the FHIR documentation on
   <li><a href="../package.tgz">Package (compressed folder)</a></li>
 </ul>
 
-<h4 id="downloadable-copy-of-this-guide">Downloadable copy of this guide</h4>
+<h3 id="downloadable-copy-of-this-guide">Downloadable copy of this guide</h3>
 
 <p>A downloadable copy of the rendered guide, for hosting locally:</p>
 
@@ -375,7 +387,7 @@ the FHIR documentation on
   <li><a href="../full-ig.zip">Downloadable copy (compressed folder)</a></li>
 </ul>
 
-<h4 id="examples">Examples</h4>
+<h3 id="examples">Examples</h3>
 
 <p>All examples of this guide:</p>
 
@@ -384,7 +396,7 @@ the FHIR documentation on
   <li><a href="../examples.json.zip">JSON (compressed folder)</a></li>
 </ul>
 
-<h4 id="consolidated-csv-and-excel-representations-of-the-profiles">Consolidated CSV and Excel representations of the profiles</h4>
+<h3 id="consolidated-csv-and-excel-representations-of-the-profiles">Consolidated CSV and Excel representations of the profiles</h3>
 
 <p>The profile information of the whole guide in a single CSV or Excel file —
 useful for testers and analysts who want to review element properties across
@@ -395,13 +407,13 @@ profiles in one table:</p>
   <li><a href="../excels.zip">Excel (compressed folder)</a></li>
 </ul>
 
-<h4 id="schematrons">Schematrons</h4>
+<h3 id="schematrons">Schematrons</h3>
 
 <ul>
   <li><a href="../schematrons.zip">Schematrons (compressed folder)</a></li>
 </ul>
 
-<h4 id="implementationguide-resource">ImplementationGuide resource</h4>
+<h3 id="implementationguide-resource">ImplementationGuide resource</h3>
 
 <p>The <code class="language-plaintext highlighter-rouge">ImplementationGuide</code> resource carries the technical details of this
 publication, including its dependencies and publication parameters.</p>
@@ -416,7 +428,7 @@ literally: a <code class="language-plaintext highlighter-rouge">pages:</code> fi
 placeholder substitution rewrites file contents, not file names.]</p>
 </blockquote>
 
-<h4 id="version-history">Version history</h4>
+<h3 id="version-history">Version history</h3>
 
 <p>Earlier versions and the detailed change history are on the
 <a href="version-history.html">Versioning</a> and <a href="changes.html">Changelog</a> pages.</p>
@@ -452,7 +464,7 @@ that your build does not produce.]</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 based on <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Generated <span title="Thu, Nov 26, 2026 10:45+0000">2026-11-26</span>
+          Generated <span title="Fri, Nov 27, 2026 13:42+0000">2026-11-27</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.
@@ -475,10 +487,23 @@ that your build does not produce.]</p>
      Imprint: points at the NUM-DIZ website's legal pages since 2026-08-14
      (TF-KDS: NUM-DIZ takes over from MII in 2027, so legal-aspect links use
      the NUM-DIZ counterpart where one exists) - German /impressum and English
-     /en/legal-notice (both verified HTTP 200 on 2026-08-14). -->
+     /en/legal-notice (both verified HTTP 200 on 2026-08-14).
+     Instance validation (NUM-DIZ request, 2026-08-31): the utility link
+     "Validate an instance" / "Instanz validieren" points at the
+     template-contributed page content/validate.html (docs/concepts.md
+     section 7). Like the TOC link it is folder-relative (the assets
+     prefix): the publisher copies template content into every language
+     folder, so a reader lands on the copy in the language they are reading
+     (and on the root copy in a single-language build).
+     The QA link is root-relative and carries the rootpath prefix: '../'
+     from a language-folder page, '' on a root page such as the root copy of
+     validate.html - a '../' from the site root would escape the output
+     folder and the publisher's HTML check aborts the build. -->
+
 
           Links: <a style="color: var(--footer-hyperlink-text-color)" href="toc.html">Table of Contents</a> |
-                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a>
+                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a> |
+                 <a style="color: var(--footer-hyperlink-text-color)" href="validate.html">Validate an instance</a>
                  
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.netzwerk-universitaetsmedizin.de/">netzwerk-universitaetsmedizin.de</a>
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.medizininformatik-initiative.de/">medizininformatik-initiative.de</a>

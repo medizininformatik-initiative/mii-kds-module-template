@@ -24,7 +24,7 @@ The name is always `<ResourceType>-<Id>-<code>.xhtml`, built from the artifact's
 {% include StructureDefinition-example-patient-dict-key.xhtml %}
 ```
 
-Guidance on how to interpret the contents of this table can be found[here](https://build.fhir.org/ig/FHIR/ig-guidance/readingIgs.html#data-dictionaries)
+See the [documentation](https://build.fhir.org/ig/FHIR/ig-guidance/readingIgs.html#data-dictionaries) on how to interpret the contents of this table
 
 **This build emits 96 fragment codes for this scaffold's two artifacts.** There is no published list that matches — the [IG Publisher documentation](https://confluence.hl7.org/spaces/FHIR/pages/35718627/IG+Publisher+Documentation) says so itself, above its own list: **"Note: as of July 2023, this list is not comprehensive."** The catalogue below was taken from the build, not from a document, and each entry is live. Open one to see its include line and its rendering.
 
@@ -159,11 +159,6 @@ This scaffold is bilingual, and the Publisher writes a `-en` and a `-de` variant
 ```
 {% lang-fragment StructureDefinition-example-patient-summary.xhtml %}
 ```
-
-** Summary **
-
-Mandatory: 2 elements
- Must-Support: 4 elements
 
 On the English page that resolves to `StructureDefinition-example-patient-summary-en.xhtml`, on the German page to `-de`. Use this rather than a plain `include` whenever the fragment contains prose, otherwise a German reader gets English tables.
 

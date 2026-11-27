@@ -21,6 +21,7 @@
 * [Artifacts Summary](en/artifacts.md)
 * [Rendering Artifacts (demo)](en/rendering-artifacts.md)
 * [Changelog](en/changes.md)
+* [](en/validate.md)
 * [Logical Models](en/logical-models.md)
 * [Versioning](en/version-history.md)
 * [Guidance for Researchers](en/researcher-guidance.md)

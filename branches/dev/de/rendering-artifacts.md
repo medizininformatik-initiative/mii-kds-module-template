@@ -5,6 +5,8 @@
 
 ## Artefakt-Rendering (Demo)
 
+Diese Seite enthält Übersetzungen aus der Originalsprache, in der der Leitfaden verfasst wurde. Informationen zu diesen Übersetzungen und Anweisungen zum Abgeben von Feedback zu den Übersetzungen finden Sie [hier](translationinfo.md).
+
 Der IG Publisher erzeugt für jedes Profil, jede Extension, jedes ValueSet und jedes Beispiel dieses Leitfadens eine eigene Seite. Sie müssen Leserinnen und Leser nicht dorthin wegschicken — Sie können die entscheidenden Teile **direkt in einer Fließtextseite** rendern, unmittelbar neben der Erläuterung.
 
 Diese Seite zeigt ein funktionierendes Beispiel für **jede Direktive, die in dieser Vorlage fehlerfrei läuft**. Jeder Block nennt zuerst die Quellzeile und zeigt dann das Ergebnis. Zeile kopieren, Artefaktnamen ändern, Seite löschen.
@@ -24,7 +26,7 @@ Der Name lautet stets `<Ressourcentyp>-<Id>-<Code>.xhtml` und wird aus der `Id:`
 {% include StructureDefinition-example-patient-dict-key.xhtml %}
 ```
 
-Guidance on how to interpret the contents of this table can be found[here](https://build.fhir.org/ig/FHIR/ig-guidance/readingIgs.html#data-dictionaries)
+See the [documentation](https://build.fhir.org/ig/FHIR/ig-guidance/readingIgs.html#data-dictionaries) on how to interpret the contents of this table
 
 **Dieser Build erzeugt 96 Fragment-Codes für die beiden Artefakte dieser Vorlage.** Es gibt keine veröffentlichte Liste, die dazu passt — die [IG-Publisher-Dokumentation](https://confluence.hl7.org/spaces/FHIR/pages/35718627/IG+Publisher+Documentation) sagt das über ihrer eigenen Liste selbst: **„Note: as of July 2023, this list is not comprehensive.“** Der folgende Katalog stammt aus dem Build, nicht aus einem Dokument, und jeder Eintrag ist live. Klappen Sie einen auf, um seine Include-Zeile und seine Darstellung zu sehen.
 
@@ -159,11 +161,6 @@ Diese Vorlage ist zweisprachig, und der Publisher schreibt von jedem Fragment ei
 ```
 {% lang-fragment StructureDefinition-example-patient-summary.xhtml %}
 ```
-
-** Summary **
-
-Mandatory: 2 elements
- Must-Support: 4 elements
 
 Auf der englischen Seite löst das zu `StructureDefinition-example-patient-summary-en.xhtml` auf, auf der deutschen zu `-de`. Verwenden Sie dies anstelle eines einfachen `include`, sobald das Fragment Fließtext enthält — sonst bekommen deutschsprachige Lesende englische Tabellen.
 

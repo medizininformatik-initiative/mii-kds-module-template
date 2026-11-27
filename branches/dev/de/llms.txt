@@ -21,6 +21,7 @@
 * [Artefaktübersicht](artifacts.md)
 * [Artefakt-Rendering (Demo)](rendering-artifacts.md)
 * [Änderungshistorie](changes.md)
+* [](validate.md)
 * [Logische Modelle](logical-models.md)
 * [Versionierung](version-history.md)
 * [Anleitung für Forschende](researcher-guidance.md)

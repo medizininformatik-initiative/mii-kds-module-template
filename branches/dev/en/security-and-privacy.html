@@ -1,4 +1,5 @@
 
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML>
 
@@ -272,6 +273,7 @@
 
 
 
+
 <div style="float: var(--ig-right);padding: 8px 0px;" id="language">
   <div id="select_flg" class="flaglist" style="background-image: url(assets/images/icon_arrow_down.png);background-position: 133px 3px;">
     <div><img class="flag" alt="flag en" src="assets/images/lang-en.png"/>English</div>
@@ -284,6 +286,7 @@
 
   </div>
 </div>
+
 
 
 
@@ -333,8 +336,13 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
 
 
     <p><!-- white space is critical inside of capture --></p>
-<div>
-<!-- do not remove - needed to prevent Jekyll from adding a p tag to any non block level element in the markdown.-->
+<div class="markdown-toc">
+<ul id="markdown-toc">
+  <li><a href="#1-the-overarching-data-protection-concept" id="markdown-toc-1-the-overarching-data-protection-concept">1. The overarching data protection concept</a></li>
+  <li><a href="#2-de-identification-minimisation-and-pseudonymisation-dimp" id="markdown-toc-2-de-identification-minimisation-and-pseudonymisation-dimp">2. De-identification, minimisation and pseudonymisation (DIMP)</a></li>
+  <li><a href="#3-module-specific-aspects" id="markdown-toc-3-module-specific-aspects">3. Module-specific aspects</a></li>
+</ul>
+
 </div>
 
 <!-- markdownlint-disable MD041 -->
@@ -357,7 +365,7 @@ the FHIR core specification —
 repeat them; it links the overarching data protection framework and states what is
 <strong>specific to this module</strong>.</p>
 
-<h4 id="1-the-overarching-data-protection-concept">1. The overarching data protection concept</h4>
+<h3 id="1-the-overarching-data-protection-concept">1. The overarching data protection concept</h3>
 
 <p>The
 <a href="https://www.medizininformatik-initiative.de/en/data-protection-concept">overarching data protection concept of the Medical Informatics Initiative</a>
@@ -369,7 +377,7 @@ scenarios (feasibility queries, distributed analyses, data and biosample
 provision). Everything this module specifies operates inside that framework —
 this guide adds no processing purpose of its own.</p>
 
-<h4 id="2-de-identification-minimisation-and-pseudonymisation-dimp">2. De-identification, minimisation and pseudonymisation (DIMP)</h4>
+<h3 id="2-de-identification-minimisation-and-pseudonymisation-dimp">2. De-identification, minimisation and pseudonymisation (DIMP)</h3>
 
 <p>How data leaving a Data Integration Center is de-identified in practice is
 specified by
@@ -381,7 +389,7 @@ configuration). The profiles of this module describe data <em>before</em> DIMP i
 applied; which elements survive a concrete data release is decided per project
 by the DIMP configuration, not by this guide.</p>
 
-<h4 id="3-module-specific-aspects">3. Module-specific aspects</h4>
+<h3 id="3-module-specific-aspects">3. Module-specific aspects</h3>
 
 <p>This is the module's own contribution: the security and privacy properties
 that follow from the <em>kind of data this module carries</em>. <strong>Its content is
@@ -441,7 +449,7 @@ or adopt the default text above if there are none.]</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 based on <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Generated <span title="Thu, Nov 26, 2026 10:45+0000">2026-11-26</span>
+          Generated <span title="Fri, Nov 27, 2026 13:42+0000">2026-11-27</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.
@@ -464,10 +472,23 @@ or adopt the default text above if there are none.]</p>
      Imprint: points at the NUM-DIZ website's legal pages since 2026-08-14
      (TF-KDS: NUM-DIZ takes over from MII in 2027, so legal-aspect links use
      the NUM-DIZ counterpart where one exists) - German /impressum and English
-     /en/legal-notice (both verified HTTP 200 on 2026-08-14). -->
+     /en/legal-notice (both verified HTTP 200 on 2026-08-14).
+     Instance validation (NUM-DIZ request, 2026-08-31): the utility link
+     "Validate an instance" / "Instanz validieren" points at the
+     template-contributed page content/validate.html (docs/concepts.md
+     section 7). Like the TOC link it is folder-relative (the assets
+     prefix): the publisher copies template content into every language
+     folder, so a reader lands on the copy in the language they are reading
+     (and on the root copy in a single-language build).
+     The QA link is root-relative and carries the rootpath prefix: '../'
+     from a language-folder page, '' on a root page such as the root copy of
+     validate.html - a '../' from the site root would escape the output
+     folder and the publisher's HTML check aborts the build. -->
+
 
           Links: <a style="color: var(--footer-hyperlink-text-color)" href="toc.html">Table of Contents</a> |
-                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a>
+                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a> |
+                 <a style="color: var(--footer-hyperlink-text-color)" href="validate.html">Validate an instance</a>
                  
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.netzwerk-universitaetsmedizin.de/">netzwerk-universitaetsmedizin.de</a>
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.medizininformatik-initiative.de/">medizininformatik-initiative.de</a>

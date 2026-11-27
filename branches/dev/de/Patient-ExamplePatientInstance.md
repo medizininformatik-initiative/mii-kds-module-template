@@ -12,7 +12,7 @@
 
 -------
 
-Profile: [Example Patient — template starter](StructureDefinition-example-patient.md) version: 2027.0.0-draft.1
+Profil: [Example Patient — template starter](StructureDefinition-example-patient.md) version: 2027.0.0-draft.1
 
 Security Label: [test health data (Details: ActReason code HTEST = 'test health data')](http://terminology.hl7.org/7.3.0/CodeSystem-v3-ActReason.html)
 

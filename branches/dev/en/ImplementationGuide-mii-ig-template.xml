@@ -9,7 +9,7 @@
   </meta>
   <language value="en"/>
   <text>
-    <status value="generated"/><div xml:lang="en" lang="en"><hr/><p><b>English</b></p><hr/><p class="res-header-id"><b>Generated Narrative: ImplementationGuide mii-ig-template</b></p><a name="mii-ig-template"> </a><a name="hcmii-ig-template"> </a><div style="display: inline-block; background-color: #d9e0e7; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%"><p style="margin-bottom: 0px">Language: en</p><p style="margin-bottom: 0px">Profiles: <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-shareableimplementationguide.html">CRMI Shareable ImplementationGuide</a>, <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-publishableimplementationguide.html">CRMI Publishable ImplementationGuide</a>, <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-implementationguide.html">CRMI ImplementationGuide</a></p></div><h2>MII_IG_Template</h2><p>The official URL for this implementation guide is: </p><pre>https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template</pre><div><p>Self-check build of the mii-kds-module-template scaffold. This repository is a template for creating a new MII KDS module Implementation Guide, or a migration target for an existing Simplifier MII IG. Every value here is a placeholder — replace them all when you create a real module.</p>
+    <status value="generated"/><div xml:lang="en" lang="en"><hr/><p><b>English</b></p><hr/><p class="res-header-id"><b>Generated Narrative: ImplementationGuide mii-ig-template</b></p><a name="mii-ig-template"> </a><a name="hcmii-ig-template"> </a><div style="display: inline-block; background-color: #fbffeb; padding: 6px; margin: 4px; border: 1px solid #8da1b4; border-radius: 5px; line-height: 60%"><p style="margin-bottom: 0px">Language: en</p><p style="margin-bottom: 0px">Profiles: <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-shareableimplementationguide.html">CRMI Shareable ImplementationGuide</a>, <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-publishableimplementationguide.html">CRMI Publishable ImplementationGuide</a>, <a href="http://hl7.org/fhir/uv/crmi/STU2/StructureDefinition-crmi-implementationguide.html">CRMI ImplementationGuide</a></p></div><h2>MII_IG_Template</h2><p>The official URL for this implementation guide is: </p><pre>https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template</pre><div><p>Self-check build of the mii-kds-module-template scaffold. This repository is a template for creating a new MII KDS module Implementation Guide, or a migration target for an existing Simplifier MII IG. Every value here is a placeholder — replace them all when you create a real module.</p>
 </div></div>
   </text>
   <extension url="http://hl7.org/fhir/StructureDefinition/resource-approvalDate">
@@ -177,365 +177,13 @@
     <version value="5.3.0"/>
   </dependsOn>
   <definition>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="copyrightyear"/>
-      </extension>
-      <extension url="value">
-        <valueString value="2027+"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="releaselabel"/>
-      </extension>
-      <extension url="value">
-        <valueString value="Release"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="i18n-default-lang"/>
-      </extension>
-      <extension url="value">
-        <valueString value="en"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="i18n-lang"/>
-      </extension>
-      <extension url="value">
-        <valueString value="de"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="translation-sources"/>
-      </extension>
-      <extension url="value">
-        <valueString value="input/translations/de"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="excludexml"/>
-      </extension>
-      <extension url="value">
-        <valueString value="false"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="excludejson"/>
-      </extension>
-      <extension url="value">
-        <valueString value="false"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="excludettl"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="excludemap"/>
-      </extension>
-      <extension url="value">
-        <valueString value="false"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="logging"/>
-      </extension>
-      <extension url="value">
-        <valueString value="init"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="logging"/>
-      </extension>
-      <extension url="value">
-        <valueString value="progress"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="logging"/>
-      </extension>
-      <extension url="value">
-        <valueString value="context"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="logging"/>
-      </extension>
-      <extension url="value">
-        <valueString value="html"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="logging"/>
-      </extension>
-      <extension url="value">
-        <valueString value="tx"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="pin-canonicals"/>
-      </extension>
-      <extension url="value">
-        <valueString value="pin-all"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-expansion-params"/>
-      </extension>
-      <extension url="value">
-        <valueString value="../../input/resources/Parameters-expansion-manifest.json"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="pin-manifest"/>
-      </extension>
-      <extension url="value">
-        <valueString value="mii-param-template-manifest"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="suppress-mappings"/>
-      </extension>
-      <extension url="value">
-        <valueString value="http://hl7.org/v3"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="suppress-mappings"/>
-      </extension>
-      <extension url="value">
-        <valueString value="http://hl7.org/v3/cda"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="autoload-resources"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-liquid"/>
-      </extension>
-      <extension url="value">
-        <valueString value="template/liquid"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-liquid"/>
-      </extension>
-      <extension url="value">
-        <valueString value="input/liquid"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-qa"/>
-      </extension>
-      <extension url="value">
-        <valueString value="temp/qa"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-temp"/>
-      </extension>
-      <extension url="value">
-        <valueString value="temp/pages"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-output"/>
-      </extension>
-      <extension url="value">
-        <valueString value="output"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-suppressed-warnings"/>
-      </extension>
-      <extension url="value">
-        <valueString value="input/ignoreWarnings.txt"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="path-history"/>
-      </extension>
-      <extension url="value">
-        <valueString value="https://www.medizininformatik-initiative.de/fhir/modul-template/history.html"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="template-html"/>
-      </extension>
-      <extension url="value">
-        <valueString value="template-page.html"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="template-md"/>
-      </extension>
-      <extension url="value">
-        <valueString value="template-page-md.html"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-contact"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-context"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-copyright"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-jurisdiction"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-license"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-publisher"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-version"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="apply-wg"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="active-tables"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="fmm-definition"/>
-      </extension>
-      <extension url="value">
-        <valueString value="http://hl7.org/fhir/versions.html#maturity"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="propagate-status"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="excludelogbinaryformat"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="tabbed-snapshots"/>
-      </extension>
-      <extension url="value">
-        <valueString value="true"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="wantGen-ttl"/>
-      </extension>
-      <extension url="value">
-        <valueString value="false"/>
-      </extension>
-    </extension>
-    <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
-      <extension url="code">
-        <valueString value="wantGen-ttl-html"/>
-      </extension>
-      <extension url="value">
-        <valueString value="false"/>
-      </extension>
-    </extension>
     <extension url="http://hl7.org/fhir/tools/StructureDefinition/expansion-parameters">
       <valueReference>
         <reference value="Parameters/expansion-parameters"/>
       </valueReference>
     </extension>
     <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-internal-dependency">
-      <valueCode value="hl7.fhir.uv.tools.r4#1.1.2"/>
+      <valueCode value="hl7.fhir.uv.tools.r4#1.3.0"/>
     </extension>
     <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-parameter">
       <extension url="code">
@@ -922,184 +570,115 @@
       <exampleBoolean value="false"/>
     </resource>
     <page>
-      <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-        <valueUrl value="toc.html"/>
-      </extension>
       <nameUrl value="toc.html"/>
       <title value="Table of Contents"/>
       <generation value="html"/>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="index.html"/>
-        </extension>
         <nameUrl value="index.html"/>
         <title value="Home"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="guidance.html"/>
-        </extension>
         <nameUrl value="guidance.html"/>
         <title value="Guidance"/>
         <generation value="markdown"/>
         <page>
-          <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-            <valueUrl value="researcher-guidance.html"/>
-          </extension>
           <nameUrl value="researcher-guidance.html"/>
           <title value="Guidance for Researchers"/>
           <generation value="markdown"/>
         </page>
         <page>
-          <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-            <valueUrl value="implementer-guidance.html"/>
-          </extension>
           <nameUrl value="implementer-guidance.html"/>
           <title value="Guidance for Implementers"/>
           <generation value="markdown"/>
         </page>
         <page>
-          <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-            <valueUrl value="uml-diagrams.html"/>
-          </extension>
           <nameUrl value="uml-diagrams.html"/>
           <title value="UML Diagrams"/>
           <generation value="markdown"/>
         </page>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="security-and-privacy.html"/>
-        </extension>
         <nameUrl value="security-and-privacy.html"/>
         <title value="Security and Privacy"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="profiles.html"/>
-        </extension>
         <nameUrl value="profiles.html"/>
         <title value="Profiles"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="extensions.html"/>
-        </extension>
         <nameUrl value="extensions.html"/>
         <title value="Extensions"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="capability-statements.html"/>
-        </extension>
         <nameUrl value="capability-statements.html"/>
         <title value="Capability Statements"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="search-parameters.html"/>
-        </extension>
         <nameUrl value="search-parameters.html"/>
         <title value="Search Parameters"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="operations.html"/>
-        </extension>
         <nameUrl value="operations.html"/>
         <title value="Operations"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="logical-models.html"/>
-        </extension>
         <nameUrl value="logical-models.html"/>
         <title value="Logical Models"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="value-sets.html"/>
-        </extension>
         <nameUrl value="value-sets.html"/>
         <title value="Value Sets"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="code-systems.html"/>
-        </extension>
         <nameUrl value="code-systems.html"/>
         <title value="Code Systems"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="examples.html"/>
-        </extension>
         <nameUrl value="examples.html"/>
         <title value="Examples"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="downloads.html"/>
-        </extension>
         <nameUrl value="downloads.html"/>
         <title value="Downloads"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="changes.html"/>
-        </extension>
         <nameUrl value="changes.html"/>
         <title value="Changelog"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="metadata.html"/>
-        </extension>
         <nameUrl value="metadata.html"/>
         <title value="Metadata Overview"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="version-history.html"/>
-        </extension>
         <nameUrl value="version-history.html"/>
         <title value="Versioning"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="ImplementationGuide-mii-ig-template.html"/>
-        </extension>
         <nameUrl value="ImplementationGuide-mii-ig-template.html"/>
         <title value="MII ImplementationGuide Resource"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="translationinfo.html"/>
-        </extension>
         <nameUrl value="translationinfo.html"/>
         <title value="Translation Information"/>
         <generation value="markdown"/>
       </page>
       <page>
-        <extension url="http://hl7.org/fhir/tools/StructureDefinition/ig-page-name">
-          <valueUrl value="rendering-artifacts.html"/>
-        </extension>
         <nameUrl value="rendering-artifacts.html"/>
         <title value="Rendering Artifacts (demo)"/>
         <generation value="markdown"/>

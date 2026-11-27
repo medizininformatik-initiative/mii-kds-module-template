@@ -1,4 +1,5 @@
 
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML>
 
@@ -272,6 +273,7 @@
 
 
 
+
 <div style="float: var(--ig-right);padding: 8px 0px;" id="language">
   <div id="select_flg" class="flaglist" style="background-image: url(assets/images/icon_arrow_down.png);background-position: 133px 3px;">
     <div><img class="flag" alt="flag en" src="assets/images/lang-en.png"/>English</div>
@@ -284,6 +286,7 @@
 
   </div>
 </div>
+
 
 
 
@@ -333,8 +336,16 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
 
 
     <p><!-- white space is critical inside of capture --></p>
-<div>
-<!-- do not remove - needed to prevent Jekyll from adding a p tag to any non block level element in the markdown.-->
+<div class="markdown-toc">
+<ul id="markdown-toc">
+  <li><a href="#version-scheme" id="markdown-toc-version-scheme">Version scheme</a></li>
+  <li><a href="#comparing-versions" id="markdown-toc-comparing-versions">Comparing versions</a></li>
+  <li><a href="#artifact-versions" id="markdown-toc-artifact-versions">Artifact versions</a></li>
+  <li><a href="#release-process" id="markdown-toc-release-process">Release process</a></li>
+  <li><a href="#version-history-and-changes" id="markdown-toc-version-history-and-changes">Version history and changes</a></li>
+  <li><a href="#version-comparison" id="markdown-toc-version-comparison">Version comparison</a></li>
+</ul>
+
 </div>
 
 <!-- markdownlint-disable MD041 -->
@@ -345,7 +356,7 @@ h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefi
      German mirror: input/translations/de/pagecontent/version-history.md — both
      files must say the same thing. -->
 
-<h4 id="version-scheme">Version scheme</h4>
+<h3 id="version-scheme">Version scheme</h3>
 
 <p>The <strong>Module Template</strong> module follows the KDS calendar-versioning (CalVer)
 scheme in a SemVer-compatible numeric form:</p>
@@ -361,14 +372,14 @@ it takes the place of the major version;</li>
 <code class="language-plaintext highlighter-rouge">cibuild</code>.</li>
 </ul>
 
-<h4 id="comparing-versions">Comparing versions</h4>
+<h3 id="comparing-versions">Comparing versions</h3>
 
 <p>Stable releases can be compared by reading the numeric components as
 SemVer-style <code class="language-plaintext highlighter-rouge">&lt;major&gt;.&lt;minor&gt;.&lt;patch&gt;</code>, with the calendar year as the major
 component: <code class="language-plaintext highlighter-rouge">2026.1.0</code> is newer than <code class="language-plaintext highlighter-rouge">2026.0.3</code>. Labels denote pre-release or
 build status; no ordering is inferred among labels.</p>
 
-<h4 id="artifact-versions">Artifact versions</h4>
+<h3 id="artifact-versions">Artifact versions</h3>
 
 <p>All released FHIR artifacts in the package carry the same version as the guide
 and its package. An artifact may therefore receive a new version on release even
@@ -376,7 +387,7 @@ when the artifact itself did not change. The computable metadata that declares
 the version algorithm, the versioning policy, the package source and the
 manifest parameters is described on the <a href="metadata.html">Metadata Overview</a> page.</p>
 
-<h4 id="release-process">Release process</h4>
+<h3 id="release-process">Release process</h3>
 
 <p>Releases follow the
 <a href="https://github.com/medizininformatik-initiative/kerndatensatz-meta/wiki/Module-Release-Workflow">Module Release Workflow</a>:
@@ -384,13 +395,13 @@ the version is raised in the release branch, the changelog entry is written, the
 validation workflows run on the release pull request, and the release is tagged
 after the merge.</p>
 
-<h4 id="version-history-and-changes">Version history and changes</h4>
+<h3 id="version-history-and-changes">Version history and changes</h3>
 
 <ul>
   <li><strong><a href="changes.html">Changelog</a></strong> — the changes of each released version.</li>
 </ul>
 
-<h4 id="version-comparison">Version comparison</h4>
+<h3 id="version-comparison">Version comparison</h3>
 
 <p>From the second <strong>formal publication</strong> on, this guide also publishes a
 <strong>machine-generated version comparison</strong>. It complements the changelog: the
@@ -455,7 +466,7 @@ profiles — describe it here. Delete this prompt afterwards.]</p>
 
           IG © 2027+ <a style="color:var(--footer-hyperlink-text-color)" href="https://www.netzwerk-universitaetsmedizin.de">NUM-DIZ</a>.  
           Package de.medizininformatikinitiative.kerndatensatz.template#2027.0.0-draft.1 based on <a style="color: var(--footer-hyperlink-text-color)" href="http://hl7.org/fhir/R4/">FHIR 4.0.1</a>.
-          Generated <span title="Thu, Nov 26, 2026 10:45+0000">2026-11-26</span>
+          Generated <span title="Fri, Nov 27, 2026 13:42+0000">2026-11-27</span>
           <br/>
           <span style="color: var(--footer-highlight-text-color)">
             <!-- Branding override for the fhir2.base.template footer fragment.
@@ -478,10 +489,23 @@ profiles — describe it here. Delete this prompt afterwards.]</p>
      Imprint: points at the NUM-DIZ website's legal pages since 2026-08-14
      (TF-KDS: NUM-DIZ takes over from MII in 2027, so legal-aspect links use
      the NUM-DIZ counterpart where one exists) - German /impressum and English
-     /en/legal-notice (both verified HTTP 200 on 2026-08-14). -->
+     /en/legal-notice (both verified HTTP 200 on 2026-08-14).
+     Instance validation (NUM-DIZ request, 2026-08-31): the utility link
+     "Validate an instance" / "Instanz validieren" points at the
+     template-contributed page content/validate.html (docs/concepts.md
+     section 7). Like the TOC link it is folder-relative (the assets
+     prefix): the publisher copies template content into every language
+     folder, so a reader lands on the copy in the language they are reading
+     (and on the root copy in a single-language build).
+     The QA link is root-relative and carries the rootpath prefix: '../'
+     from a language-folder page, '' on a root page such as the root copy of
+     validate.html - a '../' from the site root would escape the output
+     folder and the publisher's HTML check aborts the build. -->
+
 
           Links: <a style="color: var(--footer-hyperlink-text-color)" href="toc.html">Table of Contents</a> |
-                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a>
+                 <a style="color: var(--footer-hyperlink-text-color)" href="../qa.html">QA Report</a> |
+                 <a style="color: var(--footer-hyperlink-text-color)" href="validate.html">Validate an instance</a>
                  
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.netzwerk-universitaetsmedizin.de/">netzwerk-universitaetsmedizin.de</a>
                  | <a style="color: var(--footer-hyperlink-text-color)" target="_blank" href="https://www.medizininformatik-initiative.de/">medizininformatik-initiative.de</a>

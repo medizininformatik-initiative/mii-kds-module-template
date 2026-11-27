@@ -10,6 +10,8 @@
 | *Offizielle URL*:https://www.medizininformatik-initiative.de/fhir/modul-template/ImplementationGuide/mii-ig-template | *Version*:2027.0.0-draft.1 |
 | Active Stand: 2027-01-01 | *Maschinenlesbarer Name*:MII_IG_Template |
 
+Diese Seite enthält Übersetzungen aus der Originalsprache, in der der Leitfaden verfasst wurde. Informationen zu diesen Übersetzungen und Anweisungen zum Abgeben von Feedback zu den Übersetzungen finden Sie [hier](translationinfo.md).
+
 ### Einleitung
 
 Diese Spezifikation beschreibt die FHIR-Repräsentation des Kerndatensatz-(KDS-)Moduls **Module Template** der Medizininformatik-Initiative (MII). Sie beschreibt die Anwendungsfälle des Moduls sowie die zugehörigen FHIR-Profile, Extensions und Terminologie-Ressourcen in ihrer verbindlichen Form. Der MII-Kerndatensatz dient der standardisierten Nutzung klinischer Routinedaten für die medizinische Forschung.
