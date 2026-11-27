@@ -56,10 +56,10 @@ RuleSet: CRMIApprovalDateInstance(approvalDate)
 * extension[=].valueDate = "{approvalDate}"
 
 // ── Artifact topic (StructureDefinition, CapabilityStatement, IG, CS, VS) ────
-// MII codes module topics with the NCI Thesaurus. Call with the system and the
-// module's topic code, e.g.
-//   insert CRMIArtifactTopic(http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, {{TOPIC_NCI_CODE}})
-// Repeat the insert for each topic of the module.
+// MII codes module topics with the NCI Thesaurus. Call with the position (0 for
+// the first topic, + for each further one), the system and the topic code, e.g.
+//   insert CRMIArtifactTopic(0, http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl, {{TOPIC_NCI_CODE}})
+// The call pattern and why it is addressed by url are explained below.
 
 // ADDRESSED BY URL, not by `^extension[+]`, so that these rule sets also work on
 // a profile whose PARENT already carries CRMI metadata on its own root. SUSHI
