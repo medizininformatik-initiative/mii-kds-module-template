@@ -117,6 +117,7 @@ covers the *secrets* that enable the gated features.
 | IG Publisher QA summary (`output/qa.xml` → job summary) | `ENABLE_QA_SUMMARY` | ON |
 | Preview deploy path | `PAGES_ACTIONS_ENABLED` | unset (gh-pages push mode) |
 | Reusable validation | `ENABLE_VALIDATION` | ON |
+| Commit `fsh-generated/resources` back to PR branches (needed when Simplifier builds the package; set `false` when the IG Publisher builds it) | `COMMIT_FSH_GENERATED` | ON |
 | Convention check | `ENABLE_CONVENTION_CHECK` | ON |
 | Dependency check | `ENABLE_DEPENDENCY_CHECK` | ON |
 | Security scan | `ENABLE_SECURITY_SCAN` | ON |
