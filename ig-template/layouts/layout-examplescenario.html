@@ -1,0 +1,85 @@
+---
+---
+{% comment %}
+  Override of the base's layouts/layout-examplescenario.html for TWO publisher
+  rendering defects (measured with IG Publisher 2.3.2 on kerndatensatz-dokument):
+  1. PlantUML prefixes the generated sequence diagram with XML processing
+     instructions (<?plantuml …?>, <?plantuml-src …?>) that browsers show as
+     text above the diagram — only the <svg> is emitted here.
+  2. The publisher's German rendering-phrase bundle (rendering-phrases_de.properties)
+     carries 5 keys, so every ExampleScenario label (Step, Description, Initiator,
+     Receiver, Request, Response, Type, Content, Process:, Pre-/Post-conditions:)
+     falls back to English on German pages — mapped to German here for lang de.
+  Verbatim copy of fhir2.base.template 0.1.0 otherwise.
+  REMOVAL: delete this file when the publisher strips the processing instructions
+  and ships German rendering phrases (upstream: HL7/fhir-ig-publisher,
+  hapifhir/org.hl7.fhir.core rendering-phrases_de.properties).
+{% endcomment %}
+{% assign localPage = page.path | split: "/" | last %}
+{% include fragment-modelType.html type='{{[type]}}' id='{{[id]}}' lang="{{[lang]}}" %}
+{% include fragment-pagebegin.html lang="{{[lang]}}" %}
+<!-- layouts\layout-examplescenario -->
+<div class="col-12">
+  <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
+  {% include fragment-base-navtabs.html type='{{[type]}}' id='{{[id]}}' active='content' lang="{{[lang]}}" %}
+  <a name="root"> </a>
+
+{% assign respath = site.data.resources[resource_].path %}
+  <h2 id="root">{{modelType}}: {{site.data.pages[respath].titlelang['{{[lang]}}'] | escape_once}}
+{% if site.data.resources[resource_].experimental == true %}({{site.data.stringsBase['{{[lang]}}']['Experimental']}}){% endif %}
+  </h2>
+
+{% include fragment-resourceTable.html lang="{{[lang]}}" %}
+
+{%if site.data.resources[resource_].description %}
+<p>
+{{site.data.resources[resource_].descriptionlang['{{[lang]}}']|markdownify}}
+</p>
+{% endif %}
+{%if site.data.resources[resource_].purpose %}
+<p>
+{{site.data.resources[resource_].purposelang['{{[lang]}}']|markdownify}}
+</p>
+{% endif %}
+  <!-- insert intro if present -->
+  {% include fragment-intro.html type='{{[type]}}' id='{{[id]}}' lang="{{[lang]}}" %}
+
+<a name="actors"> </a>
+<h4>{{site.data.stringsBase['{{[lang]}}']['Actors']}}</h4>
+{% capture es_actors %}{% include {{[type]}}-{{[id]}}-actor-table{{[langsuffix]}}.xhtml %}{% endcapture %}
+{% if "{{[lang]}}" == "de" %}
+  {{ es_actors | replace: '>Step<', '>Schritt<' | replace: '>Description<', '>Beschreibung<' | replace: '>Receiver<', '>Empfänger<' | replace: '>Request<', '>Anfrage<' | replace: '>Response<', '>Antwort<' | replace: '>Type<', '>Typ<' | replace: '>Content<', '>Inhalt<' | replace: 'Process:', 'Prozess:' | replace: 'Pre-conditions:', 'Vorbedingungen:' | replace: 'Post-conditions:', 'Nachbedingungen:' }}
+{% else %}
+  {{ es_actors }}
+{% endif %}
+
+<a name="diagram"> </a>
+<h4>{{site.data.stringsBase['{{[lang]}}']['Diagram']}}</h4>
+{% capture es_diagram %}{% include {{[type]}}-{{[id]}}-process-diagram{{[langsuffix]}}.xhtml %}{% endcapture %}
+  {{ es_diagram | split: '<svg' | last | prepend: '<svg' | split: '</svg>' | first | append: '</svg>' }}
+
+<a name="processes"> </a>
+<h4>{{site.data.stringsBase['{{[lang]}}']['Processes']}}</h4>
+{% capture es_processes %}{% include {{[type]}}-{{[id]}}-processes{{[langsuffix]}}.xhtml %}{% endcapture %}
+{% if "{{[lang]}}" == "de" %}
+  {{ es_processes | replace: '>Step<', '>Schritt<' | replace: '>Description<', '>Beschreibung<' | replace: '>Receiver<', '>Empfänger<' | replace: '>Request<', '>Anfrage<' | replace: '>Response<', '>Antwort<' | replace: '>Type<', '>Typ<' | replace: '>Content<', '>Inhalt<' | replace: 'Process:', 'Prozess:' | replace: 'Pre-conditions:', 'Vorbedingungen:' | replace: 'Post-conditions:', 'Nachbedingungen:' }}
+{% else %}
+  {{ es_processes }}
+{% endif %}
+
+<a name="instances"> </a>
+<h4>{{site.data.stringsBase['{{[lang]}}']['Instances']}}</h4>
+{% capture es_instances %}{% include {{[type]}}-{{[id]}}-instance-table{{[langsuffix]}}.xhtml %}{% endcapture %}
+{% if "{{[lang]}}" == "de" %}
+  {{ es_instances | replace: '>Step<', '>Schritt<' | replace: '>Description<', '>Beschreibung<' | replace: '>Receiver<', '>Empfänger<' | replace: '>Request<', '>Anfrage<' | replace: '>Response<', '>Antwort<' | replace: '>Type<', '>Typ<' | replace: '>Content<', '>Inhalt<' | replace: 'Process:', 'Prozess:' | replace: 'Pre-conditions:', 'Vorbedingungen:' | replace: 'Post-conditions:', 'Nachbedingungen:' }}
+{% else %}
+  {{ es_instances }}
+{% endif %}
+
+  <!-- insert notes if present -->
+  {% include fragment-notes.html type='{{[type]}}' id='{{[id]}}' lang="{{[lang]}}" %}
+
+  {% include {{[type]}}-{{[id]}}-history{{[langsuffix]}}.xhtml %}
+
+</div>
+{% include fragment-pageend.html lang="{{[lang]}}" %}

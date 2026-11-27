@@ -1,0 +1,86 @@
+{% comment %}
+  Override of the base's template-page-md.html for TWO defects in the
+  translation notice ("This page includes translations from the original
+  source language ..."):
+  1. The base prints it with an INLINE STYLE (border/background variables)
+     instead of the template's highlight family, so it is the one block on a
+     translated page that ignores ig-highlight (styleguide §3).
+  2. The base only captures it in the no-TOC branch, so it appears on pages
+     without a table of contents and silently disappears on pages with one.
+  3. The base falls into the NO_TRANS branch whenever `translated[lang]` is
+     falsy, which includes the case where the publisher wrote no `translated`
+     map at all (issue #28). The guard renders the notice only where the
+     publisher actually tracked translation. On markdown pages the map is
+     always present, so this is a no-op here — it is kept identical to
+     includes/template-page.html, where it is the actual fix.
+  This copy is verbatim from fhir2.base.template 0.1.0 except: the notice is a
+  `div.ig-highlight.ig-highlight-grey` (markdown="1" keeps the catalog text a
+  paragraph) and it is emitted in BOTH captures, so every translated page
+  shows the same box.
+  REMOVAL: delete this file the day the pinned base renders the notice with a
+  class and in both branches — a same-path override is invisible drift on base
+  updates (styleguide §1).
+{% endcomment %}
+{% assign localPage = page.path | split: "/" | last %}
+{% include fragment-pagebegin.html lang=include.lang %}
+<style type="text/css">
+h2:before{color:silver;counter-increment:section;content:var(--heading-prefix) " ";}
+h3:before{color:silver;counter-increment:sub-section;content:var(--heading-prefix) "." counter(sub-section) " ";}
+h4:before{color:silver;counter-increment:composite;content:var(--heading-prefix) "." counter(sub-section) "." counter(composite) " ";}
+h5:before{color:silver;counter-increment:detail;content:var(--heading-prefix) "." counter(sub-section) "." counter(composite) "." counter(detail) " ";}
+h6:before{color:silver;counter-increment:more-detail;content:var(--heading-prefix) "." counter(sub-section) "." counter(composite) "." counter(detail) "." counter(more-detail)" ";}
+</style>
+<div class="col-12">
+  <!--ReleaseHeader--><p id="publish-box">Publish Box goes here</p><!--EndReleaseHeader-->
+  <h2>{{site.data.pages[localPage].titlelang[include.lang] | escape_once}}</h2>
+  {% assign path = page.path | split: '.html' %}
+
+{% capture toc-content %} <!-- white space is critical inside of capture -->
+<div class="markdown-toc" markdown="1">
+{:toc}
+* This will not be displayed
+</div>
+{% if site.data.languages.defLang != include.lang and site.data.pages[localPage].translated %}
+<div class="ig-highlight ig-highlight-grey" markdown="1">
+{% if site.data.pages[localPage].translated[include.lang] %}
+{{site.data.stringsBase[include.lang]['TRANS_HLP']}}
+{% else %}
+{{site.data.stringsBase[include.lang]['NO_TRANS']}}
+{% endif %}
+</div>
+{% endif %}
+{% include {{path}}.md %}
+{% endcapture %}
+
+{% if localPage == 'index.html' %}
+{% include fragment-igTable.html lang=include.lang %}
+{% endif %}
+{% include fragment-pageTable.html lang=include.lang %}
+
+{% capture no-toc-content %} <!-- white space is critical inside of capture -->
+<div>
+<!-- do not remove - needed to prevent Jekyll from adding a p tag to any non block level element in the markdown.-->
+</div>
+{% if site.data.languages.defLang != include.lang and site.data.pages[localPage].translated %}
+<div class="ig-highlight ig-highlight-grey" markdown="1">
+{% if site.data.pages[localPage].translated[include.lang] %}
+{{site.data.stringsBase[include.lang]['TRANS_HLP']}}
+{% else %}
+{{site.data.stringsBase[include.lang]['NO_TRANS']}}
+{% endif %}
+</div>
+{% endif %}
+{% include {{path}}.md %}
+{% endcapture %}
+
+{% assign teststring  = no-toc-content | markdownify | remove: '###### ' | remove: '##### '| remove: '#### ' | replace: "<h3", "### " | remove_first: '### ' %}
+{% assign h3headers = "### " %}
+
+{% if teststring contains h3headers %}
+    {{ toc-content | markdownify }}
+{% else %}
+    {{ no-toc-content | markdownify }}
+{% endif %}
+
+</div>
+{% include fragment-pageend.html lang=include.lang %}
