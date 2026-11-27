@@ -19,8 +19,15 @@ updates:
       day: monday
     target-branch: dev # updates land on the integration branch, never on main
     groups:
+      # Pins of this template's reusable workflows and actions (ci_build.yml,
+      # ci_*_validation.yml, actions/zts-packages) get their OWN pull request, so
+      # a module sees the template's release notes instead of finding the bump
+      # inside a batch of third-party updates (docs/adr/0006).
+      mii-kds-module-template:
+        patterns: ["medizininformatik-initiative/mii-kds-module-template*"]
       actions:
         patterns: ["*"]
+        exclude-patterns: ["medizininformatik-initiative/mii-kds-module-template*"]
 
   # npm — the publication scripts (scripts/*.mjs) are dependency-free today,
   # but a root package.json may land with them. Until a manifest exists,
