@@ -19,6 +19,7 @@ map of everything else.
 | Decide the optional (0..1) menu entries — keep or remove | [optional-pages.md](optional-pages.md) |
 | Know whether this is production-ready | [org-move.md](org-move.md) |
 | Know what is unfinished, and why | the [issue tracker](../../../issues); decided limits: [maintenance.md](maintenance.md) |
+| Know why the template and the pipeline work as they do | [architecture decision records](adr/README.md) |
 | Understand the completed move to the target organisation | [org-move.md](org-move.md) |
 | Translate the pages, menu and page titles | [recipes/add-translation.md](recipes/add-translation.md) |
 | Read the specifications this is built on | [further-reading.md](further-reading.md) |

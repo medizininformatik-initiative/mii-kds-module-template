@@ -133,6 +133,17 @@ covers the *secrets* that enable the gated features.
 | Public FHIR Zulip sender (template only) | `FHIR_ZULIP_BOT_EMAIL` | unset |
 | Production `-go-publish` | manual `workflow_dispatch` + `publish:false` | OFF (gated) |
 
+**Org-level overrides** (docs/adr/0007). Org variables override the template defaults and are not visible outside the organisation; each validation run lists the effective values in its job summary. Currently set at org level:
+
+| Variable | Value | Note |
+| --- | --- | --- |
+| `SUSHI_VERSION` | 3.21.0 → to be raised to 3.21.1 | overrides the template default |
+| `JAVA_VALIDATOR_VERSION` | 6.9.11 → to be set to 6.10.4 | stays on 6.x until the comparison run (January 2027) |
+| `JAVA_VALIDATION_OPTIONS` | MII-wide option set incl. `-forPublication` | read by `validation.yml` |
+| `ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` | `kbv.all.terminology.allergyintolerance` | each entry needs a TF KDS decision (docs/adr/0013, #83) |
+
+Update this table in the same step as an org variable.
+
 The rows marked **template only** have no effect in a module: the bootstrap
 deletes `release-please.yml`, `notify-zulip.yml` and `release-demo.yml`, so a
 module's announcement is governed by `ZULIP_API_KEY` and `ENABLE_ZULIP_ANNOUNCE`
