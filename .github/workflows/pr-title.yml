@@ -1,0 +1,37 @@
+# Pull-request title check (Conventional Commits).
+#
+# Purpose:   PRs into dev are squash-merged, so the PR title becomes the commit
+#            subject Release Please reads to choose the next version and to
+#            write the release notes. A title without a Conventional Commits
+#            type silently drops out of the notes, which is how modules miss
+#            changes in their Dependabot pull requests (docs/adr/0006).
+# Trigger:   pull_request (opened, edited, synchronize, reopened).
+# Scope:     TEMPLATE REPOSITORY ONLY. The first-run bootstrap removes this
+#            file from a created module: modules release with CalVer and the
+#            MII Module Release Workflow, not Release Please.
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Title follows Conventional Commits
+        shell: bash
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          types='feat|fix|perf|revert|chore|ci|docs|build|refactor|test|style'
+          if [[ "${TITLE}" =~ ^(${types})(\([a-z0-9._/-]+\))?!?:\ .+ ]]; then
+            echo "OK: ${TITLE}"
+          else
+            echo "::error::PR title '${TITLE}' is not a Conventional Commit (<type>(<scope>)?: <summary>, type one of ${types//|/, }). It becomes the squash commit and the release-notes line."
+            exit 1
+          fi
