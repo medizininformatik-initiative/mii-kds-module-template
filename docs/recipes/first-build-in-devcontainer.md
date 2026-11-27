@@ -72,7 +72,7 @@ access (the first build downloads the base image and tools):
    ```sh
    java -version     # OpenJDK 17.x
    node --version    # v22.23.1
-   sushi --version   # SUSHI v3.21.0
+   sushi --version   # SUSHI v3.21.1
    ruby --version    # ruby 3.3.12
    jekyll --version  # jekyll 4.4.1
    dot -V            # graphviz version ...
@@ -101,8 +101,8 @@ access (the first build downloads the base image and tools):
 
    ```sh
    curl -L -o publisher.jar \
-     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.5/publisher.jar
-   echo "1353ae81848d621350fa2b12ea7c17249ca43f66d7b26d29013e5154cd6c64ec  publisher.jar" | sha256sum --check
+     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.7/publisher.jar
+   echo "451f3a8202425f16377e2b5e9c4d59e9b191e4bd905d7e20139ef8e087a34924  publisher.jar" | sha256sum --check
    java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 
@@ -113,8 +113,8 @@ access (the first build downloads the base image and tools):
    > publisher version is governed by the repository's CI pin and dependency
    > checker, not by the container image. Baking it in would mean rebuilding
    > and re-pinning the container for every publisher bump. Version
-   > `3.0.5` + its SHA-256 above were the latest release when this block
-   > was last swept (2026-11-21). **The CI pins are the source of truth** (see
+   > `3.0.7` + its SHA-256 above were the latest release when this block
+   > was last swept (2026-11-27). **The CI pins are the source of truth** (see
    > [`docs/maintenance.md`](../maintenance.md#where-each-pin-lives-single-source-of-truth))
    > — if they ever differ from the command above, CI wins.
 

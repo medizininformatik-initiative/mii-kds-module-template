@@ -123,7 +123,7 @@
    ```sh
    sushi .
    curl -L -o publisher.jar \
-     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.5/publisher.jar
+     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.7/publisher.jar
    java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 

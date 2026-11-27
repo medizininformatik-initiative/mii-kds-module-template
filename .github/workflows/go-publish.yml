@@ -114,9 +114,9 @@ env:
   # Pinned toolchain (bumped by the scheduled dependency check, never floating).
   # Must stay identical to ig-publisher.yml and module-release.yml —
   # scripts/toolchain-pins.test.mjs fails the build if they drift apart.
-  PUBLISHER_VERSION: "3.0.5"
-  PUBLISHER_SHA256: "1353ae81848d621350fa2b12ea7c17249ca43f66d7b26d29013e5154cd6c64ec"
-  SUSHI_VERSION: "3.21.0"
+  PUBLISHER_VERSION: "3.0.7"
+  PUBLISHER_SHA256: "451f3a8202425f16377e2b5e9c4d59e9b191e4bd905d7e20139ef8e087a34924"
+  SUSHI_VERSION: "3.21.1"
   JEKYLL_VERSION: "4.4.1"
   JEKYLL_GEM_SHA256: "4c1144d857a5b2b80d45b8cf5138289579a9f8136aadfa6dd684b31fe2bc18c1"
 
