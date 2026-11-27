@@ -334,6 +334,35 @@ jobs:
           packages: ${{ vars.ZTS_PACKAGES }}
           sushi-config: release-src/sushi-config.yaml
 
+      - name: Pre-install FHIR packages the IG Publisher 3.x refuses as published
+        # de.ihe-d.terminology#3.0.1 (a dependency of kerndatensatz medikation
+        # and dokument) ships package/other/HEAD and package/other/v3.0 twice.
+        # IG Publisher 3.0.x refuses such a tarball ("Refusing to load the
+        # package ... it has more than one file named package/other/HEAD"),
+        # which stops every module that depends on it, also transitively.
+        # Extracted into the package cache it loads like any other package:
+        # tar keeps the last of two identical entries. The list is the
+        # variable FHIR_PACKAGES_PREINSTALL (name#version, space-separated);
+        # drop an entry once a fixed version is published and used.
+        shell: bash
+        env:
+          PACKAGES: ${{ vars.FHIR_PACKAGES_PREINSTALL || 'de.ihe-d.terminology#3.0.1' }}
+        run: |
+          set -euo pipefail
+          for spec in ${PACKAGES}; do
+            name="${spec%%#*}"; version="${spec#*#}"
+            if [[ "${name}" == "${spec}" || ! "${spec}" =~ ^[A-Za-z0-9._-]+#[A-Za-z0-9._-]+$ ]]; then
+              echo "::error::FHIR_PACKAGES_PREINSTALL entry '${spec}' is not name#version."; exit 1
+            fi
+            dir="${HOME}/.fhir/packages/${name}#${version}"
+            if [[ -f "${dir}/package/package.json" ]]; then continue; fi
+            mkdir -p "${dir}"
+            curl --fail --location --silent --show-error --max-time 120 \
+              "https://packages.fhir.org/${name}/${version}" | tar -xz -C "${dir}"
+            test -f "${dir}/package/package.json"
+            echo "Pre-installed ${name}#${version} into the package cache."
+          done
+
       - name: Effective FHIR settings (module file + template trust and proxy)
         # The module's .github/fhir-settings.json is a copy made when the module
         # was created and is never updated. IG Publisher 3.0.5+ stops on the MII
