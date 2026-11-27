@@ -105,3 +105,5 @@ initialise any other tracker unprompted.
 - `docs/release.md` and `docs/recipes/cut-a-release.md`: release paths for template and module.
 - `docs/workflows.md`: what each workflow under `.github/workflows/` does.
 - `docs/org-move.md`: branch history and the back-merge rule.
+- `docs/adr/`: architecture decision records — why the template and the module pipeline work as
+  they do. A new decision arrives as an ADR pull request (ADR 0001).
