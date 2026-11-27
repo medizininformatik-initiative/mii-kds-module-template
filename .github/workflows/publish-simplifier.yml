@@ -1,0 +1,153 @@
+# =============================================================================
+# publish-simplifier.yml — Simplifier-Registry-Publikation des go-publish-Pakets
+#
+# INHERITED BY MODULES: this workflow is a MODULE file; the first-run bootstrap
+# keeps it in a created module.
+#
+# Purpose:   Downloads the package.tgz of the FORMAL Pages publication
+#            (go-publish.yml, publish=true) and publishes EXACTLY that artifact
+#            to packages.simplifier.net, so registry and publication are
+#            byte-identical. Never Firely Bake: the Bake filter
+#            (status='active') drops draft terminology from the package
+#            (observed on kerndatensatzmodul-proms 2027.0.0-ballot.rc3, where
+#            draft CodeSystems/ValueSets referenced via answerValueSet went
+#            missing).
+#
+# Triggers:  workflow_dispatch ONLY. Registry publications are PERMANENT and
+#            cannot be removed; every one is a deliberate human action.
+#
+# Secrets:   SIMPLIFIER_USERNAME / SIMPLIFIER_PASSWORD — the same credentials
+#            the validation workflow's Simplifier QC uses (docs/secrets.md).
+#            ⚠️ Secrets alone are NOT sufficient: Simplifier package publishing
+#            is authorized PER PROJECT. The account behind the secrets must be
+#            a member with publish rights (Editor/Admin) of the Simplifier
+#            project that owns the module's package — a personal grant a
+#            project admin must make once per module. Without it the publish
+#            step fails with "Unauthorized" even though login succeeds.
+#
+# Template-repo self-skip: unreplaced {{...}} placeholders in sushi-config.yaml
+#            mean this is the un-instantiated template; every job skips with a
+#            ::notice instead of failing (module-release.yml idiom).
+# =============================================================================
+name: Publish package to Simplifier
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Formally published version to push to the registry (blank: version from publication-request.json)"
+        required: false
+        default: ""
+        type: string
+
+jobs:
+  guard:
+    name: Is this a bootstrapped module?
+    runs-on: ubuntu-latest
+    outputs:
+      is_module: ${{ steps.detect.outputs.is_module }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Detect unreplaced template placeholders
+        id: detect
+        run: |
+          set -euo pipefail
+          if grep -q '{{' sushi-config.yaml; then
+            echo "is_module=false" >> "${GITHUB_OUTPUT}"
+            echo "::notice::Un-instantiated template repository — Simplifier publication skipped."
+          else
+            echo "is_module=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+  publish:
+    name: Publish go-publish package.tgz to Simplifier
+    needs: guard
+    if: needs.guard.outputs.is_module == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Download and verify the published package
+        id: pkg
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          package_id="$(jq -r '."package-id"' publication-request.json)"
+          request_version="$(jq -r '.version' publication-request.json)"
+          request_path="$(jq -r '.path' publication-request.json)"
+          version="${REQUESTED_VERSION:-$request_version}"
+          publication_base="${request_path%/*}"
+          url="${publication_base}/${version}/package.tgz"
+
+          echo "Package : ${package_id}#${version}"
+          echo "Source  : ${url}"
+          curl -fsSL -o package-publish.tgz "$url" || {
+            echo "::error::package.tgz not retrievable — has ${version} been formally published (go-publish, publish=true)?"
+            exit 1
+          }
+
+          manifest_id="$(tar -xzOf package-publish.tgz package/package.json | jq -r '.name')"
+          manifest_version="$(tar -xzOf package-publish.tgz package/package.json | jq -r '.version')"
+          if [[ "${manifest_id}#${manifest_version}" != "${package_id}#${version}" ]]; then
+            echo "::error::Manifest ${manifest_id}#${manifest_version} does not match ${package_id}#${version}."
+            exit 1
+          fi
+
+          if curl -fsSL "https://packages.simplifier.net/${package_id}" \
+            | jq -e --arg v "${version}" '.versions[$v]' >/dev/null 2>&1; then
+            echo "::error::${package_id}#${version} is already in the registry (publications are immutable)."
+            exit 1
+          fi
+
+          tarball="${package_id}-${version}.tgz"
+          mv package-publish.tgz "${tarball}"
+          echo "tarball=${tarball}" >> "${GITHUB_OUTPUT}"
+          echo "package_id=${package_id}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Install Firely Terminal
+        run: dotnet tool install --global Firely.Terminal --version 3.5.0
+
+      - name: Publish to Simplifier
+        env:
+          SIMPLIFIER_USERNAME: ${{ secrets.SIMPLIFIER_USERNAME }}
+          SIMPLIFIER_PASSWORD: ${{ secrets.SIMPLIFIER_PASSWORD }}
+          TARBALL: ${{ steps.pkg.outputs.tarball }}
+        run: |
+          set -euo pipefail
+          if [[ -z "${SIMPLIFIER_USERNAME}" ]] || [[ -z "${SIMPLIFIER_PASSWORD}" ]]; then
+            echo "::error::SIMPLIFIER_USERNAME/SIMPLIFIER_PASSWORD are not configured (docs/secrets.md)."
+            exit 1
+          fi
+          fhir login email="${SIMPLIFIER_USERNAME}" password="${SIMPLIFIER_PASSWORD}"
+          fhir publish-package "${TARBALL}" || {
+            echo "::error::Publish failed. If login succeeded, the account behind SIMPLIFIER_USERNAME most likely lacks publish rights in the module's Simplifier PROJECT — a project admin must grant membership (see the workflow header)."
+            exit 1
+          }
+
+      - name: Verify registry
+        env:
+          PACKAGE_ID: ${{ steps.pkg.outputs.package_id }}
+          VERSION: ${{ steps.pkg.outputs.version }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            if curl -fsSL "https://packages.simplifier.net/${PACKAGE_ID}" \
+              | jq -e --arg v "${VERSION}" '.versions[$v]' >/dev/null; then
+              {
+                echo "### Simplifier publication"
+                echo
+                echo "- \`${PACKAGE_ID}#${VERSION}\` is in the registry."
+                echo "- Install: \`fhir install ${PACKAGE_ID}@${VERSION}\`"
+              } >> "${GITHUB_STEP_SUMMARY}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::${PACKAGE_ID}#${VERSION} not found in the registry after upload."
+          exit 1

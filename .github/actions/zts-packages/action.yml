@@ -1,0 +1,71 @@
+# Composite action: FHIR packages that exist only on the BfArM ZTS.
+#
+# Purpose:   Install FHIR packages that are published only on the BfArM
+#            Zentraler Terminologieserver (ZTS, https://terminologien.bfarm.de),
+#            e.g. kbv.all.terminology.allergyintolerance, into the FHIR package
+#            cache (~/.fhir/packages). SUSHI, the IG Publisher, fhir-pkg-tool
+#            and the HL7 validator then load them from the cache instead of
+#            failing on the package registry. Issue #55.
+#
+# Callers:   every workflow step that runs SUSHI, fhir-pkg-tool, the IG
+#            Publisher or the validator, placed BEFORE that step (and after any
+#            step that clears the package cache), by full path pinned to a
+#            commit SHA:
+#              uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@<commit-SHA>
+#              with:
+#                accepted-download-conditions: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+#                packages: ${{ vars.ZTS_PACKAGES }}
+#
+# Behaviour: candidates are the direct dependencies in sushi-config.yaml plus
+#            `packages`. Only candidates that are on the ZTS catalog AND not on
+#            packages.fhir.org are installed (dvmd.kdl.r4, for instance, is on
+#            both and keeps loading from the registry). Without such a
+#            candidate the action does nothing, with or without accepted
+#            conditions. A ZTS-only candidate whose conditions are not accepted,
+#            or whose version the ZTS does not have, fails the step with an
+#            error naming the package. No secret is involved, so the action
+#            also works for pull requests from forks.
+#
+# Accepting: `accepted-download-conditions` lists package names. Requesting a
+#            download token for them accepts the BfArM download conditions on
+#            behalf of the organisation; whoever may accept them for the MII has
+#            to decide that before the variable is set. The package contents
+#            must not be redistributed: never upload or cache ~/.fhir/packages
+#            as an artifact. The token is masked and never printed.
+#
+# Bootstrap: a created module does NOT keep this directory
+#            (first-run-bootstrap.sh REMOVE=); modules use the copy here.
+name: ZTS packages
+description: Install FHIR packages that exist only on the BfArM ZTS into the FHIR package cache.
+
+inputs:
+  accepted-download-conditions:
+    description: Package names whose BfArM download conditions are accepted (comma-, space- or newline-separated). Usually vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS.
+    required: false
+    default: ''
+  packages:
+    description: Additional packages as name#version (comma-, space- or newline-separated), for packages needed only transitively. Usually vars.ZTS_PACKAGES.
+    required: false
+    default: ''
+  sushi-config:
+    description: Path of the sushi-config.yaml whose direct dependencies are checked. Skipped when the file does not exist.
+    required: false
+    default: sushi-config.yaml
+
+outputs:
+  installed:
+    description: Packages installed from the ZTS in this run, as comma-separated name#version (empty when none).
+    value: ${{ steps.zts.outputs.installed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install ZTS-only FHIR packages
+      id: zts
+      shell: bash
+      env:
+        ZTS_ACCEPTED_DOWNLOAD_CONDITIONS: ${{ inputs.accepted-download-conditions }}
+        ZTS_PACKAGES: ${{ inputs.packages }}
+        ZTS_SUSHI_CONFIG: ${{ inputs.sushi-config }}
+        ACTION_DIR: ${{ github.action_path }}
+      run: bash "${ACTION_DIR}/zts-packages.sh"

@@ -72,7 +72,7 @@ access (the first build downloads the base image and tools):
    ```sh
    java -version     # OpenJDK 17.x
    node --version    # v22.23.1
-   sushi --version   # SUSHI v3.20.1
+   sushi --version   # SUSHI v3.21.1
    ruby --version    # ruby 3.3.12
    jekyll --version  # jekyll 4.4.1
    dot -V            # graphviz version ...
@@ -101,9 +101,9 @@ access (the first build downloads the base image and tools):
 
    ```sh
    curl -L -o publisher.jar \
-     https://github.com/HL7/fhir-ig-publisher/releases/download/2.3.2/publisher.jar
-   echo "07c576024df917cc1f879b6b5a64147cd0222d5b4129688e8f0ad9ccce58b1d5  publisher.jar" | sha256sum --check
-   java -Xmx6g -jar publisher.jar -ig ig.ini
+     https://github.com/HL7/fhir-ig-publisher/releases/download/3.0.7/publisher.jar
+   echo "451f3a8202425f16377e2b5e9c4d59e9b191e4bd905d7e20139ef8e087a34924  publisher.jar" | sha256sum --check
+   java -Xmx6g -jar publisher.jar -ig ig.ini -fhir-settings .github/fhir-settings.json
    ```
 
    The rendered IG appears in `output/` — open `output/index.html` in a
@@ -113,8 +113,8 @@ access (the first build downloads the base image and tools):
    > publisher version is governed by the repository's CI pin and dependency
    > checker, not by the container image. Baking it in would mean rebuilding
    > and re-pinning the container for every publisher bump. Version
-   > `2.3.2` + its SHA-256 above were the latest release when this block
-   > was last swept (2026-08-19). **The CI pins are the source of truth** (see
+   > `3.0.7` + its SHA-256 above were the latest release when this block
+   > was last swept (2026-11-27). **The CI pins are the source of truth** (see
    > [`docs/maintenance.md`](../maintenance.md#where-each-pin-lives-single-source-of-truth))
    > — if they ever differ from the command above, CI wins.
 
@@ -148,6 +148,7 @@ access (the first build downloads the base image and tools):
 | Toast never appears; no "Reopen in Container" command | The Dev Containers extension is missing. | Install `ms-vscode-remote.remote-containers`, then reload VS Code. |
 | Container start fails with a bind-mount error mentioning `.fhir` | The container mounts `~/.fhir` (the FHIR package cache) from your host, and your Docker setup refuses to auto-create it. | Create it once on the **host**: `mkdir ~/.fhir` — then rebuild. |
 | First build seems stuck at the Ruby feature | Ruby is compiling from source; this is the slow step. | Wait — it can take several minutes. Do not cancel. |
+| Publisher (3.0.5 or later) stops with `The template '…ig-template-mii-kds' runs scripts, and it is not a trusted template` | The MII IG template ships scripts, and the publisher runs such a template only once it is trusted. The commands in this recipe and CI pass `.github/fhir-settings.json`, which trusts it; a run without `-fhir-settings` reads your own `~/.fhir/fhir-settings.json` instead. | Add `-fhir-settings .github/fhir-settings.json` to the command (as in step 8),| Add `-fhir-settings .github/fhir-settings.json` to the command, or run once with `-trust-template https://github.com/medizininformatik-initiative/ig-template-mii-kds`, which records the trust in your own settings file. |
 | Publisher dies with `java.lang.OutOfMemoryError: Java heap space` | The IG Publisher needs more heap than the JVM default; KDS builds with many dependencies are memory-hungry. | Run it with an explicit heap limit: `java -Xmx6g -jar publisher.jar -ig ig.ini` (raise to `-Xmx8g` if your machine has the RAM; also raise Docker Desktop's memory limit if the container itself is capped). |
 | Publisher hangs or fails while "Fetching" / "Loading" packages; or errors mention a corrupt package | The FHIR package cache (`~/.fhir/packages`) has a truncated download from an interrupted run. | Delete the offending package directory from `~/.fhir/packages` on the host (or the whole `packages` folder in the worst case) and rebuild — the cache repopulates. |
 | QA report notes that value sets could not be expanded; log shows a fallback notice about `tx.fhir.org` | No SU-TermServ client certificate configured, so the build used the public HL7 terminology server, which does not carry every MII-specific value set. | Expected fallback behavior, not a failure — see the terminology note in step 8. For full expansion a maintainer configures the SU-TermServ client-certificate secret (Germany-only access). |

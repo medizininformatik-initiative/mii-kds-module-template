@@ -38,7 +38,9 @@ Please, previews its own demo build, and monitors its own dependencies.
 | Workflow | Trigger | What it does | Toggle (default) | Fate in a created module |
 | --- | --- | --- | --- | --- |
 | `release-please.yml` | push to `main` | Opens the SemVer release PR (tag + changelog) | `ENABLE_RELEASE_PLEASE` (ON) | **REMOVED by bootstrap** |
-| `notify-zulip.yml` | `release: published` | Announces the template release to the MII Zulip (topic *Template Releases*) | `ENABLE_ZULIP_ANNOUNCE` (ON) · `ANNOUNCE_PUBLIC_ZULIP` (OFF) | **REMOVED by bootstrap** |
+| `notify-zulip.yml` | called by `release-please.yml` when it cuts a release; `release: published` for a hand-made release | Announces the template release to the MII Zulip (topic *Template Releases*) | `ENABLE_ZULIP_ANNOUNCE` (ON) · `ANNOUNCE_PUBLIC_ZULIP` (OFF) | **REMOVED by bootstrap** |
+| `ci_dotnet_validation.yml`, `ci_java_validation.yml` | `workflow_call` only (reusable) | The MII reusable validation workflows (SUSHI + Simplifier QC; HL7 Java validator against SU-TermServ), hosted here for every KDS module since kerndatensatz-meta#251. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/workflows/ci_*.yml@<commit-SHA> # vX.Y.Z` | — (the caller's `ENABLE_VALIDATION`) | **REMOVED by bootstrap** |
+| `.github/actions/zts-packages/` | composite action (`uses:`) | Installs FHIR packages that exist only on the BfArM ZTS into the package cache, before SUSHI, the IG Publisher or the validator need them. Callers pin `uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@<commit-SHA>`. See [§ FHIR packages from the BfArM ZTS](#fhir-packages-from-the-bfarm-zts) | — | **REMOVED by bootstrap** |
 | `release-demo.yml` | `release: published`; `workflow_dispatch` (inputs `tag`, `update_landing_page`) | Rebuilds the Pages **demo from the released tag** with the same pinned toolchain, verifies the render carries that version, publishes it to `gh-pages/demo/<tag>/` and regenerates the root index (`scripts/gen-pages-index.mjs`). See [§ The published demo](#the-published-demo) | `ENABLE_RELEASE_DEMO` (ON) · `ENABLE_VERSION_COMPARISON` (ON) · `PAGES_ACTIONS_ENABLED` | **REMOVED by bootstrap** |
 
 > **How it is triggered.** Not by a `release` event: release-please publishes the
@@ -66,15 +68,17 @@ Everything below **propagates** to a module (the bootstrap keeps it). This is ho
 
 | Workflow | Trigger | What it does | Output | Toggle (default) | Human-gated? |
 | --- | --- | --- | --- | --- | --- |
-| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication. **On this template repo only**, every preview deploy also regenerates the `gh-pages` root index (`scripts/gen-pages-index.mjs`) | `gh-pages/branches/<branch>/` + PR comment | `ENABLE_PREVIEW` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
+| `ig-publisher.yml` | push to any branch except `main`/`gh-pages`/`fsh-generated`; `workflow_dispatch` | Builds the IG (SUSHI + IG Publisher) and deploys a preview. **On this template repo only**, the self-check build also demonstrates a version comparison at `comparison-demo/` in the preview, rendered with the FHIR validator's `-compare` (the publisher's own `version-comparison` needs a formal publication history at the canonical, which the scaffold never has): the last dev preview's package is relabelled `2027.0.0-draft.0` and compared to the build — on `dev` a self-comparison (what a no-changes report looks like), on a feature branch the real delta against `dev`. A created module enables `version-comparison` from its second formal publication. **On this template repo only**, every preview deploy also regenerates the `gh-pages` root index (`scripts/gen-pages-index.mjs`) | `gh-pages/branches/<branch>/` + PR comment + `qa.xml` job summary | `ENABLE_PREVIEW` (ON) · `ENABLE_QA_SUMMARY` (ON) · `ENABLE_VERSION_COMPARISON` (ON; `false` disables the whole feature — the publisher's `version-comparison` in every build workflow, including `release-demo.yml`, *and* the template repo's demo report) | no |
 | `cleanup-gh-pages.yml` | schedule (Sun 00:00 UTC); `workflow_dispatch` (input `dry_run`: list stale previews without deleting) | Prunes previews of deleted branches; keeps root + version paths | pruned `gh-pages` | `ENABLE_PREVIEW` (ON) | no |
 | `validation.yml` | push to `dev`/`main`; any pull request; `workflow_dispatch` | Runs the **MII reusable validation** workflows | validation report | `ENABLE_VALIDATION` (ON) | no (skips on the template repo itself) |
 | `convention-check.yml` | push/PR to `dev`/`main`/`release/**`; `workflow_dispatch` (input `strict`: force release mode) | The **single** convention checker: metadata-contract patterns (hard on release branches) + the optional-page decision gate (M9, `docs/optional-pages.md`) + the language-model guard (`scripts/language-model-check.sh`) + the offline test suites (`scripts/*.test.mjs`, and on the template repo `scripts/*.template-test.mjs`); the advisory repo ↔ MII-wiki drift review is a manual review, not part of this workflow | check result | `ENABLE_CONVENTION_CHECK` (ON) | no |
 | `module-release.yml` | push of a CalVer tag `vYYYY.n.n`; `release: published` (the announcement); `workflow_dispatch` (dry run) | Builds, creates the GitHub Release, announces to the MII Zulip (topic *Releases*), hands off to `go-publish` | release | `ENABLE_MODULE_RELEASE` (ON) · `ENABLE_ZULIP_ANNOUNCE` (ON) | production publish is gated |
 | `go-publish.yml` | `workflow_dispatch` **only** | Production `-go-publish`; `publish:false` = full dry run by default | published IG | — | **always human-triggered** |
+| `publish-simplifier.yml` | `workflow_dispatch` **only** | Publishes the `package.tgz` of a formal Pages publication to the Simplifier package registry, unchanged (for modules whose package goes to Simplifier, not through a registry feed) | Simplifier package | `SIMPLIFIER_USERNAME` / `SIMPLIFIER_PASSWORD` | **always human-triggered; registry versions are permanent** |
 | `dependency-check.yml` | schedule (Mon 06:00 UTC); `workflow_dispatch` | Version drift (IG Publisher, SUSHI, Jekyll, both templates, FHIR deps) → one tracking issue | `dependencies` issue | `ENABLE_DEPENDENCY_CHECK` (ON) | proposals only |
 | `security-scan.yml` | schedule (Mon 07:00 UTC); PR to `dev`; `workflow_dispatch` | OSV + Trivy (fs + dev-container image) | SARIF in Security tab | `ENABLE_SECURITY_SCAN` (ON) | no |
 | `sync-ig-template.yml` | schedule (Mon 05:00 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps the vendored `ig-template/` (the offline/reproducibility fallback behind the URL default in `ig.ini`) in step with `ig-template-mii-kds@dev`; opens a PR on drift, fails a PR whose mirror is stale | sync PR | `ENABLE_TEMPLATE_SYNC` (ON) | never auto-merges |
+| `sync-scripts.yml` | schedule (Mon 05:30 UTC); `workflow_dispatch`; PR to `dev` (check only) | Keeps a module's `scripts/` (checker, bootstrap, publication helpers) in step with `mii-kds-module-template@main`; opens a PR on drift, fails a PR whose copy is stale; skipped in the template repository itself | sync PR | `ENABLE_SCRIPT_SYNC` (ON) | never auto-merges |
 
 Notes:
 - **The reusable validation needs two files in the repo root**, at fixed paths the
@@ -110,8 +114,10 @@ covers the *secrets* that enable the gated features.
 | Pipeline | Variable | Default |
 | --- | --- | --- |
 | IG build + preview | `ENABLE_PREVIEW` | ON |
+| IG Publisher QA summary (`output/qa.xml` → job summary) | `ENABLE_QA_SUMMARY` | ON |
 | Preview deploy path | `PAGES_ACTIONS_ENABLED` | unset (gh-pages push mode) |
 | Reusable validation | `ENABLE_VALIDATION` | ON |
+| Commit `fsh-generated/resources` back to PR branches (needed when Simplifier builds the package; set `false` when the IG Publisher builds it) | `COMMIT_FSH_GENERATED` | ON |
 | Convention check | `ENABLE_CONVENTION_CHECK` | ON |
 | Dependency check | `ENABLE_DEPENDENCY_CHECK` | ON |
 | Security scan | `ENABLE_SECURITY_SCAN` | ON |
@@ -134,6 +140,41 @@ alone.
 variables, not toggles — the last two override the versions `validation.yml`
 passes to the MII reusable workflows, and unset means the pinned defaults there
 (see [maintenance.md](maintenance.md#where-each-pin-lives-single-source-of-truth)).
+`QA_SUMMARY_INCLUDE` (`errors` | `warnings` | `all`; default `errors`) and
+`QA_SUMMARY_FILTERS` (line-separated `filename|messageId|detailsWildcard|location`
+rules for known issues) are plain variables too; they tune the `qa.xml` summary
+in `ig-publisher.yml`.
+
+### FHIR packages from the BfArM ZTS
+
+Some FHIR packages are published only on the BfArM Zentraler
+Terminologieserver (ZTS, <https://terminologien.bfarm.de>), not on
+packages.fhir.org, for example `kbv.all.terminology.allergyintolerance`.
+SUSHI, the IG Publisher and the validator cannot download those from the
+registry. The action `.github/actions/zts-packages` installs them into the FHIR
+package cache first. `ig-publisher.yml`, `module-release.yml`,
+`go-publish.yml` and `release-demo.yml` call it before SUSHI with the two
+variables below. The reusable `ci_java_validation.yml` and
+`ci_dotnet_validation.yml` take them as the inputs
+`ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` and `ZTS_PACKAGES`, which `validation.yml`
+fills from the same variables.
+
+The action reads the direct dependencies in `sushi-config.yaml` and installs a
+package only when it is on the ZTS catalog **and** not on packages.fhir.org.
+Packages that are on both, such as `dvmd.kdl.r4`, keep loading from the
+registry. A module without ZTS-only dependencies is unaffected, with or without
+the variables below.
+
+Two plain variables (organisation or repository level) control it:
+
+| Variable | Meaning |
+| --- | --- |
+| `ZTS_ACCEPTED_DOWNLOAD_CONDITIONS` | Package names whose BfArM download conditions are accepted, comma-separated, e.g. `kbv.all.terminology.allergyintolerance`. **Setting it accepts those conditions on behalf of the organisation**, so whoever may accept them for the MII has to decide that first. A ZTS-only dependency that is not listed fails the build with an error naming the package. |
+| `ZTS_PACKAGES` | Additional packages as `name#version`, comma-separated, for packages a module needs only **transitively**, for example a module that depends on kerndatensatz-basis sets `kbv.all.terminology.allergyintolerance#1.0.0`. The IG Publisher and the validator load dependencies of dependencies, but the action only sees the module's own `sushi-config.yaml`. |
+
+No secret is involved, so this also works for pull requests from forks. The
+BfArM download conditions do not allow redistributing the package contents:
+**never upload or cache `~/.fhir/packages`** as a workflow artifact.
 
 ---
 

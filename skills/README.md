@@ -18,6 +18,14 @@ Skills that belong to the org catalog are not kept as copies here; install them 
 Edit these here. Report-only by design: they propose, a human decides, and any change lands as a
 pull request targeting `dev`.
 
+### Windows checkouts
+
+On Windows, git checks out the `.claude/skills` and `.agents/skills` symlinks as plain text files
+containing the link target unless symlink support is enabled (Developer Mode or admin rights, plus
+`git config core.symlinks true` before checkout). If a runtime on such a checkout cannot follow the
+links, read the canonical `skills/` directory directly, or generate a mirror from `skills/` in CI.
+Never hand-copy the content into the runtime directories: copies drift.
+
 ## From the org catalog — install, do not copy
 
 The IG-measuring and IG-translation skills belong to the organization's skill catalog,

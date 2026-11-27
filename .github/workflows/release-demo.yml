@@ -72,6 +72,13 @@
 #            which this workflow deliberately never writes (a guard fails the
 #            job if one appears).
 #
+# ZTS packages: FHIR packages that exist only on the BfArM ZTS (e.g.
+#            kbv.all.terminology.allergyintolerance) are installed into the
+#            package cache by .github/actions/zts-packages before SUSHI runs,
+#            controlled by vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS and
+#            vars.ZTS_PACKAGES. A no-op without ZTS-only dependencies. See
+#            docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+#
 # Fixed versions: the IG Publisher jar (+ SHA-256), SUSHI and Jekyll are pinned
 #            in the env: block below under the SAME names ig-publisher.yml,
 #            go-publish.yml and module-release.yml use;
@@ -129,9 +136,9 @@ env:
   # module-release.yml. A workflow cannot read another workflow's env:, so the
   # blocks are copies; scripts/toolchain-pins.test.mjs fails the build if they
   # stop agreeing.
-  PUBLISHER_VERSION: "2.3.2"
-  PUBLISHER_SHA256: "07c576024df917cc1f879b6b5a64147cd0222d5b4129688e8f0ad9ccce58b1d5"
-  SUSHI_VERSION: "3.20.1"
+  PUBLISHER_VERSION: "3.0.7"
+  PUBLISHER_SHA256: "451f3a8202425f16377e2b5e9c4d59e9b191e4bd905d7e20139ef8e087a34924"
+  SUSHI_VERSION: "3.21.1"
   JEKYLL_VERSION: "4.4.1"
 
 jobs:
@@ -314,6 +321,49 @@ jobs:
             echo "::notice::No SU-TermServ client certificate configured — falling back to the public HL7 terminology server https://tx.fhir.org. Some MII-specific value sets may not fully expand (a QA note, not a failure)."
           fi
 
+      # FHIR packages that exist only on the BfArM ZTS (e.g.
+      # kbv.all.terminology.allergyintolerance) must be in the package cache
+      # before SUSHI and the IG Publisher need them.
+      # No-op without ZTS-only dependencies.
+      # See docs/workflows.md § FHIR packages from the BfArM ZTS (#55).
+      - name: Install ZTS-only FHIR packages
+        if: ${{ steps.tag.outputs.skip != 'true' }}
+        uses: medizininformatik-initiative/mii-kds-module-template/.github/actions/zts-packages@93f99070b4c5bd4fcb438a368038b0e6eb94049c # mii-kds-module-template dev @ 2026-11-13 (#56)
+        with:
+          accepted-download-conditions: ${{ vars.ZTS_ACCEPTED_DOWNLOAD_CONDITIONS }}
+          packages: ${{ vars.ZTS_PACKAGES }}
+          sushi-config: release-src/sushi-config.yaml
+
+      - name: Effective FHIR settings (module file + template trust and proxy)
+        # The module's .github/fhir-settings.json is a copy made when the module
+        # was created and is never updated. IG Publisher 3.0.5+ stops on the MII
+        # IG template unless it is listed under trustedTemplates, and 2.3.1+
+        # refuses the plain-HTTP local SU-TermServ proxy unless it is allowed.
+        # This step adds both when the module's file lacks them, keeps
+        # everything else the module set, never adds "all", and hands the
+        # result to the publisher. A module with an old settings file builds
+        # with any publisher from 2.3.1 on.
+        shell: bash
+        env:
+          MODULE_SETTINGS: ${{ github.workspace }}/.github/fhir-settings.json
+        run: |
+          set -euo pipefail
+          out="${RUNNER_TEMP}/fhir-settings.json"
+          base='{}'
+          if [ -s "${MODULE_SETTINGS}" ]; then base="$(cat "${MODULE_SETTINGS}")"; fi
+          jq -n --argjson base "${base}" '
+            $base
+            | .servers = ((.servers // []) as $s
+                | if any($s[]; .url == "http://127.0.0.1:8090/fhir") then $s
+                  else $s + [{"url": "http://127.0.0.1:8090/fhir", "type": "fhir",
+                              "authenticationType": "none", "allowHttp": true,
+                              "allowPrivateNetwork": true}] end)
+            | .trustedTemplates = ((.trustedTemplates // [])
+                + ["https://github.com/medizininformatik-initiative/ig-template-mii-kds", "#ig-template"]
+                | unique)
+          ' > "${out}"
+          echo "FHIR settings: $(jq -c '{servers: [.servers[].url], trustedTemplates}' "${out}")"
+
       - name: Build the released demo IG (SUSHI + the pinned IG Publisher)
         if: ${{ steps.tag.outputs.skip != 'true' }}
         shell: bash
@@ -343,9 +393,12 @@ jobs:
           # (http://127.0.0.1:8090) for the publisher's terminology access:
           # publisher 2.3.1+ SSRF hardening can refuse plain-HTTP/private-
           # network -tx targets without it (basis idiom, kerndatensatz-basis
-          # @190a3a18). Inert on the tx.fhir.org fallback path.
+          # @190a3a18). Inert on the tx.fhir.org fallback path. It also lists
+          # the MII IG template under trustedTemplates: publisher 3.0.5+ stops
+          # on a template with scripts that is not trusted (kerndatensatz-basis
+          # @bad77b36; scripts/template-trust.test.mjs keeps it matching ig.ini).
           java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" -ig ig.ini -tx "${TX_URL}" \
-            -fhir-settings "${GITHUB_WORKSPACE}/.github/fhir-settings.json"
+            -fhir-settings "${RUNNER_TEMP}/fhir-settings.json"
           test -s output/index.html
           jq empty output/qa.json
 
