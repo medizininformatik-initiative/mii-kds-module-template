@@ -310,6 +310,14 @@ jobs:
             source/sushi-config.yaml)"
           publication_date="${REQUESTED_DATE}"
           if [[ -z "${publication_date}" ]]; then
+            # Prefer the date sushi-config.yaml declares: the input contract says
+            # the publication date must match it, and the tagged commit date can
+            # lag behind it. The commit date stays the last resort.
+            publication_date="$(sed -nE \
+              's/^date:[[:space:]]*"?([0-9]{4}-[0-9]{2}-[0-9]{2})"?([[:space:]]*#.*)?$/\1/p' \
+              source/sushi-config.yaml)"
+          fi
+          if [[ -z "${publication_date}" ]]; then
             publication_date="$(git -C source show -s --format=%cs HEAD)"
           fi
           ig_date="$(sed -nE \
@@ -669,6 +677,8 @@ jobs:
         env:
           CANONICAL: ${{ steps.release.outputs.canonical }}
           PUBLICATION_BASE: ${{ steps.release.outputs.publication_base }}
+          # The seed step runs under set -u and builds the RSS dates from this.
+          PUBLICATION_DATE: ${{ steps.release.outputs.publication_date }}
         run: |
           set -euo pipefail
           # The very first -go-publish needs the webroot configuration that
@@ -703,10 +713,76 @@ jobs:
             }' > site/publish-setup.json
           touch site/.nojekyll
 
+          # package-feed.xml / publication-feed.xml — the two RSS feeds that the
+          # publish-setup.json written just above DECLARES under "feeds", but that
+          # nothing here creates. -go-publish reads the declaration, looks for the
+          # files and dies:
+          #   java.lang.Error: Attempt to copy .../site/package-feed.xml but it
+          #   doesn't exist   (PublicationProcess.updateFeed)
+          # The reference module keeps them as checked-in files under
+          # publication/webroot/; a generated module has no such folder, so they are
+          # seeded here in the same shape: an empty channel the Publisher fills.
+          # First publication only — afterwards the feeds live on in the webroot.
+          # LC_ALL=C: RFC-822 dates in RSS need English day and month abbreviations.
+          # Without it a localised runner writes "Do., 03 Sep. 2026" instead of
+          # "Wed, 02 Sep 2026". Caught by running this block on a German-locale machine,
+          # where the GNU -d form also silently fell through to the fallback and used
+          # today instead of the publication date.
+          feed_date="$(LC_ALL=C date -u -d "${PUBLICATION_DATE}" '+%a, %d %b %Y 00:00:00 GMT')"
+          seed_feed() {
+            local file="$1" title="$2" description="$3"
+            [[ -e "site/${file}" ]] && return 0
+            cat > "site/${file}" <<XML
+          <?xml version="1.0" encoding="UTF-8"?>
+          <rss xmlns:dc="http://purl.org/dc/elements/1.1/"
+               xmlns:content="http://purl.org/rss/1.0/modules/content/"
+               xmlns:fhir="http://hl7.org/fhir/feed"
+               xmlns:atom="http://www.w3.org/2005/Atom"
+               version="2.0">
+            <channel>
+              <title>${title}</title>
+              <description>${description}</description>
+              <link>${PUBLICATION_BASE}</link>
+              <generator>Medical Informatics Initiative (MII)</generator>
+              <lastBuildDate>${feed_date}</lastBuildDate>
+              <atom:link href="${PUBLICATION_BASE}/${file}"
+                         rel="self"
+                         type="application/rss+xml"/>
+              <pubDate>${feed_date}</pubDate>
+              <language>en</language>
+              <ttl>600</ttl>
+            </channel>
+          </rss>
+          XML
+            test -s "site/${file}"
+          }
+          seed_feed package-feed.xml \
+            "${EXPECTED_PACKAGE_ID} FHIR packages" \
+            "FHIR packages published by the Medical Informatics Initiative"
+          seed_feed publication-feed.xml \
+            "${EXPECTED_PACKAGE_ID} FHIR publications" \
+            "FHIR Implementation Guide releases published by the Medical Informatics Initiative"
+
+
+          # package-registry.json — REQUIRED by -go-publish, and not created by
+          # anything above. Without it the Publisher stops before doing any work:
+          #   "ERROR @ parameters: There is no package-registry.json file. Create
+          #    one by running the publisher -generate-package-registry {folder}"
+          # Only the FIRST publication hits this: every follow-up finds the file
+          # already in the webroot, which is why it stayed unnoticed. The command
+          # is the one the Publisher's own error message prescribes.
+          if [[ ! -e site/package-registry.json ]]; then
+            java -Xmx6g -jar "${RUNNER_TEMP}/publisher.jar" \
+              -generate-package-registry "${GITHUB_WORKSPACE}/site"
+            test -s site/package-registry.json
+          fi
+
           {
             echo "### First-publication webroot seeded"
             echo
             echo "- Generated publish-setup.json for ${PUBLICATION_BASE}"
+            echo "- Generated package-registry.json (required by -go-publish)"
+            echo "- Generated package-feed.xml and publication-feed.xml (declared in publish-setup.json)"
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Prepare publication workspace
@@ -1140,8 +1216,29 @@ jobs:
       id-token: write
 
     steps:
+      # When Pages still serves the gh-pages BRANCH directly (legacy mode), the
+      # branch push in the publish job has already deployed the site, and
+      # actions/deploy-pages fails ("Pages not configured for Actions"). Detect
+      # the mode, request a fresh branch build in legacy mode, and run the
+      # Actions deployment only in workflow mode. The verification below runs
+      # in both modes.
+      - name: Detect Pages serving mode
+        id: pagesmode
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          bt="$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type)"
+          echo "build_type=${bt}" >> "${GITHUB_OUTPUT}"
+          if [[ "${bt}" == "legacy" ]]; then
+            echo "Pages serves the gh-pages branch directly; the branch push already deployed. Requested a fresh branch build." >> "${GITHUB_STEP_SUMMARY}"
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null || true
+          fi
+
       - name: Deploy exact Pages artifact
         id: deployment
+        if: steps.pagesmode.outputs.build_type == 'workflow'
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
 
       - name: Verify Pages publication
@@ -1149,7 +1246,7 @@ jobs:
         env:
           CANONICAL: ${{ needs.prepare.outputs.canonical }}
           LABEL: ${{ needs.prepare.outputs.label }}
-          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+          PAGES_URL: ${{ steps.deployment.outputs.page_url || format('{0}/', env.EXPECTED_PUBLICATION_BASE) }}
           VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           set -euo pipefail
@@ -1160,7 +1257,7 @@ jobs:
             echo "::error::Pages deployed at ${pages_base}, expected ${publication_base}."
             exit 1
           fi
-          for attempt in {1..18}; do
+          for attempt in {1..60}; do  # legacy branch builds need a generous window
             if package_list="$(curl --fail --location --silent --show-error \
               --max-time 30 "${publication_base}/package-list.json")" &&
               jq -e \

@@ -265,12 +265,19 @@ function validateEntry(
     );
   } else {
     const edition = editions[0];
-    assertEqual(
-      edition.name,
-      requiredString(request, "sequence", "Publication request"),
-      "edition.name",
-      errors,
-    );
+    // The Publisher names the edition by the bare sequence when the publication
+    // status is "release", "trial-use" or "update", and as "<sequence> <Status>"
+    // otherwise: a ballot or draft publishes as "2027 Draft", not "2027". The
+    // public FHIR IG registry carries many such editions ("STU 1 Ballot",
+    // "Releases Draft"). Comparing against the bare sequence alone rejected every
+    // ballot publication.
+    const sequence = requiredString(request, "sequence", "Publication request");
+    const status = typeof request?.status === "string" ? request.status.trim() : "";
+    const bareStatuses = new Set(["", "release", "trial-use", "update"]);
+    const expectedEditionName = bareStatuses.has(status.toLowerCase())
+      ? sequence
+      : `${sequence} ${status.charAt(0).toUpperCase()}${status.slice(1)}`;
+    assertEqual(edition.name, expectedEditionName, "edition.name", errors);
     assertEqual(edition.package, `${packageId}#${version}`, "edition.package", errors);
     assertEqual(
       normalizeUrl(edition.url ?? "", "Generated edition URL"),
